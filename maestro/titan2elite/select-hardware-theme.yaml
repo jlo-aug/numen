@@ -1,0 +1,12 @@
+appId: app.numen.keyboard
+name: Select hardware keyboard theme
+---
+- scrollUntilVisible:
+    element:
+      text: "Choose a preset"
+    direction: DOWN
+    timeout: 20000
+- tapOn:
+    text: "${THEME_NAME}"
+- assertVisible:
+    text: "Active"

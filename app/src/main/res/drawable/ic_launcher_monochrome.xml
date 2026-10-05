@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Numen monochrome icon (themed icons, notifications): keycap silhouette with the N cut out. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="1.12"
+        android:scaleY="1.12">
+        <path
+            android:fillColor="#FFFFFFFF"
+            android:fillType="evenOdd"
+            android:pathData="M41,27 H67 A11,11 0 0 1 78,38 V68 A11,11 0 0 1 67,79 H41 A11,11 0 0 1 30,68 V38 A11,11 0 0 1 41,27 Z M45,40 H49.6 L58.4,53.5 V40 H63 V62 H58.4 L49.6,48.5 V62 H45 Z M72,36 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
+    </group>
+</vector>

@@ -1,0 +1,14 @@
+en_pairs.txt: English word-pair counts for Numen's sentence-aware correction.
+Built with tools/build_context_pairs.py from:
+
+- Simple English Wikipedia (https://simple.wikipedia.org), text licensed under the
+  Creative Commons Attribution-ShareAlike 4.0 License (CC BY-SA 4.0). Only word-pair counts
+  derived from article text are included.
+- Tatoeba (https://tatoeba.org) English sentences, licensed under the Creative Commons
+  Attribution 2.0 France License (CC BY 2.0 FR). Only word-pair counts are included.
+- Google Books Ngram Corpus top English 2-grams via
+  https://github.com/orgtre/google-books-ngram-frequency, licensed under the Creative Commons
+  Attribution 3.0 Unported License (CC BY 3.0).
+- Hand-written common pairs (tools/en_pairs_curated.txt).
+
+As a derivative of CC BY-SA 4.0 material, this file is distributed under CC BY-SA 4.0.

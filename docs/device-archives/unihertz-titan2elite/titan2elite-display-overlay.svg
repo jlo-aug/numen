@@ -1,0 +1,22 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1080" height="1200" viewBox="0 0 1080 1200">
+  <title>Titan 2 Elite display overlay</title>
+  <desc>Photo-derived 96 pixel bottom-corner mask, 16 pixel bottom-row inset guides, and two-row modifier LED guides.</desc>
+  <path
+      d="M0 1104V1200H96A96 96 0 0 1 0 1104ZM1080 1104V1200H984A96 96 0 0 0 1080 1104Z"
+      fill="#000000"
+      fill-opacity="0.7" />
+  <path
+      d="M16 930V1200M1064 930V1200"
+      fill="none"
+      stroke="#00E5FF"
+      stroke-width="3" />
+  <g fill="none" stroke="#FFEA00" stroke-width="2" opacity="0.9">
+    <rect x="0" y="1182" width="177" height="5" rx="2.5" />
+    <rect x="907" y="1182" width="173" height="5" rx="2.5" />
+  </g>
+  <g fill="none" stroke="#FF4DB8" stroke-width="2" opacity="0.9">
+    <rect x="0" y="1193" width="177" height="5" rx="2.5" />
+    <rect x="726" y="1193" width="177" height="5" rx="2.5" />
+    <rect x="907" y="1193" width="173" height="5" rx="2.5" />
+  </g>
+</svg>

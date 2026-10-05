@@ -1,0 +1,671 @@
+package it.palsoftware.pastiera.inputmethod
+
+import android.os.Build
+import android.view.InputDevice
+import android.view.KeyEvent
+import it.palsoftware.pastiera.DeviceIdentitySnapshot
+
+object DeviceSpecific {
+    enum class InputDeviceKind {
+        BUILT_IN,
+        ACCESSORY,
+        UNKNOWN
+    }
+
+    data class KeyboardInputIdentity(
+        val name: String,
+        val descriptor: String,
+        val vendorId: Int,
+        val productId: Int,
+        val sources: Int,
+        val keyboardType: Int,
+        val isExternal: Boolean,
+        val isVirtual: Boolean
+    )
+
+    data class ResolvedInputProfile(
+        val profileId: String,
+        val kind: InputDeviceKind,
+        val autoDetected: Boolean
+    )
+
+    data class RemappedHardwareEvent(
+        val keyCode: Int,
+        val event: KeyEvent?
+    )
+
+    private enum class KeyboardFamily {
+        BLACKBERRY,
+        UNIHERTZ,
+        MINIMAL,
+        UNKNOWN
+    }
+
+    private enum class KeyboardModel {
+        Q25,
+        KEY2,
+        TITAN_2_ELITE_QWERTY,
+        TITAN_2,
+        TITAN_POCKET,
+        TITAN_SLIM,
+        TITAN_ORIGINAL,
+        MINIMAL_PHONE,
+        CLICKS_RAZR,
+        CLICKS_PIXEL,
+        CLICKS_POWER,
+        UNKNOWN
+    }
+
+    private data class DeviceProfile(
+        val family: KeyboardFamily,
+        val model: KeyboardModel,
+        val physicalLayoutName: String,
+        val needsEventRemapping: Boolean
+    )
+
+    private var testBuildFingerprintOverride: BuildFingerprint? = null
+
+    // Unihertz scan codes (Titan2)
+    private const val SCANCODE_TITAN2_CTRL: Int = 251
+    private const val SCANCODE_TITAN2_SYM: Int = 253
+
+    private const val KEYCODE_CTRL: Int = KeyEvent.KEYCODE_CTRL_LEFT
+    private const val KEYCODE_SYM: Int = KeyEvent.KEYCODE_SYM
+    private const val KEYCODE_Q25_CTRL: Int = KeyEvent.KEYCODE_SHIFT_RIGHT
+    private const val KEYCODE_Q25_SYM: Int = KeyEvent.KEYCODE_ALT_RIGHT
+    private const val RELOADABLE_META_MASK: Int =
+        KeyEvent.META_SHIFT_MASK or
+            KeyEvent.META_ALT_MASK or
+            KeyEvent.META_CTRL_MASK or
+            KeyEvent.META_SYM_ON
+
+    private const val META_Q25_SHIFT: Int = KeyEvent.META_SHIFT_LEFT_ON
+    private const val META_Q25_ALT: Int = KeyEvent.META_ALT_LEFT_ON
+    private const val META_Q25_CTRL: Int = KeyEvent.META_SHIFT_RIGHT_ON
+    private const val META_Q25_SYM: Int = KeyEvent.META_ALT_RIGHT_ON
+    private const val META_Q25_CTRL_OR_SYM: Int = META_Q25_CTRL or META_Q25_SYM
+
+    private const val META_SHIFT: Int = KeyEvent.META_SHIFT_LEFT_ON or KeyEvent.META_SHIFT_ON
+    private const val META_ALT: Int = KeyEvent.META_ALT_LEFT_ON or KeyEvent.META_ALT_ON
+    private const val META_CTRL: Int = KeyEvent.META_CTRL_LEFT_ON or KeyEvent.META_CTRL_ON
+    private const val META_SYM: Int = KeyEvent.META_SYM_ON
+
+    private var lastQ25MetaState: Int = 0
+
+    fun needsRemapping(): Boolean = currentDeviceProfile().needsEventRemapping
+
+    fun remapHardwareKeyEvent(
+        keyCode: Int,
+        event: KeyEvent?,
+        physicalProfileOverride: String? = null
+    ): RemappedHardwareEvent {
+        val model = resolveKeyboardModel(event, physicalProfileOverride)
+        val positionNormalized = normalizePhysicalKeyPosition(model, keyCode, event)
+        return when (model) {
+            KeyboardModel.Q25 -> remapQ25KeyEvent(
+                positionNormalized.keyCode,
+                positionNormalized.event
+            )
+            else -> positionNormalized
+        }
+    }
+
+    private fun normalizePhysicalKeyPosition(
+        model: KeyboardModel,
+        keyCode: Int,
+        event: KeyEvent?
+    ): RemappedHardwareEvent {
+        val usesCanonicalAlphabeticPositions =
+            model == KeyboardModel.KEY2 || model == KeyboardModel.CLICKS_POWER
+        if (!usesCanonicalAlphabeticPositions) {
+            return RemappedHardwareEvent(keyCode, event)
+        }
+
+        val canonicalKeyCode = PhysicalKeyPositionNormalizer
+            .canonicalAlphabeticKeyCode(event?.scanCode ?: -1)
+            ?: keyCode
+        return patchKeyCodeIfNeeded(keyCode, event, canonicalKeyCode)
+    }
+
+    // Backward-compatible API used by existing callers.
+    fun remapKeyEvent(
+        keyCode: Int,
+        event: KeyEvent?,
+        physicalProfileOverride: String? = null
+    ): Pair<Int, KeyEvent?>? {
+        val remapped = remapHardwareKeyEvent(keyCode, event, physicalProfileOverride)
+        if (remapped.keyCode == keyCode && remapped.event === event) {
+            return null
+        }
+        return remapped.keyCode to remapped.event
+    }
+
+    private fun remapQ25KeyEvent(keyCode: Int, event: KeyEvent?): RemappedHardwareEvent {
+        if (!shouldRemapQ25Event(keyCode, event)) {
+            return RemappedHardwareEvent(keyCode, event)
+        }
+
+        val normalizedKeyCode = when (keyCode) {
+            KEYCODE_Q25_CTRL -> KEYCODE_CTRL
+            KEYCODE_Q25_SYM -> KEYCODE_SYM
+            else -> keyCode
+        }
+
+        return RemappedHardwareEvent(
+            keyCode = normalizedKeyCode,
+            event = patchQ25MetaState(event)
+        )
+    }
+
+    private fun patchKeyCodeIfNeeded(
+        keyCode: Int,
+        event: KeyEvent?,
+        normalizedKeyCode: Int
+    ): RemappedHardwareEvent {
+        if (event == null || normalizedKeyCode == keyCode) {
+            return RemappedHardwareEvent(normalizedKeyCode, event)
+        }
+
+        return RemappedHardwareEvent(
+            keyCode = normalizedKeyCode,
+            event = KeyEvent(
+                event.downTime,
+                event.eventTime,
+                event.action,
+                normalizedKeyCode,
+                event.repeatCount,
+                event.metaState,
+                event.deviceId,
+                event.scanCode,
+                event.flags,
+                event.source
+            )
+        )
+    }
+
+    private fun shouldRemapQ25Event(keyCode: Int, event: KeyEvent?): Boolean {
+        if (keyCode == KEYCODE_Q25_CTRL || keyCode == KEYCODE_Q25_SYM) {
+            return true
+        }
+        if (event == null) {
+            return false
+        }
+        val combinedMetaState = event.metaState or lastQ25MetaState
+        return (combinedMetaState and META_Q25_CTRL_OR_SYM) != 0
+    }
+
+    private fun patchQ25MetaState(event: KeyEvent?): KeyEvent? {
+        if (event == null) {
+            return null
+        }
+
+        val currentMetaState = event.metaState
+        val combinedMetaState = currentMetaState or lastQ25MetaState
+        if ((combinedMetaState and META_Q25_CTRL_OR_SYM) == 0) {
+            lastQ25MetaState = currentMetaState
+            return event
+        }
+        lastQ25MetaState = currentMetaState
+
+        val normalizedMetaState = rebuildNormalizedMetaState(currentMetaState)
+        val normalizedKeyCode = when (event.keyCode) {
+            KEYCODE_Q25_CTRL -> KEYCODE_CTRL
+            KEYCODE_Q25_SYM -> KEYCODE_SYM
+            else -> event.keyCode
+        }
+        val normalizedScanCode = when (event.keyCode) {
+            KEYCODE_Q25_CTRL -> SCANCODE_TITAN2_CTRL
+            KEYCODE_Q25_SYM -> SCANCODE_TITAN2_SYM
+            else -> event.scanCode
+        }
+
+        if (
+            normalizedMetaState == currentMetaState &&
+            normalizedKeyCode == event.keyCode &&
+            normalizedScanCode == event.scanCode
+        ) {
+            return event
+        }
+
+        return KeyEvent(
+            event.downTime,
+            event.eventTime,
+            event.action,
+            normalizedKeyCode,
+            event.repeatCount,
+            normalizedMetaState,
+            event.deviceId,
+            normalizedScanCode,
+            event.flags,
+            event.source
+        )
+    }
+
+    private fun rebuildNormalizedMetaState(metaState: Int): Int {
+        val mappedShift = if ((metaState and META_Q25_SHIFT) != 0) META_SHIFT else 0
+        val mappedCtrl = if ((metaState and META_Q25_CTRL) != 0) META_CTRL else 0
+        val mappedAlt = if ((metaState and META_Q25_ALT) != 0) META_ALT else 0
+        val mappedSym = if ((metaState and META_Q25_SYM) != 0) META_SYM else 0
+        val mappedMetaState = mappedShift or mappedCtrl or mappedAlt or mappedSym
+        return (metaState and RELOADABLE_META_MASK.inv()) or mappedMetaState
+    }
+
+    private data class BuildFingerprint(
+        val brand: String,
+        val manufacturer: String,
+        val model: String,
+        val device: String,
+        val product: String,
+        val board: String,
+        val display: String,
+        val fingerprint: String
+    ) {
+        fun containsAny(vararg tokens: String): Boolean {
+            return tokens.any { token ->
+                brand.contains(token) ||
+                    manufacturer.contains(token) ||
+                    model.contains(token) ||
+                    device.contains(token) ||
+                    product.contains(token) ||
+                    board.contains(token) ||
+                    display.contains(token)
+            }
+        }
+    }
+
+    private fun resolveDeviceProfile(): DeviceProfile {
+        val fp = buildFingerprint()
+        if (isQ25(fp)) {
+            return DeviceProfile(
+                family = KeyboardFamily.BLACKBERRY,
+                model = KeyboardModel.Q25,
+                physicalLayoutName = "Q25",
+                needsEventRemapping = true
+            )
+        }
+        if (isKey2(fp)) {
+            return DeviceProfile(
+                family = KeyboardFamily.BLACKBERRY,
+                model = KeyboardModel.KEY2,
+                physicalLayoutName = "key2",
+                needsEventRemapping = false
+            )
+        }
+        if (isTitan2EliteQwerty(fp)) {
+            return DeviceProfile(
+                family = KeyboardFamily.UNIHERTZ,
+                model = KeyboardModel.TITAN_2_ELITE_QWERTY,
+                physicalLayoutName = "titan2elite_qwerty",
+                needsEventRemapping = false
+            )
+        }
+        if (isTitanFamily(fp)) {
+            val model = resolveTitanModel(fp)
+            return DeviceProfile(
+                family = KeyboardFamily.UNIHERTZ,
+                model = model,
+                physicalLayoutName = when (model) {
+                    KeyboardModel.TITAN_ORIGINAL -> "titan"
+                    else -> "titan2"
+                },
+                needsEventRemapping = false
+            )
+        }
+        if (isMinimalPhone(fp)) {
+            return DeviceProfile(
+                family = KeyboardFamily.MINIMAL,
+                model = KeyboardModel.MINIMAL_PHONE,
+                physicalLayoutName = "mp01",
+                needsEventRemapping = false
+            )
+        }
+        return DeviceProfile(
+            family = KeyboardFamily.UNKNOWN,
+            model = KeyboardModel.UNKNOWN,
+            physicalLayoutName = "unknown",
+            needsEventRemapping = false
+        )
+    }
+
+    private fun buildFingerprint(): BuildFingerprint {
+        testBuildFingerprintOverride?.let { return it }
+        return BuildFingerprint(
+            brand = Build.BRAND.orEmpty().lowercase(),
+            manufacturer = Build.MANUFACTURER.orEmpty().lowercase(),
+            model = Build.MODEL.orEmpty().lowercase(),
+            device = Build.DEVICE.orEmpty().lowercase(),
+            product = Build.PRODUCT.orEmpty().lowercase(),
+            board = Build.BOARD.orEmpty().lowercase(),
+            display = Build.DISPLAY.orEmpty().lowercase(),
+            fingerprint = Build.FINGERPRINT.orEmpty()
+        )
+    }
+
+    private fun currentDeviceProfile(): DeviceProfile = resolveDeviceProfile()
+
+    private fun keyboardModelForProfile(profileId: String?): KeyboardModel {
+        return when (normalizePhysicalProfileOverride(profileId)) {
+            "key2" -> KeyboardModel.KEY2
+            "q25" -> KeyboardModel.Q25
+            "titan2elite_qwerty" -> KeyboardModel.TITAN_2_ELITE_QWERTY
+            "titan" -> KeyboardModel.TITAN_ORIGINAL
+            "titan2" -> KeyboardModel.TITAN_2
+            "mp01" -> KeyboardModel.MINIMAL_PHONE
+            "clicks_razr" -> KeyboardModel.CLICKS_RAZR
+            "clicks_pixel" -> KeyboardModel.CLICKS_PIXEL
+            "clicks_power" -> KeyboardModel.CLICKS_POWER
+            else -> currentDeviceProfile().model
+        }
+    }
+
+    private fun resolveKeyboardModel(
+        event: KeyEvent?,
+        physicalProfileOverride: String?
+    ): KeyboardModel {
+        return keyboardModelForProfile(
+            resolveInputProfile(event, physicalProfileOverride).profileId
+        )
+    }
+
+    fun resolveInputProfile(
+        event: KeyEvent?,
+        physicalProfileOverride: String? = null
+    ): ResolvedInputProfile {
+        val identity = event
+            ?.takeIf { it.deviceId >= 0 }
+            ?.let { InputDevice.getDevice(it.deviceId) }
+            ?.let(::keyboardInputIdentity)
+        return resolveInputProfile(identity, physicalProfileOverride)
+    }
+
+    fun resolveInputProfile(
+        device: InputDevice,
+        physicalProfileOverride: String? = null
+    ): ResolvedInputProfile {
+        return resolveInputProfile(keyboardInputIdentity(device), physicalProfileOverride)
+    }
+
+    fun isClicksPowerKeyboard(device: InputDevice): Boolean {
+        return isClicksPowerKeyboard(keyboardInputIdentity(device))
+    }
+
+    internal fun resolveInputProfile(
+        identity: KeyboardInputIdentity?,
+        physicalProfileOverride: String? = null
+    ): ResolvedInputProfile {
+        val kind = when {
+            identity == null -> InputDeviceKind.UNKNOWN
+            identity.isExternal -> InputDeviceKind.ACCESSORY
+            else -> InputDeviceKind.BUILT_IN
+        }
+
+        if (identity != null && isClicksPowerKeyboard(identity)) {
+            return ResolvedInputProfile(
+                profileId = "clicks_power",
+                kind = InputDeviceKind.ACCESSORY,
+                autoDetected = true
+            )
+        }
+
+        val manualProfile = normalizePhysicalProfileOverride(physicalProfileOverride)
+        if (manualProfile != null) {
+            return ResolvedInputProfile(
+                profileId = manualProfile,
+                kind = kind,
+                autoDetected = false
+            )
+        }
+
+        return ResolvedInputProfile(
+            profileId = currentDeviceProfile().physicalLayoutName,
+            kind = kind,
+            autoDetected = currentDeviceProfile().model != KeyboardModel.UNKNOWN
+        )
+    }
+
+    fun detectedInputProfiles(): List<ResolvedInputProfile> {
+        val profiles = mutableListOf<ResolvedInputProfile>()
+        val builtIn = currentDeviceProfile()
+        if (builtIn.model != KeyboardModel.UNKNOWN) {
+            profiles += ResolvedInputProfile(
+                profileId = builtIn.physicalLayoutName,
+                kind = InputDeviceKind.BUILT_IN,
+                autoDetected = true
+            )
+        }
+        InputDevice.getDeviceIds().forEach { deviceId ->
+            val device = InputDevice.getDevice(deviceId) ?: return@forEach
+            val identity = keyboardInputIdentity(device)
+            if (!identity.isVirtual && isKeyboardLike(identity) && isClicksPowerKeyboard(identity)) {
+                profiles += resolveInputProfile(identity)
+            }
+        }
+        return profiles.distinctBy { it.kind to it.profileId }
+    }
+
+    fun hasConnectedHardwareKeyboard(): Boolean {
+        if (hasBuiltInHardwareKeyboard()) {
+            return true
+        }
+        return InputDevice.getDeviceIds().any { deviceId ->
+            val device = InputDevice.getDevice(deviceId) ?: return@any false
+            val identity = keyboardInputIdentity(device)
+            !identity.isVirtual &&
+                isKeyboardLike(identity) &&
+                identity.keyboardType == InputDevice.KEYBOARD_TYPE_ALPHABETIC
+        }
+    }
+
+    fun hasBuiltInHardwareKeyboard(): Boolean =
+        currentDeviceProfile().model != KeyboardModel.UNKNOWN
+
+    private fun keyboardInputIdentity(device: InputDevice): KeyboardInputIdentity {
+        return KeyboardInputIdentity(
+            name = device.name.orEmpty(),
+            descriptor = device.descriptor.orEmpty(),
+            vendorId = device.vendorId,
+            productId = device.productId,
+            sources = device.sources,
+            keyboardType = device.keyboardType,
+            isExternal = device.isExternal,
+            isVirtual = device.isVirtual
+        )
+    }
+
+    private fun isKeyboardLike(identity: KeyboardInputIdentity): Boolean {
+        return (identity.sources and InputDevice.SOURCE_KEYBOARD) == InputDevice.SOURCE_KEYBOARD ||
+            identity.keyboardType != InputDevice.KEYBOARD_TYPE_NONE
+    }
+
+    private fun isClicksPowerKeyboard(identity: KeyboardInputIdentity): Boolean {
+        return identity.isExternal &&
+            !identity.isVirtual &&
+            isKeyboardLike(identity) &&
+            identity.vendorId == 2007 &&
+            identity.name.trim().startsWith("Power Keyboard-", ignoreCase = true)
+    }
+
+    private fun normalizePhysicalProfileOverride(physicalProfileOverride: String?): String? {
+        val normalized = physicalProfileOverride?.trim()?.lowercase().orEmpty()
+        return when (normalized) {
+            "", "auto" -> null
+            "key2", "q25", "titan", "titan2", "titan2elite_qwerty", "mp01",
+            "clicks_razr", "clicks_pixel", "clicks_power" -> normalized
+            else -> null
+        }
+    }
+
+    internal fun setBuildFingerprintForTests(
+        brand: String,
+        manufacturer: String,
+        model: String,
+        device: String,
+        product: String,
+        board: String = "",
+        display: String = "",
+        fingerprint: String = ""
+    ) {
+        testBuildFingerprintOverride = BuildFingerprint(
+            brand = brand.lowercase(),
+            manufacturer = manufacturer.lowercase(),
+            model = model.lowercase(),
+            device = device.lowercase(),
+            product = product.lowercase(),
+            board = board.lowercase(),
+            display = display.lowercase(),
+            fingerprint = fingerprint
+        )
+    }
+
+    internal fun clearTestOverrides() {
+        testBuildFingerprintOverride = null
+        lastQ25MetaState = 0
+    }
+
+    private fun isQ25(fp: BuildFingerprint): Boolean {
+        return fp.containsAny("q25") &&
+            (fp.containsAny("zinwa", "blackberry", "q20") || fp.device == "q25" || fp.model == "q25")
+    }
+
+    private fun isKey2(fp: BuildFingerprint): Boolean {
+        // LineageOS Key2 codenames:
+        // - KEY2: athena
+        // - KEY2 LE: luna
+        if (fp.device == "athena" || fp.device == "luna") {
+            return true
+        }
+        return fp.containsAny("blackberry key2", "key2", "bbf100")
+    }
+
+    private fun isMinimalPhone(fp: BuildFingerprint): Boolean {
+        return fp.containsAny("minimal_phone") || (fp.containsAny("mp01") && fp.containsAny("along"))
+    }
+
+    private fun isTitanFamily(fp: BuildFingerprint): Boolean {
+        return fp.containsAny("unihertz", "titan")
+    }
+
+    private fun isTitan2EliteQwerty(fp: BuildFingerprint): Boolean {
+        val strictTokenMatch = fp.containsAny(
+            "titan2elite_qwerty",
+            "titan2elite-qwerty",
+            "titan2eliteqwerty"
+        )
+        if (strictTokenMatch) {
+            return true
+        }
+
+        // Reviewer devices may expose Titan 2-like model/product, but still leak Elite traits
+        // via BOARD or DISPLAY. Use these only inside the Unihertz Titan family.
+        val looksLikeTitanFamily = fp.containsAny("unihertz", "titan")
+        val hasEliteDisplay = fp.display.contains("elite")
+        val hasEliteBoard = fp.board.contains("g72")
+        return looksLikeTitanFamily && (hasEliteDisplay || hasEliteBoard)
+    }
+
+    private fun resolveTitanModel(fp: BuildFingerprint): KeyboardModel {
+        return when {
+            fp.containsAny("titan pocket", "titan_pocket") -> KeyboardModel.TITAN_POCKET
+            fp.containsAny("titan slim", "titan_slim") -> KeyboardModel.TITAN_SLIM
+            fp.containsAny("titan 2", "titan2") -> KeyboardModel.TITAN_2
+            fp.containsAny("titan") -> KeyboardModel.TITAN_ORIGINAL
+            else -> KeyboardModel.UNKNOWN
+        }
+    }
+
+    fun deviceName(): String {
+        return Build.BRAND + " " + Build.MODEL
+    }
+
+    fun detectedDeviceIdentity(): DeviceIdentitySnapshot {
+        val fingerprint = buildFingerprint()
+        val model = resolveDeviceProfile().model
+        val fallbackName = listOf(fingerprint.brand, fingerprint.model)
+            .filter(String::isNotBlank)
+            .joinToString(" ")
+            .ifBlank { "Unknown device" }
+        return DeviceIdentitySnapshot(
+            stableId = when (model) {
+                KeyboardModel.Q25 -> "q25"
+                KeyboardModel.KEY2 -> "key2"
+                KeyboardModel.TITAN_2_ELITE_QWERTY -> "titan2-elite"
+                KeyboardModel.TITAN_2 -> "titan2"
+                KeyboardModel.TITAN_POCKET -> "titan-pocket"
+                KeyboardModel.TITAN_SLIM -> "titan-slim"
+                KeyboardModel.TITAN_ORIGINAL -> "titan"
+                KeyboardModel.MINIMAL_PHONE -> "minimal-phone"
+                KeyboardModel.CLICKS_RAZR,
+                KeyboardModel.CLICKS_PIXEL,
+                KeyboardModel.CLICKS_POWER,
+                KeyboardModel.UNKNOWN -> null
+            },
+            displayName = when (model) {
+                KeyboardModel.Q25 -> "Q25"
+                KeyboardModel.KEY2 -> "BlackBerry KEY2"
+                KeyboardModel.TITAN_2_ELITE_QWERTY -> "Titan 2 Elite"
+                KeyboardModel.TITAN_2 -> "Titan 2"
+                KeyboardModel.TITAN_POCKET -> "Titan Pocket"
+                KeyboardModel.TITAN_SLIM -> "Titan Slim"
+                KeyboardModel.TITAN_ORIGINAL -> "Titan"
+                KeyboardModel.MINIMAL_PHONE -> "Minimal Phone"
+                KeyboardModel.CLICKS_RAZR,
+                KeyboardModel.CLICKS_PIXEL,
+                KeyboardModel.CLICKS_POWER,
+                KeyboardModel.UNKNOWN -> fallbackName
+            },
+            brand = fingerprint.brand,
+            manufacturer = fingerprint.manufacturer,
+            model = fingerprint.model,
+            device = fingerprint.device,
+            product = fingerprint.product,
+            board = fingerprint.board,
+            buildDisplay = fingerprint.display,
+            buildFingerprint = fingerprint.fingerprint
+        )
+    }
+
+    fun keyboardName(): String {
+        return when (currentDeviceProfile().family) {
+            KeyboardFamily.BLACKBERRY -> "Blackberry"
+            KeyboardFamily.UNIHERTZ -> "Unihertz"
+            KeyboardFamily.MINIMAL -> "Minimal"
+            KeyboardFamily.UNKNOWN -> "unknown"
+        }
+    }
+
+    fun physicalKeyboardName(): String {
+        return currentDeviceProfile().physicalLayoutName
+    }
+
+    fun isTitan2Device(): Boolean {
+        return when (currentDeviceProfile().model) {
+            KeyboardModel.TITAN_2,
+            KeyboardModel.TITAN_2_ELITE_QWERTY -> true
+            else -> false
+        }
+    }
+
+    fun isTitan2EliteDevice(): Boolean =
+        currentDeviceProfile().model == KeyboardModel.TITAN_2_ELITE_QWERTY
+
+    fun isMinimalPhoneDevice(physicalProfileOverride: String? = null): Boolean {
+        return keyboardModelForProfile(physicalProfileOverride) == KeyboardModel.MINIMAL_PHONE
+    }
+
+    fun isPhysicalKeyboardDevice(physicalProfileOverride: String? = null): Boolean {
+        return when (keyboardModelForProfile(physicalProfileOverride)) {
+            KeyboardModel.Q25,
+            KeyboardModel.KEY2,
+            KeyboardModel.TITAN_2_ELITE_QWERTY,
+            KeyboardModel.TITAN_2,
+            KeyboardModel.TITAN_POCKET,
+            KeyboardModel.TITAN_SLIM,
+            KeyboardModel.TITAN_ORIGINAL,
+            KeyboardModel.MINIMAL_PHONE,
+            KeyboardModel.CLICKS_RAZR,
+            KeyboardModel.CLICKS_PIXEL,
+            KeyboardModel.CLICKS_POWER -> true
+            KeyboardModel.UNKNOWN -> false
+        }
+    }
+}

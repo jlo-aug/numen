@@ -1,0 +1,200 @@
+# Everyday texting messages and replies, written for Numen's keyboard simulation (ChatSimulationTest).
+Hey, are you free tonight?
+Yeah I should be free after work.
+What time works for you?
+How about seven at the usual place?
+Sounds good, see you then!
+Running a few minutes late, sorry.
+No worries, take your time.
+Just got here, grabbing a table.
+Can you send me the file when you get a chance?
+Sent it a minute ago, let me know if it doesn't come through.
+Got it, thanks!
+Thanks so much for your help today.
+Of course, happy to help anytime.
+Let's get some food after the meeting.
+I'm starving, want to grab lunch?
+Sure, where do you want to go?
+Anywhere is fine with me.
+Did you see the game last night?
+No I missed it, who won?
+They won in overtime, it was crazy.
+I can't believe it's already Friday.
+This week went by so fast.
+What are you up to this weekend?
+Not much, probably just relaxing at home.
+We should go hiking if the weather is nice.
+I'm down, let me know when.
+Can you pick up some milk on the way home?
+Sure, do we need anything else?
+Maybe some bread and eggs too.
+I'll be home in about twenty minutes.
+Drive safe!
+Call me when you land.
+Just landed, waiting for my bag.
+How was the flight?
+Long but not too bad.
+Happy birthday! Hope you have a great day.
+Thank you! That means a lot.
+Are we still on for tomorrow?
+Yes, still works for me.
+Actually something came up, can we move it to Thursday?
+Thursday works, same time?
+Perfect, thanks for being flexible.
+I just sent you the invite.
+Did you get my email about the project?
+Yes, I'll reply this afternoon.
+Can we talk about it on a quick call?
+Give me ten minutes and I'll call you.
+I'm in a meeting right now, can I call you back?
+No rush, whenever you're free.
+Where did you put the keys?
+They should be on the kitchen counter.
+Found them, thanks.
+I think I left my charger at your place.
+I'll bring it over tomorrow.
+Do you want to watch a movie tonight?
+Sure, what did you have in mind?
+Something funny, I need a laugh.
+I'm so tired, I barely slept last night.
+You should go to bed early tonight.
+I know, I keep saying that.
+Let me know when you're on your way.
+On my way now.
+Be there in five.
+Traffic is terrible, might be a bit late.
+That's okay, we haven't started yet.
+Congrats on the new job!
+Thanks, I start next week.
+That's amazing news, I'm so happy for you.
+How did the interview go?
+Pretty well I think, they said they'd get back to me soon.
+Fingers crossed for you.
+Can you remind me what time the party starts?
+It starts at eight but people will show up later.
+Should I bring anything?
+Maybe some drinks or snacks.
+I'll bring chips and salsa.
+Did you finish the report?
+Almost done, just need to check the numbers.
+Send it over when it's ready and I'll take a look.
+The meeting got moved to three.
+Thanks for the heads up.
+I'm going to the store, need anything?
+Could you grab some coffee?
+Which kind do you want?
+The usual one is fine.
+How are you feeling today?
+Much better, thanks for asking.
+Glad to hear it.
+Let me check my calendar and get back to you.
+I'm free all day Saturday.
+Let's do brunch on Sunday instead.
+Good idea, I'll make a reservation.
+What's the address again?
+I'll text you the address.
+Is it okay if I bring a friend?
+Of course, the more the merrier.
+I'm sorry about earlier, I didn't mean it.
+It's fine, don't worry about it.
+I miss you, when are you coming back?
+Hopefully next month if everything works out.
+Can't wait to see you.
+I'm outside, come down when you're ready.
+Coming down now.
+Do you know if the store is open today?
+I think it closes early on Sundays.
+Thanks for dinner, it was delicious.
+Anytime, we should do it again soon.
+I'll be offline for a bit, talk later.
+Talk soon.
+Good morning! Did you sleep well?
+Good night, sleep well.
+Have a safe trip.
+Let me know if you need anything.
+I'm here if you want to talk.
+That makes sense, thanks for explaining.
+I don't think that's going to work.
+Maybe we can try a different approach.
+I agree, let's try that.
+What do you think about the new design?
+I like it, but the colors feel a bit dark.
+We can change them before the launch.
+The kids are finally asleep.
+Finally some quiet time.
+Do you want to come over for dinner?
+I'd love to, what can I bring?
+Just bring yourself.
+It's raining again, take an umbrella.
+I forgot my umbrella at work.
+The package arrived this morning.
+Great, I was worried it got lost.
+I'll pay you back tomorrow.
+No problem, there's no rush.
+Did you hear what happened at school?
+No, what happened?
+I'll tell you when I see you.
+Can you believe the price of gas right now?
+It's getting ridiculous.
+We need to book the tickets before they sell out.
+I already booked them this morning.
+You're the best.
+I'm heading to the gym, want to come?
+Not today, maybe tomorrow.
+How long will you be?
+About an hour, maybe less.
+Can you help me move this weekend?
+Sure, what time should I come over?
+Around nine if that works.
+I'll bring some boxes.
+Have you talked to mom lately?
+I called her yesterday, she sounds good.
+We should visit her soon.
+Let's plan something for next month.
+My phone is about to die, I'll text you later.
+Text me when you get home.
+Home now, thanks again for tonight.
+It was so much fun.
+We have to do that again.
+Do you have the link for the meeting?
+I'll send it in the chat.
+The link isn't working for me.
+Try refreshing the page.
+That worked, I'm in.
+Who else is coming tonight?
+Just a few friends from work.
+Sounds fun, count me in.
+I think I'm getting sick.
+Stay home and get some rest.
+Drink lots of water and sleep.
+Thanks, I'll try to take it easy.
+Lol that's hilarious.
+Omg I can't stop laughing.
+Idk, what do you think?
+Tbh I'm not sure either.
+Btw, did you pay the rent yet?
+Not yet, I'll do it tonight.
+Ok sounds good.
+Yeah that works for me.
+Nah, I'm good, thanks though.
+Haha no way.
+Wait, really?
+For sure.
+Same here.
+Me too.
+Exactly what I was thinking.
+That's a great idea.
+I'm not sure that's a good idea.
+Let's think about it some more.
+Can you check if the door is locked?
+I locked it when I left.
+Did you feed the dog?
+Yes, she already ate.
+Please don't forget to water the plants.
+I won't forget, I promise.
+The train is delayed again.
+I'll wait for you at the station.
+Do you want me to pick you up?
+That would be great, thank you.
+I'll be there around six.
+See you soon.

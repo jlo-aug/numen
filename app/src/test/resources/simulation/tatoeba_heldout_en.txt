@@ -1,0 +1,3002 @@
+# Everyday English sentences from Tatoeba (tatoeba.org), CC BY 2.0 FR, by Tatoeba contributors.
+# Held out of the word-pair counts (every 50th sentence id; see tools/build_context_pairs.py).
+I may give up soon and just nap instead.
+I am proud to be a part of this project.
+Have you ever seen him swimming?
+You must practice it at regular intervals.
+Where do you come from?
+I'll help you so long as you do your best.
+The gold coin was much more valuable than was supposed.
+The GOP accused the Democrats of pork barrel politics.
+The chairman should take the minority opinion into account.
+There's a scent of danger.
+Not all the students are against the plan.
+The colonists bartered with the natives for fur.
+We are against war.
+It is very hard to get rid of cockroaches from our house.
+Can you deliver it to my house?
+I sort of understand.
+I feel something.
+Have you begun studying English?
+If it rains, the game will be canceled.
+Nothing is so pleasant as traveling alone.
+The committee is composed of five students.
+I don't think I'm cut out for city life.
+I had my radio repaired by him.
+Help yourself to more potato chips.
+Could you give me a few more minutes?
+Mary understands Chinese.
+The manager complimented him on his achievement.
+Bob lost interest in rock music.
+Helen is always at the top of her class.
+Bill is still a legendary figure in this company.
+I didn't like rock music at first, but it soon grew on me.
+Nancy knows better than to marry Jack.
+I'll make you happy no matter what happens.
+All the stories are interesting.
+Where can I cash this personal check?
+Please don't mind me.
+I defy you to make it public.
+I've just washed the dishes.
+What time does the cab leave for the airport?
+You've got a nerve to say such a thing!
+That was of great help to me.
+And just think, you're on the other side of the world.
+The problem was under discussion.
+All were quiet in the room.
+The shop windows display the latest fashion.
+The frost rendered the orange crop worthless.
+The boy dreamed of going on an Antarctic expedition.
+The experiment failed because of some minor faults.
+The kid got hurt.
+The orphan was fostered by the wealthy man.
+A discussion of the proposal seems to be in order.
+The timid soldier was tormented by terrible nightmares.
+Everybody is supposed to wear a tie at the party.
+The rumor can't be true.
+Do come and see us again.
+Way off in the distance she could see the lights of the city.
+John has not come yet, but when he does, I will call you.
+Jim promised me not to come again.
+Many forms of life are disappearing.
+Such playfulness is characteristic of Mr Baker.
+This happened under my nose.
+This is what you must do.
+This is a book often read by adults.
+This road will lead you to the station and the city center.
+There is no room for further improvement in this system.
+I will read a book when I have finished this task.
+This desk was too heavy for Patty to lift.
+Can you answer this riddle?
+You should leave out these two lines.
+If you do that, it will help you.
+Who has eaten all the cookies?
+A goose is a water bird.
+Is it to go?
+Hey! Don't be silly.
+I have heard nothing from him yet.
+My resolution dissolved at the last moment.
+Is that as heavy as this?
+The politician is as slippery as an eel!
+Uh..., where's the post office?
+Which way did you choose?
+Your question is very hard to answer.
+Let me exchange seats with you.
+He is a tough customer.
+The couple was quarrelling and Chris knocked Beth down.
+Let me go with you.
+The police dug out some facts about the matter.
+The moon landing was a monumental achievement.
+At present freedom of speech is taken for granted.
+How about a cup of tea or something, if you aren't in a hurry?
+Hiroko has charming features.
+I made up my mind to quit smoking from now on.
+What about next Sunday?
+This year we had more snow than last year.
+More and more people these days are getting overwhelmed by housing loans.
+His bag was stolen yesterday.
+Work is behind schedule.
+Children are to obey their parents.
+This is the only book I have.
+Our conversation always ends in a quarrel.
+We should have paid attention to the announcement.
+We rented the apartment by the week.
+Will you have dinner with me?
+My uncle drives a Ford.
+My bicycle needs fixing.
+My father is as bald as a billiard ball.
+I saw a bird flying over a tree.
+I am taking a bath now.
+I have been to the supermarket.
+I'm in agreement on that matter.
+I bought a pair of boots.
+I don't like a novel without a hero.
+I went to Kyoto, where I happened to see her.
+I have to cook dinner today.
+I was ashamed of my behavior.
+I like blue best of all colors.
+I met Tom in front of the store.
+I had a chance to see him.
+I remember him well.
+I have all my suits made to order.
+I like hot tea better than cold.
+We call our English teacher E.T.
+On account of an accident, I was late for school.
+I'll try my luck.
+Having seen him in the picture, I recognized him at once.
+Where the drink goes in, there the wit goes out.
+Spring is just around the corner.
+Little by little the water gets shallower.
+I was moved to tears in spite of myself.
+A new difficulty has arisen.
+I forgot to bring my I.D. card.
+If you would succeed in life, you must work hard.
+I will go with you as far as Narita Airport.
+How long adolescence continues is determined by biological factors.
+The train bound for Sendai has just left.
+War must be avoided at all costs.
+What a nice car you have! You must have paid a lot for it.
+Everybody in the village knew him.
+Ever since she fell in the kitchen, she hasn't been all there.
+A potential third party would not be able to crack the code.
+How was your birthday?
+I'll be late for school!
+Let's take advantage of the long weekend.
+When the whistle blows, the race will start.
+The name of the character is Hamlet.
+Animals live in many places and in great numbers, too.
+The meat cuts tough.
+You may not come in.
+There was a sprinkling of foreigners among the visitors in the museum.
+I can't make out why he isn't here yet.
+That he is alive is certain.
+He is cursed with idle sons.
+He has a very good sense of humor.
+His ideas were far in advance of the age in which he lived.
+His noble deed deserves praise indeed.
+His book deals with traffic accidents.
+He ate himself into the grave.
+He is always late for school.
+He gave me a curt answer.
+He made up his mind to go there.
+He acceded to the office.
+He can speak a little English.
+He wasn't able to attend the party.
+He came near being run over by a car.
+He tried hard, but he failed.
+He extinguished the fire.
+He grew a beard while he was on holiday.
+He has broad shoulders.
+When he is in trouble, he always turns to his sister for help.
+He was at the point of death when I arrived.
+He was making sheep's eyes at my daughter.
+He is unable to provide for his family.
+He was seriously ill, and the doctor was sent for.
+He seems nice, but he's wicked at heart.
+He saved a sailor.
+He is known to everyone.
+He is clever, but on the other hand he often makes careless mistakes.
+He reasoned her into believing what he said.
+He has a lunch.
+He is a famous artist.
+Their house is being remodeled.
+They adapted themselves to the change quickly.
+They can come on Monday or Tuesday, but not on Wednesday or Thursday.
+They arrived too soon.
+He shan't go there.
+She may well be proud of her son.
+Her cheeks burned with shame.
+Her mother was busy cooking the dinner.
+She spent more money than usual.
+She lives in an expensive style.
+She had an accident that ended her life as a tennis player.
+She admonished the child to be more careful.
+She was moved to tears.
+She is at work right now.
+She gets up the earliest in my family.
+She abstains from drinking.
+She tried to screen her son from reality.
+She received the letter to the effect that he would soon be back.
+I don't think she takes after her mother.
+We sent some flowers to the hospital to cheer her up.
+It will be all the same a hundred years hence.
+My father must do the work.
+There was a sudden calm as the wind dropped.
+His shadow on the wall looked sad.
+He could not but cry, when he heard about his mother's death.
+I have to go now.
+If the hunted should perish, the hunter would, too.
+When you wake up tomorrow morning, you will find a wonderful thing.
+Night coming on, the boys went home.
+Supper was laid out on the table.
+The storm was at its height.
+Quality is more important than quantity.
+Regardless of the subject, he pretends to know all about it.
+Fighting the fading light he continued to count their names.
+Tektronix's new software perfectly responds to the needs of customers using logic analysers.
+I salute your dedicated work.
+It was less than fifteen dollars.
+I started liking Mary as soon as I met her.
+I think his novel is boring.
+When I got to school, the race had already finished.
+English is never wrong when it is beautiful.
+Muiriel is an Indian.
+A snowstorm is coming in.
+Go up the street.
+I wash myself.
+Please come see me tomorrow.
+The boy has the greatest amount of fruit.
+Things have become so expensive!
+We drank soju at the karaoke bar.
+My mother hummed to herself as she went about her cooking in the kitchen.
+I've had a perfectly wonderful evening. But this wasn't it.
+Let's stroll around the bazaar!
+He refuses to accept his old age.
+You like him, don't you?
+I'm taking a trip to Armenia next year.
+A child of just five was hit by a bicycle.
+A witch once gave Christopher Columbus an evil eye... and never got it back.
+No, I'm not Byron, I'm different.
+Cancer patients often have to deal with debilitating bouts of nausea.
+If it isn't on Tatoeba, it isn't a sentence.
+You look funny in that hat.
+The weather is bad in the north.
+Don't let schooling interfere with your education.
+I am bored out of my mind.
+The bank refused to give them more credit.
+Tom joined his school's drama club.
+I do not react well to surprises.
+I'm gonna get a cell phone tomorrow!
+Will you check the tires?
+Please give me a drink.
+I'd rather live in peaceful poverty than in wealth and fear.
+The definition of 'family' has changed over the years.
+The same force spread over a smaller area will produce more pressure.
+He will be prosecuted to the full extent of the law.
+I love my mother.
+I want to live in a town.
+That's not exactly what I had in mind.
+They feared a threat to democracy.
+He would be paid a small amount of money.
+The Americans rejected the offer.
+Some even accused him of treason.
+Unfortunately, the usage of MacBooks is very limited in Turkey.
+Dean really eats quite a lot, don't you think?
+He hopes to entice her into doing what he wants.
+All I know is that I do not know everything.
+Has anybody ever thought of this?
+We're selling her one of our tickets.
+She begged him to stay.
+She wouldn't even speak to him.
+My vet told me to feed my dog in the evening.
+What's your favorite summer sport?
+Is it not clear enough?
+A traveling woman lets her heart travel as well.
+Why don't you telephone the theatre and enquire about tickets?
+Gold is the most valuable of the metals.
+I never imagined I'd be working for you.
+Let's go out and get something to eat.
+You're the only person I know that likes getting up early in the morning.
+He was getting increasingly anxious.
+He tires easily.
+Many monkeys are found on the hill.
+Tom was singing with the children sitting around the campfire.
+Tom lives in a house without running water.
+Tom is a big eater.
+Tom felt a sharp pain in his stomach.
+Tom didn't have enough experience to know what to do.
+Tom ate three hotdogs.
+Apparently, Tom was already famous before he released that album.
+Tom often runs errands for Mary.
+Tom got Mary to cook dinner.
+Tom consulted Mary about the matter.
+Did Tom tell you about what he and Mary did last weekend?
+Tom drives Mary up the wall.
+Without family and friends, it's a dog's life.
+If you don't have anything to say, say nothing.
+I'll do that without fail.
+Tom wanted Mary to play a song for him on the piano.
+Tom needed some cash.
+Tom had his chauffeur drive Mary to the airport.
+Tom doesn't know squat about Mary.
+Tom couldn't stop yawning.
+Tom can no longer afford to live in the style he is accustomed to.
+You need to be more careful from now on.
+Tom pretended that he didn't care.
+I'll fill you in later.
+Is there an ATM close by?
+The family eats breakfast on the balcony.
+I'd like to open a checking account.
+Tom walked in the door at just the right time.
+Revision of the law can't be delayed further.
+Good day. Are you Mr. Sherlock Holmes?
+Now's not the time to have that attitude!
+I've been looking forward to him coming.
+Which flight centre will your sister work for?
+She is a woman worthy of admiration.
+It seems that they're bored of married life.
+I won't divorce you unless you give me a legitimate reason.
+Mother is cooking in the kitchen.
+Why do people like to smell their own farts?
+He often skips meetings.
+What is Gestalt Therapy?
+I suppose I could do that.
+He was a Frenchman. I could tell by his accent.
+I was planning to call him, but changed my mind and didn't.
+May I ask you for your name and address?
+Who are you looking for?
+Ken's team is likely to win.
+Dinosaur eggs? Impossible. These animals are already extinct.
+Mice don't have nephews.
+He's the tallest in the class.
+I was very tired so I went to bed early.
+Tom likes to listen to music from the eighties.
+He is also writing a book.
+Tom's friends called him Mr. Money Bags.
+I think it's necessary for you to see him.
+It's possible we'll arrive at the Tokyo station around noon.
+There's a secret passage.
+Tom blew all his money on a motorcycle.
+Pull out all the nouns from the text.
+Did you call Tom?
+The husband admits he has a relationship.
+Tom is a member of the First Nations.
+Constantine the Great is discussed controversially in modern historical research.
+It's a risky proposition.
+I just bought a new pair of shoes.
+I think Tom might be telling the truth.
+Traveling educates young people.
+Is your car next to her house?
+But how are you going to decide what is important, and what isn't?
+They made money by selling drugs into the huge market.
+Is your brother a ski instructor?
+Taste buds are very useful.
+I can't do that.
+He won the lottery.
+When I was at high school, I knew a lot of jokes.
+I don't know what to answer.
+I cannot make my bed. I don't have time for that!
+No, please go, both of you. Don't let me be the third wheel.
+Have you ever been to Germany?
+She owns many valuable works.
+He lost everything.
+It seems to me that she is almost fifteen years old.
+Which sport do you like practising?
+This is my pencil.
+Have you got your ID with you?
+I think that German syntax is difficult.
+The jury found that Samsung had infringed upon Apple's patents.
+This kid is wearing shorts.
+Do you think she still remembers me?
+He advises us.
+How many chromosomes does a human being have?
+Tom ate the banana without washing his hands.
+Tom pretended that he didn't know Mary.
+Mary likes you.
+Stay out of this.
+Call me when you're ready.
+Tom is too young.
+She looked pleased.
+In winter, we must feed the birds.
+Tom should have discussed the matter with me.
+Can you open it?
+Is that the same guy?
+I see the problem.
+I'll get right on it.
+We need to get you out of here.
+That didn't work.
+You look like a boy.
+This is the craziest thing I've ever heard.
+The cook used a chinois.
+There's something I want to show you.
+I thought Tom had agreed to do the job.
+You can't believe that.
+I can't just let Tom kill me.
+I can't take another day off.
+I thought something was odd.
+The customs officials boarded the ship.
+How long did it take?
+No matter who you ask, you won't be able to get a satisfactory answer.
+Think of all the times we've been in trouble before.
+She doesn't drink anymore.
+Let's settle this now.
+I want a new dress.
+Everyone wants something.
+I want us not to get caught.
+Don't you want to live forever?
+You don't want me to sing, do you?
+I can't see through walls.
+I don't really want to be all by myself.
+Do you want me to pick up Tom after school?
+Tom wants to tell you about Mary.
+You want me to do your dirty work for you, don't you?
+I'd like to have a word with you about what happened yesterday.
+I would be happy to do that for you.
+I'm a little busy right now.
+Tom loves playing old computer games.
+The newspaper says that she committed suicide.
+I was looking for something.
+When I started to fix the language, I got wrapped around the axle.
+Did anybody see you?
+Most of the people working here are bilingual, trilingual and multilingual.
+My son is way too skinny.
+I raised the binoculars again and looked at the cemetery.
+The book fell to the floor.
+What place do you want to go to?
+If it bleeds, it leads.
+Tom is fashionable.
+Don't leave me alone with Tom.
+Are you flirting with me?
+You're acting weird.
+I didn't want to look stupid.
+This isn't easy.
+Tom became uneasy.
+Tom isn't outside.
+Tom shot twice.
+Tom wouldn't approve.
+We lost it.
+They kept running.
+America loves you.
+I can't look.
+I was outdoors.
+I'm only eighteen.
+It works perfectly.
+Nothing's been touched.
+That wasn't smart.
+There's my team.
+Were you attacked?
+You weren't listening.
+I'm amazed at his nerve.
+Tom just watches.
+How long ago did it happen?
+I'm counting on your help.
+Three of the rooms face the street.
+I didn't break in.
+Tom has been transferred.
+Tom is passed out.
+Think twice before translating.
+I don't like the dark.
+That doesn't sound very promising.
+We didn't have any choice.
+I would rather die than submit.
+I didn't see who was driving.
+I think we spoke on the phone.
+I can still help you.
+I closed the deal an hour ago.
+I didn't really understand what was happening.
+Who's the lead singer of the group this year?
+I feel like I know you.
+I guess Tom already knows.
+I hate it when you're right.
+Everything here tastes of seafood.
+I've already read that document.
+I've explained that to Tom.
+I've never seen you here before.
+I hear Tom is very good at swimming.
+I don't know why I didn't try this before.
+I've already rescheduled my appointment twice.
+She gulped down half her tea in one mouthful.
+I just want to know what Tom said.
+I know I shouldn't care what Tom thinks.
+I know you speak French.
+I made a stupid mistake.
+I need to leave.
+I paid for these tickets.
+I have a much better idea.
+You're disappointed, aren't you?
+I shouldn't have interfered.
+I think I'd better help Tom.
+They escaped when the door was opened.
+I would never lie to you.
+Some people don't act their age.
+Tom speaks French fairly well.
+This cathedral was built more than four centuries ago.
+I'd like some powidl.
+She's interested in fashion.
+I can't help loving her despite her flaws.
+Tom shouted at Mary.
+I wonder if Tom is as excited about this as Mary is.
+Take your hat off.
+But why did he do it?
+Tom won't tell me how much he paid for his new computer.
+Tom stopped the car and turned off the engine.
+Tom wouldn't be here if it wasn't for me.
+Why don't you come to the zoo with me?
+Tom seemed to be having a good time.
+I told Tom not to play in the road.
+I'm worried about Tom's behavior.
+I'll leave that decision to you.
+I was hoping I might catch you.
+I told Tom I'd finish up here.
+Aren't you going to share it?
+I don't have anything to do.
+Beautiful woman, isn't she?
+You'll be very impressed.
+You're on your own, Tom.
+We don't need a ladder.
+We wish you well, Tom.
+We all have families.
+Tom is wearing blue.
+I'm not an invalid.
+I'm sure of that.
+I can't leave before the job is done.
+Your room is very big.
+He yelled at her.
+She asked if I needed a taxi.
+The children want to go to the pool.
+I know that you are up to some trick.
+Tom is eating snacks.
+Who's in charge around here?
+Tom and Mary looked as if they might start crying.
+Tom was a good friend of yours, wasn't he?
+Tom was looking at a map of the area.
+Tom said he needed some more time.
+That's your signature, isn't it?
+What're you doing in my room?
+They had no idea what to do.
+Tom unzipped his knapsack.
+Tom is in very bad shape.
+I told you Tom was fast.
+Boston is a great city.
+Why did you hesitate?
+When does Tom leave?
+Tom may be sincere.
+Is this your desk?
+Tom hired Mary.
+She helped her friends.
+He became very ill.
+Problems don't usually go away by themselves.
+Why is that still a problem?
+You have not heard the children.
+I have something I have to do in the evening.
+Do you own a pharmacy?
+Why are you so glum?
+I've had it with this stupid job.
+I was disappointed by the news.
+You're a good cook.
+I will harvest my wheat in July.
+Tom and Mary didn't tell anyone that they had gotten married.
+We're not ruining our clothing.
+We passed one test, but failed the other.
+What's the best way to get there?
+I've always loved plants.
+I surf the Net more frequently at home.
+Everyone has a right to have no rights.
+Thank you for this nice present.
+My name is of Hebraic origin.
+There are no girls among us.
+Tom laid the racket on the ground.
+How do you avoid getting sweat in your eyes?
+I have a best friend.
+I'll help you stop smoking.
+He's full of big ideas.
+Tom wants to live in the country.
+He's wearing sunglasses.
+You're not supposed to have this key.
+He heard the sound.
+This steak is very juicy.
+She did warn Tom.
+They miss Boston.
+I made mistakes.
+The villa sleeps.
+She assembled the motor.
+No, we'll never become humans!
+I see things differently now.
+This big book makes my brain hurt.
+Can you make it work?
+It's not all that great.
+This is getting on my nerves.
+Where did you get this information?
+Your argument has no validity.
+How many more of these do we need?
+Fairies exist only in fairy tales.
+These meetings are infinite and fruitless.
+He seemed very nice.
+Tatoeba was sick and almost died.
+I don't enjoy teaching children to swim when their parents are around.
+I wish I hadn't wasted so much time.
+People around here don't have many opportunities to swim.
+What should we do?
+You're just like a little puppy.
+Tom and Mary want different things.
+Tom did what he promised me he'd do.
+Tom is getting better at speaking French.
+Tom poured the remaining beer into the sink.
+Tom told me to go home.
+Tom was racked with pain.
+Call me if you need anything.
+Do I have to stay in hospital?
+Tom gave me a pamphlet.
+I'm quite embarrassed now.
+Have you ever been to Minnesota?
+I don't want to discuss my problems with you.
+Why did you run off to Boston?
+Tom has been really upset.
+Have you seen Tom today?
+I can't forget her smile.
+A police car just tore past the house.
+That's not quite right. It's even completely wrong in many cases.
+She was sure that she had found the love of her life.
+I have only myself to thank for this mess.
+I gave the book to my friend.
+Are you sure Tom can do this without any help?
+If you do come up with something, let me know.
+The stage was sprinkled with flower petals.
+This book is now considered politically incorrect.
+It isn't necessary for you to be multilingual.
+The conductor was expecting a more connotated definition.
+What happens if that happens?
+How do we stop it from happening again?
+There's a black hole at the center of our galaxy.
+Are you questioning my plan?
+Tom tried to remember the name of the girl he'd met in Boston.
+We've all bought stuff from that store.
+We'll give it back.
+What will you give me in return?
+I ate something that didn't agree with me.
+Tom is the only one here with a driver's license.
+I could really use your help on something.
+Why doesn't Tom just buy a new one?
+I'll go find out where Tom is.
+Tom was calm.
+I think Tom is charismatic.
+Where am I going to sleep?
+Can I talk with you?
+Tom never talks about his feelings.
+It's all right, Tom. Everything's all right now.
+Perhaps you should stay here.
+I should've followed Tom's advice.
+We have to tell someone.
+Can you tell us where Tom is?
+Did you tell Tom that you did it?
+Tom does everything we tell him to do.
+Tell me you don't know anything about this.
+Tom told me he was going to help me with my homework.
+The little girls are crying.
+Tom is sitting in front of the TV.
+You're not safe there.
+This is a photo of my painting.
+That blouse fits you well.
+We go to the seashore in the summer.
+She still has a little money, but not much.
+I met them last week.
+I sometimes meet him at the club.
+There's nothing you can do to stop me.
+I burst into tears and then started laughing.
+We've talked about starting a family.
+We'll take care of Tom.
+We could use a tow.
+Tom and I have big plans.
+Are you alright? You look a little shaken.
+Can we see the doctor now?
+I wasn't looking at Tom.
+I haven't seen Tom here before.
+We'll talk about it in a few days.
+I like eating durian.
+He particularly insisted on this.
+You can let go of me now.
+Tom got muddy playing football.
+He is worried about his future.
+Does Tom believe in God?
+It's going to stay that way.
+Can you give Tom a ride back into the city?
+Let me have that.
+Please don't make me ask Tom.
+That doesn't make any sense to me.
+That would be awfully sweet of you.
+Tom is lonely and unhappy.
+What other explanation is there?
+Tom has already gone to school.
+Tom has already left the office.
+Tom handed a note to me.
+Mary is quite cute, isn't she?
+The beaches are less crowded in September.
+Tom asked me if he could borrow my car.
+Tom has been driving all day.
+I've got to sit down. I'm exhausted.
+I apologized immediately.
+Tom has been waiting for this to happen.
+It's a nice idea.
+Tom said his bus was late.
+Tom has been waiting for Mary.
+Tom is standing at the back of the room.
+Tom is no longer working for us.
+The next convention will take place on Wednesday two weeks from now.
+How does that sound to you?
+Tom knew he'd said too much.
+Tom suddenly realized what he had just done.
+Tom shouldn't go by himself.
+Everything changes very quickly, which calls for a new mindset among today's employees.
+Tom suddenly lost consciousness.
+Your best friend's girlfriend is as big as a whale.
+You're the one.
+She lives far from me.
+I get lonely when the cat is outside all day.
+The team needs me.
+Hey, do you want some help?
+Can I ask you something strange?
+It looks like you also want to buy it for Theresa.
+I'd rather do this by myself.
+Julia cries and calls Emilia.
+I've been waiting for Tom to leave.
+Tom is now being held prisoner.
+I'm here to fix the broken window.
+Is that your umbrella?
+I thought you said you were going to be in Boston this week.
+Not everything doable is worth doing.
+The most important discoveries are the ones that we cannot anticipate.
+You took the cellphone from the table.
+We must do it quickly.
+Unfortunately I can't find the lyrics for this song.
+I can't wait to meet this girl.
+We're as good as dead.
+Somebody's in a good mood.
+I don't need a whistle.
+We almost bought it in there.
+Hey, now we're talking.
+Now get on with your work.
+You could do a lot worse than Tom.
+I have just one small question.
+We think Tom might be in imminent danger.
+Tom looks like he was half expecting this.
+That can't be the good news.
+I'm sure you all read about it.
+Tom has a better work ethic than you.
+I really appreciate your willingness to testify.
+Can I get you something to wet your whistle?
+How do you talk to women?
+Are you sure this is in Tom's best interest?
+Your time won't be wasted.
+I couldn't do anything about that at the time.
+Tom doesn't often beg.
+I remember your grandfather well.
+We'll need to ask Tom for permission.
+They were left alone together.
+Bears are quite dangerous.
+I knew you'd enjoy the concert.
+It went beautifully.
+Did you ask Tom why he was late?
+Why isn't Tom helping us?
+Above all, beware of the cat.
+I want to eat either ice cream or shaved ice.
+From this moment on it is forbidden to cry.
+Let's ask ourselves why.
+I enjoyed it, too.
+I'm interested in buying one of those.
+Tom's parents are teachers.
+I regret not having paid more attention to what the teacher said.
+Tom is as strong as an ox.
+You can see Tom in the morning.
+Did you buy a washing machine?
+Tom is so much older than Mary is.
+I think I'll shave my head.
+Do you have a nail file?
+That'll be the next thing we do.
+I finally washed the car.
+This is what I'm good at.
+Your guess is as good as mine on this one.
+Tom was as excited as a schoolboy.
+Which browser is your favourite?
+The towel on the left is yours.
+I'll get in touch with her.
+I'll discuss it with them.
+We think it was him.
+You underestimated him.
+I told you not to use those.
+Can you talk to her?
+Have you ever spoken to him?
+That's what happened to them.
+Tell him to help us.
+How are you going to tell her?
+Where did they take her?
+I haven't seen him in months.
+Please let me go and see him.
+I can't protect them.
+It was nice of him to help.
+I'm meeting him for breakfast.
+Would you like her to help you?
+I won't let her do that.
+I believe you all know them.
+You really hurt us.
+Are you going to help him?
+Give us some privacy.
+We gave her some apples.
+Shouldn't we wait for him?
+I'm going to wait here for her.
+I've got to find them.
+I'm calling them back.
+I don't believe them.
+You'd have to ask them.
+Do you ever think about them?
+I think you and I had better have a talk with Tom.
+We have more important things to deal with.
+Nobody suspected it!
+Dan left the bar with two men.
+Sit and have some tea!
+The cat loves to chase mice.
+Dan was waiting for the police.
+And then I turned the TV off and went to sleep.
+Will you take me with you?
+Where did you think I was?
+Do you have any idea who could've done this?
+It's not quite as bad as it sounds.
+When did you write that last part?
+Aren't you even going to listen to me?
+Do you think Tom really did it?
+Tom allowed Mary to hold his hand.
+That was a dumb thing to do.
+It's made of brass.
+The most precious thing in life is moments.
+You're in love with someone else.
+Tom became depressed after Mary left him.
+An Irish girl is writing.
+I wonder why Tom wasn't at Mary's party.
+Tom started yelling at Mary.
+I'll think of some other solution.
+Tom and Mary save half of their income every year.
+Life is full of confusing things.
+Do you like writing?
+Mary knows everything about the latest fashion trends.
+Tom is the only one in our family who can speak French.
+I knew he was waiting for Mary.
+Tom probably didn't notice that Mary was there.
+This is his car.
+This is an infantile game.
+Boy was I wrong.
+Have you played that game again?
+I wish I could relax listening to music.
+Nobody's forcing you to do anything.
+I'll never betray you.
+Tom tiptoed quietly across the hall.
+Tom is really intelligent.
+It wasn't that great.
+What a pretty lady!
+Let the celebrations begin.
+What's the color of Tom's hair?
+This is a huge development.
+We don't have that right.
+Tom said he still feels pain in his legs.
+It all happened quickly.
+I'm in pain every day.
+Maybe they know something.
+This is just what Tom needs.
+Tom has to respond.
+What a happy surprise!
+I noticed a new face in the gym.
+She is unable to add that sentence.
+That kind of behavior isn't acceptable.
+Tom thinks he's a big shot.
+Prove you're brave.
+Do you have any idea where Tom might be hiding?
+Can I talk to Mike?
+I asked Tom if we could meet.
+The chicken was wonderful.
+The activity of the left brain increases, as I sit in the pizza parlour.
+Tom is saving his money up to start a business.
+Tom says he'll never go back to Boston.
+Tom always forgets Mary's birthday.
+You should ask Tom to help you.
+The changes won't be radical.
+Tom should let me do that.
+Ask Tom to stay a while.
+I don't know how Paris is the most visited city in the world.
+I'm getting fed up with social justice warriors.
+They spend the night together.
+Tom doesn't take vacations very often.
+For children, this world is full of wonders and miracles.
+This is a big dog.
+I don't go there as often as that anymore.
+Please don't tell your parents this.
+Tom kicked the snow off his boots.
+When does his plane take off?
+It's a mysterious death.
+Tom died in the earthquake.
+That didn't use to happen.
+We feel for your loss.
+Will my premiums go up?
+I think that's what's happening.
+I'm good at many things.
+I was young and strong back then.
+I'll try to persuade Tom to do that.
+Your breath stinks of garlic.
+Everybody was on the edge of their seat.
+Do you like spinach?
+The ship left the port, never to be seen again.
+The natural feed of horses is grass.
+Have you forgotten everything we've done for you?
+You are bright and glowy this morning.
+Tom's parents are both dead.
+It was totally quiet in the street.
+Do you have my book?
+I think he is forty years old.
+Please don't send me back home!
+Registration is only valid after payment in advance.
+You're making absolutely no sense.
+Tom was my buddy.
+One person spoke for everyone.
+Tom began to beat his daughter.
+She has to fix the fridge.
+She works as an au pair in Germany.
+Let's talk about your family.
+I've gotten kind of used to doing things by myself.
+I'll stay here as long as I can.
+Can you give your thoughts on that?
+Usually Tom can get whatever he wants.
+Tom is a dead man walking.
+Can you tell the difference between an alligator and a crocodile?
+Tom wasn't the one who broke the window.
+He had all the qualities of a leader.
+I quit right then and there.
+I'll surely have nightmares after this movie.
+Tom got on his bicycle.
+It works for most people.
+If you want to succeed, you have to appeal to the lowest common denominator.
+I'd love it if somebody did that.
+Tom asked Mary what kind of food she liked to eat.
+Maria used this table.
+The sentence does not win a prize for beauty, in my opinion.
+Was it a squirrel?
+Tom is an excellent pilot.
+We'll be in Boston all week.
+Children like to explore. This can be dangerous.
+The boy is buying a dog.
+I'm losing my passion for modern languages.
+My car can beat yours!
+The nobles of the court asked her where were the children of Lir.
+I hate bologna sandwiches.
+Unfortunately, Tom wasn't wearing a life jacket.
+Let us daydream!
+Unless you take all your time, you won't get through it.
+I heard that you were in Boston last week.
+My girlfriend's name is Mary.
+You should be able to do this without any help.
+I'll visit Tom next week.
+We've stopped doing that.
+Tom told Mary more about his past.
+We haven't heard anything yet.
+Everything he said so far should be treated as evidence.
+Do not squander time, for that's the stuff life is made of.
+Do you know my age?
+Once I start cleaning, I can't stop myself.
+I still have things I need to buy.
+Tom doesn't understand you.
+I expect you're right.
+Tom asked Mary to stop the car.
+She never really got over him.
+Who would like to go first?
+I would do the same exact thing.
+Tom put on his snow boots.
+Tom finally got around to calling his grandmother. It turned out she was dead.
+Don't walk home alone.
+The craftsmanship is extraordinary.
+There was great conviction in Tom's voice.
+Tom couldn't have said that better.
+Let's a keep on moving forward.
+The real answer is surprising.
+Tom was a friend and a mentor.
+I don't worry about mistakes.
+Tom screamed out Mary's name.
+Tom disclosed his intentions.
+Monday will be interesting.
+We consider it a blessing.
+I woke up in the hospital.
+Tom gave a sigh of content.
+I survived the shipwreck.
+There was some shouting.
+I can't put it in words.
+Tom understands you now.
+I can't say I blame Tom.
+Who should supervise?
+Gold is going higher.
+I think I'm over Tom.
+I dream about bugs.
+Can we be honest?
+I forgot the address.
+Tom goes out for a walk every morning.
+He thinks he can get cancer from vinyl records.
+This opera is awful.
+Tom bought a leather couch.
+Tom hasn't washed the car yet.
+All the furniture in our house was made by Tom.
+I would rather play the drums than sing.
+Do you wanna come with me?
+I think Tom likes it.
+I thought that would brighten up your day.
+Tom really didn't want to work in Boston.
+We really thought Tom was going to stay for a few days.
+What do you expect Tom to do?
+Dania started working at a strip club.
+I've already thanked Tom.
+How should we deal with the current situation?
+I guess that's the smart thing to do.
+How did Tom know where Mary was going to be?
+I don't do that very often.
+I do a lot of swimming.
+I just don't think it's right.
+I have curly hair.
+I figured it out.
+Why isn't Tom playing with us?
+Tom said I looked excited.
+I refuse to leave.
+A long flight across the Atlantic Ocean requires several aerial refuels.
+We need to reinforce the roof.
+Fadil studied Islam.
+There is nothing going on between us.
+Fadil had no one to turn to.
+Whom are you looking for?
+I usually eat lunch with Tom two or three times a week.
+Tom was the first one in our class to find a job.
+Sami has had nothing to eat all day.
+I wore a white shirt yesterday.
+Tom looks a lot younger than Mary.
+I sharpened my pencil.
+My opponent hit a wicked drop shot to save the first match point.
+I'm wearing the jacket I bought three days ago.
+Tom had been missing for a few days.
+You're still young and healthy.
+You're very hard to please.
+No one cares what Tom thinks.
+Is smoking allowed here?
+Did Tom say where he was last weekend?
+That computer doesn't work anymore.
+Regulations harm the economy.
+I never left the building.
+Tom has no intention of marrying Mary.
+He was the only one who didn't realize it.
+The facts are not on her side.
+Tom put the cake on a platter.
+You're a sinner.
+It's the same every year.
+Tom wouldn't tell anyone what was wrong.
+He is the master of empty verbiage.
+He loves whining.
+Layla was a very popular girl in town.
+Tom was also shot.
+Tom was the handsomest man Mary had ever laid her eyes on.
+Persistence makes anything possible.
+We have the same opinion.
+Tom can't speak French as well as I thought he could.
+Let's try trading jobs.
+Layla wanted to kill Sami.
+Layla can't put gloves on.
+Kids open their presents in Christmas morning.
+Do you ever do that with Tom?
+Tom doesn't do that as well as he should be able to.
+I think more people should do that.
+Tom told Mary that he enjoyed doing that.
+He was kidnapped.
+You won't be able to convince Tom to stop doing that.
+Tom suspected that Mary was lying.
+I need you here now.
+Aren't you happy about this?
+I think we need this.
+Layla and Sami lived there without parents.
+Tom informed Mary that she was going to have to do that by herself.
+Was Tom supposed to do that?
+There's no doubt in my mind that Tom was planning to do that.
+Maybe Tom will do that for Mary.
+I plan to buy Tom a cap.
+Tom said he didn't have the permission to do that.
+I think Tom went to Boston last week.
+Tom really should be in Boston by now.
+Tom was the first one to say he'd do that.
+Tom got busted for stealing a car.
+Tom didn't know Mary had to do that.
+Mary is my type of girl.
+This is an omnivorous species.
+Tom says he wants to go to Boston.
+City planners hope that new businesses will revitalize the downtown area.
+Remember to press the dodge button immediately after the dragon opens its mouth.
+All humans are created equal.
+My job is to steam the vegetables for lunch.
+You've kept me waiting for two hours.
+The season too was the season of love.
+Tom has to be tired.
+No one has been fired yet.
+Tom has never allowed me to do that.
+No one I know wanted to do that.
+Tom might get fined if he does that.
+Tom is going to be ready to do that.
+It would be difficult to do that again.
+Tom isn't someone you can replace easily.
+Tom said he's had no trouble sleeping.
+Tom likes the same kind of music Mary does.
+Tom probably doesn't know what I'm planning to do.
+Tom told Mary that she should stop pretending to be sympathetic.
+You knew that I was the only one who could do that, didn't you?
+I'm sure Tom won't be tired.
+I expect Tom to participate.
+You didn't know I no longer needed to do that, did you?
+I didn't wake up as early as I should've this morning.
+Tom won't likely get cold since he's dressed very warmly.
+You weren't surprised that Tom did that, were you?
+I didn't know that you wouldn't be able to do that.
+Did Tom study with you?
+Tom told the police that three men had attacked him.
+You think that I did that on purpose, don't you?
+How many days have you already spent doing that?
+I think Tom will be surprised if that happens.
+I wish I could stay in Boston a little longer.
+You shouldn't have been permitted to do that.
+Tom doesn't know whether he can do that or not.
+Tom said he didn't have to do that by himself.
+Tom was in his office just a few minutes ago.
+I thought you said you'd do that on Monday.
+You think I'll do that for you, don't you?
+Tom doesn't care whether you do that or not.
+Tom said that wasn't who we thought it was.
+Tom doesn't remember if he did that or not.
+I didn't get paid for all the work I did.
+I wonder who'll go to Boston with Tom.
+I couldn't get Tom to change his mind.
+We might have to be in Boston all week.
+I won't permit Tom to do that again.
+You're willing to do that, aren't you?
+Tom bought his wife whatever she wanted.
+Perhaps Tom won't do that anymore.
+I didn't know you were dating Tom.
+I know that Tom needs to do that.
+I don't care what other people think.
+You ate a piece of cake, didn't you?
+It's strange that Tom did that.
+I don't think Tom is depressed.
+The last three days have been hard.
+I don't think enough is being done.
+You seem to be a little bit crazy.
+Tom said that's definitely not true.
+Tom has been trying to convince Mary to start studying French.
+Tom won't likely tell Mary about the job he's been offered.
+Tom asked Mary if John was planning to do that by himself.
+Tom says he hopes that you do that.
+Tom is willing to buy that for you.
+Tom had a good reason to celebrate.
+Tom and I had a fight this morning.
+Tom says that he'll do that today.
+Tom looked at me again and smiled.
+I don't like to sing in French.
+Tom could be a very rich man soon.
+Let's do that some other time.
+Tom might be studying French now.
+Tom has three university degrees.
+Tom cut down the tree with an ax.
+I need you to come to Boston.
+Tom is used to eating cold rice.
+Tom probably doesn't know why Mary did that.
+Tom says he doesn't know why Mary did that.
+How often are you in Boston?
+My sister has many friends.
+Tom makes his spaghetti spicy.
+Tom asked if we had done that.
+I'd still like to do that.
+I didn't go into the cave.
+Tom said he'd do that later.
+Tom did that for his sister.
+Tom often does that for us.
+Tom and I got into a fight.
+I didn't want Tom to speak to Mary.
+I don't want Tom to speak to Mary.
+Tom thought Mary would be ready.
+Tom says Mary didn't seem busy.
+Tom was jealous of me.
+Tom is trying to help Mary.
+The graph is misleading.
+We'll have you home before you can say Jack Robinson.
+Is this about money?
+This, of course, does not have to be taken literally.
+Tom was an ordinary teacher, who had pleasure, above all, in exposing his students.
+Did you sit down and talk to him?
+Sami hung his head and said he was sorry.
+You must do that again.
+Tom planned on going yesterday, but he had to change his plans.
+I'm definitely planning on doing that.
+I wonder whether Tom really wants that.
+I wonder whether Tom can swim as well as Mary.
+I can't swim as well as you.
+I don't think you should tell Tom how to do that.
+Tom wasn't the only one who didn't have a driver's license.
+Tom says he doesn't ever win when he plays badminton.
+I definitely make more money than Tom does.
+I'm not the one who gave Tom a black eye.
+I heard that Tom went fishing yesterday.
+I don't think Tom wanted us to do that.
+How many Stephen Foster songs do you know?
+I lied when I said I didn't like Tom.
+Tom seemed to know just about everybody.
+You don't have to do that immediately.
+Perhaps Tom will agree to do that.
+Did you ask Tom why he didn't win?
+I didn't know Tom was so nervous.
+I'm going to do that all by myself.
+I think I should let Tom leave.
+I doubt I can get Tom to swim.
+Did Tom go swimming with you?
+Tom seemed to have many friends.
+We don't want to do that again.
+How should we actually do that?
+What's Tom studying?
+Why does that make you angry?
+Tom told me he wasn't tired.
+I haven't agreed to do that.
+I think I'd better eat now.
+I watched TV after supper.
+Tom looks like he's poor.
+Tom said I ought to win.
+Tom says he hopes Mary is able to win.
+I thought Tom wasn't as old as Mary.
+Tom is never at home.
+Tom and Mary don't often cry.
+Tom died, not Mary.
+What am I supposed to do with you?
+The corpulence of the peasants revealed that there was no shortage of food there.
+Sami was interested in horses.
+There was a romantic relationship between Sami and Layla.
+Sami's mother died a short time after his father.
+Sami lives alone in Cairo.
+Sami has done something terrible.
+It's Friday so I don't have to get up for school tomorrow.
+Mary said she planned to go.
+Mary said she thought Tom needed to do that as soon as possible.
+You said Mary was upset, but she didn't seem that way to me.
+Mary said that she wasn't certain that Tom had to do that.
+Does Mary still do the same kind of stuff she used to do?
+Mary said Tom knew she might not be allowed to do that.
+Have you told Mary where you want her to park her car?
+Mary told me that she thought Tom would be discreet.
+Mary told me she thought it would be OK to do that.
+Mary told me that she thought Tom was a good cook.
+Mary was lying to Tom when she said she did that.
+You'd think they'd tell Mary what she should do.
+If Mary drops by, please give her this document.
+Mary decided she was too old for rock climbing.
+Mary probably doesn't know she should do that.
+Mary said that she wanted to see the manager.
+Mary told me that she thought Tom was right.
+I think Mary could do that if she wanted to.
+Mary is going to be very glad she did that.
+Mary said she regretted what had happened.
+Mary says that she wants to do that, too.
+Mary won't tell me what she wants to do.
+Mary does exactly what I tell her to do.
+Mary needs us to show her the way home.
+Mary said she'd never let Tom do that.
+Mary told me she didn't like fishing.
+Mary can leave early if she wants to.
+Mary had the whole house to herself.
+Mary looked like she was confident.
+Mary said she hoped Tom would win.
+Mary said she's going to do that.
+Mary started talking to herself.
+Mary says she wants to do that.
+Mary said she wasn't Canadian.
+Mary said Tom saved her life.
+Mary has canceled her party.
+Mary said she likes pizza.
+Mary is wise, isn't she?
+What'll Tom be doing in Boston?
+It's going to be difficult to forget you.
+I think Tom would do anything to get what he thinks he needs.
+Tom is probably going to be homeless by next October.
+Tom has no idea where Mary ate dinner last night.
+When do you think Tom will want us to do that?
+Tom had lunch with Mary in Boston last week.
+Tom and Mary sat side by side on the sofa.
+Tom is working for an insurance company.
+Tom says he likes chocolate ice cream.
+Tom's boots are near the front door.
+I told Tom I wanted him to help me.
+Tom said he heard Mary screaming.
+Mary bought herself a new dress.
+Tom is going to meet me later.
+Tom hates eating by himself.
+Tom now knows what to do.
+Tom won't stay long.
+I was up in the mountains.
+Sami has to know that the time to repay has arrived.
+The exam was relatively easy.
+Sami vanished from his apartment.
+Not another outburst!
+Sami noticed Layla's reaction.
+Tom found out that Mary wasn't doing what she was supposed to do.
+Tom and Mary told me they weren't planning on staying very long.
+Tom and Mary said they didn't plan on doing that here.
+The problem is that we don't know where Tom and Mary are.
+I know Tom and Mary are planning on being there.
+Tom and Mary want to live in Boston after they graduate from high school.
+Tom and Mary said they didn't think John really knew how to do that.
+Tom and Mary said I looked thinner than the last time they saw me.
+Tom and Mary say they don't know where John is planning to stay.
+Tom and Mary don't have to talk about it if they don't want to.
+I'm pretty sure Tom and Mary know what they're supposed to do.
+I asked Tom and Mary to come yesterday, but they didn't come.
+We have no plans to replace Tom and Mary after they retire.
+Tom and Mary wouldn't go to Boston if they didn't have to.
+Have Tom and Mary ever told you how they broke their legs?
+Tom and Mary said they couldn't provide any more details.
+I asked Tom and Mary why they thought that was important.
+Tom and Mary aren't the only ones who're going to do that.
+Tom and Mary are good at practically everything they do.
+Tom and Mary say they don't think they'll ever do that.
+You don't think Tom and Mary want to do that, do you?
+Tom and Mary are using an old bus as a storage shed.
+Tom and Mary are expected back in Boston on Monday.
+Where did Tom and Mary stay when they were in Boston?
+Tom and Mary said they didn't have to wait very long.
+I asked Tom and Mary why they weren't here yesterday.
+I don't know where Tom and Mary want to do that.
+I sense that Tom and Mary are hiding something.
+Tom and Mary have told me they won't do that again.
+Tom and Mary say they're good at riding unicycles.
+Tom and Mary cleaned the garage all by themselves.
+Tom and Mary said they walked home by themselves.
+Are Tom and Mary going to do that this week?
+Tom and Mary said their new car cost them a lot.
+Tom and Mary told me they were studying French.
+I knew Tom and Mary weren't good at chess.
+Tom and Mary don't want to become famous.
+I don't know why Tom and Mary were angry.
+Tom and Mary said they were going to do that.
+Tom and Mary admitted that they'd been wrong.
+Tom and Mary said they did that three times.
+Tom and Mary told me they were ready to go.
+Tom and Mary don't want you to go, do they?
+Tom and Mary say they often forget things.
+Tom and Mary are going to take their time.
+I think Tom and Mary are courageous.
+Tom and Mary told me they weren't upset.
+Are Tom and Mary always so helpful?
+I hope Tom and Mary aren't biased.
+Tom and Mary say that they didn't cry.
+Tom and Mary told me that they'd won.
+Tom and Mary say they have no vices.
+Tom and Mary did that on their own.
+Are Tom and Mary out there?
+Tom is still looking for someone to help him.
+I wonder whether Tom knew Mary needed to do that or not.
+I don't think this is the first time Tom has tried doing that.
+Tom and Mary have both finished doing their homework.
+Tom is trying hard to finish doing that by the end of the day.
+Tom and Mary are both good guitarists, aren't they?
+I'll take care of all the travel arrangements.
+Tom could understand everything Mary said.
+Don't you remember what Tom did to you?
+Tom doesn't want to buy another car.
+I'm sure Tom will change his mind.
+Tom lives near you, doesn't he?
+Tom didn't want to move here.
+I'll do all I can to help.
+Do spiders scare you?
+Layla is wearing the ugliest dress.
+Sami tried to leave Layla.
+I think Tom and I might've poisoned ourselves.
+She had about a hundred and fifty dollars in cash.
+Why doesn't Mary like me?
+Sami was on his back.
+Everything crumbles as soon as I touch it.
+Sami knew his act was cowardly.
+He has nausea.
+Tom read the contract in secret.
+Tom opened his arms to hug me.
+I've left clues.
+Sami married an Egyptian woman.
+He went blind in one eye.
+I sat up in bed and listened intently.
+If you add sugar in water, it will become sweet.
+That was brave of you.
+There is a blue umbrella stand by the office entrance.
+Tom told me that Mary wasn't very hungry.
+Tom told me he thought Mary was sympathetic.
+Tom told everyone he was lonely.
+Tom said that he wished that he hadn't forgotten to do that.
+Tom said that he thought that Mary might need to do that again.
+Tom said that he hopes Mary will help him with his homework.
+Tom said Mary told him never to do that again.
+Tom said that he wouldn't eat at that restaurant anymore.
+Tom said he was planning to go, too.
+Tom said he thought that Mary wouldn't do that today.
+Tom said that he thinks you're stupid.
+Tom said he hopes you try your best to win.
+Tom said that he doesn't mind doing that at all.
+Tom said that he didn't know when the meeting started.
+You don't seem to be aware that Tom did that.
+Tom packed his suitcases and left.
+Tom was very reluctant to do that.
+I think I've found the solution to the problem.
+Tom didn't seem to be as committed as Mary seemed to be.
+Tom dropped his phone and broke it.
+Tom convinced me to go.
+Tom will show up soon.
+You're the one who told me to do that.
+Tom and I are the ones who should be apologizing.
+I'll never forget the day I met Tom.
+Tom didn't seem to know what to say.
+I have a baseball card collection.
+If you think Tom is going to do that, you're wrong.
+Tom and I are the ones who'll handle that.
+I don't think Tom did what he said he did.
+Tom wasn't satisfied with Mary's answers.
+Tom went to Boston for a funeral.
+I don't plan to give up.
+I got mugged.
+I suspect Tom wasn't the only one who did that.
+I suspect that Tom and Mary are puzzled.
+They'd have been killed if the car had gone over the cliff.
+This is a map of Boston.
+I'm not the only person who can help you do that.
+Tell Tom where the bus stop is.
+Sami thinks Layla is capable of murder.
+Current microscopes allow us to observe with fine detail the molecular structure of materials.
+The moon is made of cheese.
+Tom is a shepherd.
+Tom is pretty good at painting.
+Sami must have been terrified.
+We might get hurt if we do that.
+It's nice to see you after all these years.
+Sami was trying to save a colleague.
+I asked Tom to help Mary do that.
+Sami needed a cellphone.
+Why isn't the bus leaving?
+Sami didn't want to believe it.
+How long will you be away from Boston?
+Sami cashed Layla's check.
+Sami doesn't know who shot him.
+Tom let Mary do that.
+I don't enjoy talking with Tom.
+I don't understand why Tom needed to do that.
+I'll be leaving the day after tomorrow.
+Sami listened to children's TV programs.
+Tom worked until late last night.
+I don't drink beer often.
+May I see it now?
+I know that Tom doesn't want to be here.
+Do not wear shoes in the mosque.
+I intend to stay in Boston with Tom.
+I am fatigued from their continual demands.
+Sami greeted visitors at the reception.
+Those ducks are hurt.
+I'll send Tom a message.
+Sami was sentenced to sixteen years.
+That's a bit personal.
+Please tell Tom that I'm sorry.
+I don't think Tom and Mary have finished doing that yet.
+The pages I printed were about astrology.
+Do you really think I was fooled?
+I know Tom is done.
+I think there is someone in here.
+Tom might not want to help Mary.
+It wasn't long before I was able to do that.
+Don't let capitalism undermine your soul.
+The woman over there holding a baby is my wife.
+I should have expected it.
+I should have told Tom not to smoke.
+You should have reported that to the police.
+I wish I could have stuck around for a few more hours.
+Tom would have done that if Mary hadn't done it for him yesterday.
+I never would have let Tom do that.
+I'm able to swim across the river.
+You must have thought I was an idiot.
+I think that everybody knows that.
+Is this the stuff Tom wants?
+Tom can swim, but he doesn't like to.
+You sharpened the knives.
+No one ever believed you.
+I won't call you anymore.
+I'll bring you a glass of water.
+Tom is afraid of us, isn't he?
+What's something that you've done that you'd never do again?
+Do you want me to tell you what I think?
+Tom stayed there for three hours.
+We have a stop for half an hour in Paris.
+I remembered to lock the door, but I forgot to lock the windows.
+Don't blow our cover.
+Tom is pretty amazing, isn't he?
+Tom is not cut out for this type of work.
+What was your favorite toy when you were a child?
+Tom had a hectic morning.
+The aliens' upper arms are ridgy.
+Did you get enough to eat?
+If all your friends jumped off a bridge, would you do it?
+A deer jumped out in front of Tom's car.
+The Grand Canal is Venice's main watercourse.
+This is our art teacher.
+Tom has big muscles, but a small brain.
+Where are you, my darling?
+She is not even a math teacher.
+She is a diligent student.
+I wonder if Tom is still committed.
+I guess that Tom and I aren't on the same wavelength.
+These are the same questions that Tom might've asked.
+Tom is likely to be well.
+Who shall I say is calling?
+I hesitated to do that.
+Why couldn't Tom win?
+Tom could be frantic.
+Tom considers Mary a friend.
+That's all Tom said to me.
+Sami was read his rights.
+I'm not sure if I can do that properly.
+Tom returned a few hours later.
+Let's make this room into an office.
+Tom was once a basketball player.
+Tom didn't have the strength to carry his own suitcase.
+Tom needs to get away from his mother.
+Tom picks up on things really fast.
+Have you collected your things?
+Tom is doing quite well, isn't he?
+Sami turned on the TV.
+I think it's very obvious what's going to happen if we do that.
+Sami is going to join us.
+Sami was Layla's brother.
+Sami painted the picture too small.
+I didn't think Tom would have fun doing that.
+I didn't think that anyone could do this.
+Sami was a few years older than Layla.
+Sami told me about his past.
+Who else in Australia do you know?
+Sami approached the girl.
+Tom told Mary that he was on his way to Australia.
+Tom should be glad he isn't here in Australia.
+Tom should come to Australia.
+Sami can't go to sleep.
+I've decided to go to Australia.
+I'm having a wonderful time here in Australia.
+I'm now staying in Australia.
+Sami likes to study.
+Tom doesn't want anybody to know that he's going to Australia.
+I leave for Australia tomorrow.
+Sami doesn't have the money to sue them.
+Sami finished off his church service.
+I think that Tom already knows why Mary doesn't need to do that.
+I think that Tom is getting more suspicious.
+I think that Tom was supposed to do that by himself.
+I think that Tom could force you to do that.
+I knew that Tom wasn't very artistic.
+I thought that you said that we weren't going to do that anymore.
+I thought you said that you weren't going to be here.
+I thought that Tom and Mary were going to kill John.
+I thought that Tom wasn't worried.
+I thought that you had fixed it.
+I thought that I was done for.
+Tom thought that he was going to win.
+Tom thought that Mary wouldn't win.
+Tom thinks that he can take care of himself.
+Tom said that whales are worth saving.
+Tom said that Mary was likely to be displeased.
+Tom said that Mary knew she might have to do that with John today.
+Tom said that Mary doesn't want to do that now.
+Tom said that he's very busy right now.
+Tom said that he wasn't sure that Mary wanted to do that.
+Tom said that he thought that Mary needed help.
+Tom said that doing that shouldn't take too much time.
+Sami felt so helpless.
+I don't think I'll go to Australia.
+Sami saw a black mass moving inside of his closet.
+Sami's story is truly terrifying.
+I'm going to Australia next week to visit Tom.
+Sami was a junky.
+Tom said he thought he'd forgotten to lock the door.
+Sami went to middle school with Layla.
+Sami's classroom was on the second floor.
+I don't need to ask Tom to do that.
+That's the reason that Tom and I are here.
+Tom wasn't surprised Mary was afraid.
+It isn't too late to change the schedule.
+Sami really wants to know what's going on.
+It isn't always like this.
+Please promise you'll do what I ask you to do.
+I got up and Tom did, too.
+Sami is involved in a serious case.
+Sami came here with his girlfriend.
+Sami saw Layla in the same outfit in several videos.
+Sami never goes to clubs.
+Tom told me he thought Mary had acted irresponsibly.
+Tom told me he thought Mary was out.
+Tom is pretty outgoing.
+Sami was on MySpace.
+Tom told me that he thought this was a good idea.
+I'm afraid that I'll be stuck here forever.
+Tom told me that he thought that Mary would be surprised.
+Sami made the camel sit down.
+I hope that that won't happen again.
+I don't think that Tom was engaged at that time.
+I don't think that it works like that.
+I don't think that you should say any more.
+I don't think that Tom would be interested.
+Sami saw some shit in that haunted house.
+I don't think that I've ever met anybody who knows how to do that.
+I don't think that Tom is good enough for you.
+I don't think that Tom is prejudiced.
+I don't think that I'll ever be forgiven for doing that.
+He doesn't listen to anybody but himself.
+I don't think that I can trust you anymore.
+I suspect Tom wasn't really sick.
+Sami isn't talking about them.
+I want you to know that I don't like doing things like that.
+You know that that's impossible.
+Sami was smoking his blunt.
+Sami did it once.
+Sami wanted to know how Layla broke her toe.
+Sami knew Layla was talking about him.
+Sami couldn't believe Layla did that.
+Sami was a big partier.
+Sami and Layla were talking about birthdays.
+Sami said the entire mall was closed.
+Sami was laughing at himself.
+Sami said my name.
+A pregnant woman shouldn't smoke.
+Sami stayed in my car.
+Sami was asking how much everything cost.
+Sami met Layla at a Starbucks.
+Tom received fan mail.
+Sami isn't that kind of friend.
+Sami's mom was always very organized.
+Layla talked to me about another guy.
+Tom lives near the ocean, but he can't swim.
+Sami lived in a house.
+Sami had an ice cream cake.
+Sami wanted the best for Layla.
+Sami put juice or soda in alcohol.
+Layla is Sami's girlfriend and the mother of his child.
+Sami was not about to drop Layla for Salima.
+He is a boy, isn't he?
+Sami could still see the faint mark on Layla's face.
+Sami and Layla texted each other after that.
+Sami went in the water.
+Who owns this lorry?
+Tom wasn't much older than Mary.
+Sami didn't sit down next to me.
+You're my best friend, too.
+Mary is looking for her dog, isn't she?
+Mary is going to Australia, isn't she?
+Mary isn't as thin as she used to be.
+Mary says she doesn't want to fight.
+Mary has plenty of her own problems.
+Mary isn't very courageous, is she?
+Mary said that she's going to win.
+Mary admitted that she didn't win.
+Mary gave some oats to her horse.
+Mary got more than she expected.
+Mary hid herself in the closet.
+Mary reached into her pocket.
+Mary is happy with her car.
+Mary says she'll win.
+He pulled himself together.
+She cut herself with a razor.
+He said no one else could help him.
+He burned his hand.
+He has woken up from his coma.
+He put his jacket back on.
+She was afraid to tell her parents.
+He brought his guests some drinks.
+He doesn't want to lose his job.
+She has no children of her own.
+She's eating her favorite ice cream.
+She said she's proud of her children.
+He needed to wash his car.
+She said her team would likely win.
+He took his children to the zoo.
+He wouldn't let me drive his car.
+She thought she was no longer needed.
+He said he had to work on Saturday.
+She admitted that she didn't do that.
+He said that he was really sleepy.
+He isn't as nosy as he used to be.
+She should do that if she wants to.
+She said she heard a noise outside.
+She told me that she was relieved.
+She said she went there for a job.
+She comes and goes as she pleases.
+She said that she'd go to church.
+She doesn't look like she's busy.
+She said that she was depressed.
+She denies she broke the window.
+She said that she isn't sleepy.
+She waved to everyone she saw.
+She said she had to stay home.
+She says she's not tired yet.
+He told me he'd been busy.
+He was sure he could win.
+He told me he was bored.
+He said he was worried.
+She told us she'd win.
+They're passionate about their work.
+They said they're Canadians.
+They often talk to their dog.
+They must've done that by themselves.
+They admit they've cried.
+They do whatever we tell them.
+In whose interest are you acting, may I ask?
+The two girls were close friends.
+Tom and Mary said that they could probably do that.
+Tom and Mary said that they felt like dancing.
+Tom and Mary said they didn't agree.
+They said that they tried to be optimistic.
+They said that they'd be happy to help.
+They said they plan to go on Monday.
+They said they were ambidextrous.
+They said they might not win.
+Tom and Mary will be back on their feet soon.
+They were both orphaned when they were three.
+They know that they can trust me.
+Tom and Mary told me that they felt offended.
+They told me that they weren't sorry.
+They told me they disagreed.
+Mary stared at her plate.
+Did you tell him yet?
+Tom and Mary promised that they'd do that tomorrow.
+Tom and Mary just got their learner's permits.
+Tom and Mary played on their college teams.
+Tom and Mary said that they don't know.
+They claimed that they've never done that.
+They're not sure they need to do that.
+They aren't sure they should do that.
+They've shown us what they can do.
+They sold their house last week.
+They seemed sad, didn't they?
+They put their robes on.
+How does he know?
+This isn't salt.
+Tom is going to have a heart attack if he isn't careful.
+Where did he get his shirt?
+Tom assumed everyone in the room knew that Mary couldn't understand French.
+I know that Tom knows that Mary knows that he needs to do that.
+I didn't know you weren't supposed to do that by yourselves.
+I know Tom knows that Mary knows that he needs to do that.
+Tom talks to almost everyone he that passes on the road.
+I know that Tom will be faster at doing that than Mary.
+I know Tom didn't know that he didn't have to do that.
+I didn't know that Tom was supposed to do that today.
+I didn't know Tom wouldn't mind doing that for Mary.
+Why don't you let Tom know that you need his help?
+Did Tom know that you weren't planning to do that?
+I didn't know that Tom wanted to do that with us.
+I knew that I shouldn't have done that with Tom.
+I know that I need to do that before I go home.
+I pretended that I couldn't understand French.
+Why didn't you tell me that you were married?
+Why didn't you tell me that you were coming?
+I knew Tom wouldn't be able to get the loan.
+I know Tom is a very close friend of yours.
+I know that Tom isn't a very fast swimmer.
+The doctor assured Tom that he'd be fine.
+I know that you don't want to be killed.
+Tom didn't know that you could do that.
+You know Tom wants to help, don't you?
+Tom doesn't know Mary isn't Canadian.
+Tom already knows Mary will do that.
+I think Tom can do that on his own.
+I know that Tom can do that again.
+I know Tom is a Canadian citizen.
+I know that Tom isn't a genius.
+Make sure you do it yourself.
+I knew Tom was a sociopath.
+I think Tom is a CPA.
+Climate shapes where and how we live and the environment around us.
+Would you consider selling your motorcycle to me?
+Tom looked over the menu.
+Tom, Mary, John and Alice are all waiting in the parking lot.
+Neither Tom nor Mary has given a lot of things to me.
+Tom wore an orange hat. His coat was orange too.
+Tom blocked the door with some heavy crates.
+Tom is in the locker room getting changed.
+Tom, Mary, John and Alice all did well.
+Tom is a very good flying instructor.
+Tom asked me to wait until Monday.
+Tom is unlocking the door now.
+Tom is thirty something.
+We have a daughter who is married to a Canadian.
+We have no reason to feel ashamed.
+Algerians learn Berber at school.
+I wrote to Tom last month.
+If it rains, I won't go.
+What did your lawyer say?
+Tom is trying to cook something he's never cooked before.
+Tom is younger than all of his friends.
+Tom needs to help his parents.
+Tom ran down the hallway.
+Tom cooked me lunch.
+Tom wondered why Mary was blushing.
+We won't get the chance to do that again.
+I wonder who Tom thinks will do that.
+Tom is in third grade.
+I can hear Tom playing his banjo.
+Please don't cross this line.
+Sami wasn't paying attention to us.
+I had no idea about the Berber language.
+Tom would be parched.
+I can't really speak Berber.
+How do you interpret these words?
+I teach in the college of medicine.
+I've visited Tom multiple times in Boston.
+I told him that I could not accompany him in this trip.
+I see you really have some big, beautiful projects.
+It took me three hours to drive from Boston to here.
+I like chocolate cake.
+As we approach autumn, the nights get longer.
+He said he would prove he didn't do it.
+I live in Algiers.
+That writer I mentioned a lot in the past passed away yesterday.
+I'm going to Boston next week to see my sister.
+There is nothing wrong with speaking Berber in public.
+Do you know that's a bad sign?
+She was arrested in Kabylie, Algeria.
+Mary suffered in silence.
+Are they coming from their house?
+Would you like me to set the table?
+He wants to get a loan from an Islamic bank.
+Most Algerians are Sunni Muslims.
+And they digged in the torrent, and found living water.
+Have you seen that Netflix series?
+I'm not sure what size Tom wears.
+Tom is a really swell guy.
+I come from there.
+Baghdad is the capital of Iraq.
+Did you write anything in your diary yesterday?
+Strange things happened that night.
+Where's a hairdresser?
+Would you all like to share an orange?
+The port city of Hamburg is the largest urban development project in Europe.
+Sami has dyed his hair.
+We all made it back safely.
+Aren't you sick of doing that yet?
+His speech did not represent the party's wishes.
+I arrived here three days ago.
+Tom isn't the smartest student in the class.
+Sami took a really long time to reply.
+Sami blocked Layla on Twitter.
+Why did you give money to Tom?
+Sami and Layla's conversation was getting a little bit too personal.
+Why didn't you tell me Tom was in the hospital?
+Mennad got into marijuana.
+I think that I've convinced Tom.
+Mennad doesn't care about anything else.
+Tom wasn't wearing slippers.
+Mennad likes girls like Baya.
+Tom adamantly denied the charge.
+I want you to call me back as soon as you can.
+Mennad was going through anxiety and depression.
+I saw him in Kabylie.
+Who's the man in this picture?
+Mennad was dealing with depression.
+Tom's kid is a spoiled brat.
+What made you want to become a policeman?
+Tom is a much better swimmer than Mary.
+I can't remember the names of Tom's sisters.
+These documents are fake.
+Mennad and Baya were in the conference room.
+Mennad has been a nurse for almost sixteen years.
+Mennad has nowhere else to go.
+My trip to Kabylie opened my mind to the world.
+Mennad's jacket looks cute.
+Tom was stopped for breaking the speed limit.
+Tom called back a few minutes later.
+It won't be possible for us to meet your needs.
+You can link and unlink sentences.
+I didn't know how to write that.
+He might hear you better if you whisper into his ear.
+Portugal will always be dominated by farms and farmers.
+Tom and Mary laughed and screamed with joy.
+She was a beautiful but very proud girl.
+Tom refused to admit that he had made a mistake.
+Tom typed on his Blackberry.
+Stop making excuses for Tom.
+Algerians have a rebellious attitude.
+After she converted to Islam, she started wearing the hijab.
+The uniforms vary according to the school.
+Tom was only there for a couple of weeks.
+It's important to know how to appreciate the beautiful aspects of life.
+Tom and Mary went on a road trip across Canada.
+He said some stuff in Berber.
+I still think that it's unlikely Tom will win.
+I think that you should ask Tom not to do that.
+He lives upstairs.
+Is it true Tom has a twin?
+They asked me what I will do in the future.
+How many states does his country have?
+God willing I'll get there.
+Is Islam difficult?
+The bus ride has ended.
+I don't know what I should do this afternoon.
+Good to know you're fine.
+Don't enter my room when I'm gone!
+Tom has never seen Mary without makeup.
+I've already explained it so many times.
+I do not feel any anger after what you said.
+Is Jesus God?
+Get close to God.
+He's taking a Berber exam.
+He talked a lot about Berber.
+Tom didn't ask Mary what she thought.
+Children need more sleep than adults.
+She asked God for forgiveness.
+The narrow streets became crowded.
+Tom decided to stay up until Mary got home.
+Such beliefs will be left to fester.
+I think that we timed it just right.
+Melt the butter in the saucepan, and add the finely chopped onion.
+Let's have a look at some particular characteristics of this Berber dialect.
+Did you lose your hat?
+You've used the wrong punctuation here.
+She looked very cute.
+We're talking about cars.
+Who saw them steal it?
+Mennad found a centipede in the basement.
+It might be a good experience for you.
+Tom came with his mother.
+I didn't feel very well.
+I don't want to work tonight.
+Tom loves going to the library.
+The ball is round.
+Algeria needs water.
+My mother wants me to study in Australia.
+We were shocked to learn Tom had been killed.
+Tom ran too fast for me to keep up with him.
+I think that it's working.
+I think that we're safe here.
+A golf ball hit Tom.
+Tom seemed absolutely devastated.
+The house on the hill is his.
+How did you get to school today?
+Tom is looking through some papers.
+I'm so miserable that I just wanna go to Algeria.
+Tom has been a basketball coach for three years.
+Tom told me not to smoke.
+I felt really dumb.
+I've never eaten couscous.
+My first language was French.
+Nginx is open source software.
+You remind me of that actress.
+No fighting, please.
+Before I converted to Islam, I didn't believe in God.
+I don't eat ham.
+I learned more about Islam.
+I've taken precautions.
+I've been here quite a while.
+He just walked in.
+She's straddling his dick.
+Here you can relax.
+Mark the right answer, please.
+I hope that I don't get arrested.
+Tom noticed Mary was smiling.
+Tom braked, but not in time to avoid hitting the dog.
+I don't think that anyone was frustrated.
+He had gone abroad to study.
+I still hate you and Tom.
+There weren't any passengers on the bus at the time of the crash.
+The rotting food in the garbage can smelled really bad.
+Her role as an English teacher is very important.
+We want to get a dog eventually, but not right now.
+Europe's Green political parties appear to be coming of age.
+I understand why you don't like Boston.
+He saw it.
+He came early.
+He cut my hair.
+He'll sit here.
+He isn't stoned.
+He works nearby.
+He arrived early.
+We have a big garden.
+He said that his belly button piercing did not really hurt.
+There is a lot left to do.
+Tom was hanged for a murder that he didn't commit.
+I think that Mary is way cuter than Alice.
+They talked about Algerian music.
+She had a date with him.
+He refuses to take orders from her.
+He said he believes her.
+He always feels happy when he sees her.
+He turned around and looked at her.
+She bought a necklace for him.
+She leaned forward and spoke to him.
+He asked if anyone knew anything about her.
+She definitely despised him.
+She ordered some pie and so did he.
+She couldn't help but tease him.
+Tom wants his kids to learn French.
+She told him she didn't want him to go to Boston.
+She's pleased, isn't she?
+He's coming, too, isn't he?
+He's being careful, isn't he?
+She's quite observant, isn't she?
+She's waiting downstairs, isn't she?
+Tom was three when his mother went missing.
+He finally caught up with her.
+He didn't want to go to the circus with her.
+Those chairs are made from wood.
+She was talking about him.
+He isn't old enough to do that by himself.
+He said that he walked home by himself.
+I was with you.
+We're celebrating our successes.
+It would be nice if you were able to do that, too.
+Africa is the only continent where giraffes live in the wild.
+A giraffe won't hesitate to attack you if it feels threatened.
+We might have to wait for months.
+Where's the market?
+His skin is pure white.
+I'd like to find out where Tom is.
+They're both Canadians, aren't they?
+You don't know why he didn't come yesterday, do you?
+Our lives are in God's hands.
+They both ran away.
+Algeria wants to have direct access to the Atlantic Ocean.
+This cat is pregnant.
+This food is without pork and halal.
+No one's going to hit you.
+Tom sang with me.
+I disagreed with Tom on that point.
+Algeria needs hospitals.
+Tom went from Boston to Chicago.
+We should've waited.
+We have to clean this place up.
+He's an Algerian billionaire.
+Tom booked a cruise for the Caribbean.
+Now you can ask whatever you want.
+She was playing the guitar and he was singing.
+I thought everything would turn out just fine, but I was wrong.
+Layla is a translator.
+I am looking at the house.
+A chicken is not a bird, and a misogynist is not a person.
+David created a diorama with miniature British soldiers.
+My father doesn't know anything.
+Did you go talk to Mary or what?
+Marriage is a patriarchal institution.
+I know I am right.
+He described the current situation as apocalyptic.
+Tom said hello to his neighbour.
+He has worked here in Algeria for fourteen years.
+This clinic is doing laser surgery.
+You've written to your uncle.
+There are things I have to do.
+The street is empty today.
+I killed the spider.
+Yanni and Skura were victorious.
+She starved to death.
+Yanni and Skura beat him.
+What are you thankful for?
+I'm excited at the prospect of meeting Tom.
+I've been busy getting ready for the party.
+The rice should absorb all the liquid.
+I'm an insomniac.
+Does Tom keep a diary?
+Does Tom like opera?
+Should I come next Monday?
+The demands placed on students are increasing.
+The neighbours have made their balcony into a proper greenhouse.
+The old man was mumbling something.
+I bought Tom a couple of drinks.
+Everybody knew it would be dangerous.
+I don't know what his real intentions are.
+I expected the test to be easier.
+Sami is a Chenoui.
+Tom wants to apologize.
+Hydrocarbon exploration has ceased with declining oil prices.
+Tom wants me to show you how to do that.
+I laughed involuntarily.
+She helped an old woman across the street.
+Do you know where Tom is headed?
+I'll tell you when to start.
+Is the table already laid?
+Tom won't do that tonight.
+That's not quite how we see it.
+We appreciate everything you've done.
+They caught him in the act.
+The year is coming to an end.
+Tom will be very upset when he finds out.
+How nice that we finally get to know each other!
+Who's Tom? Oh, right. I had a brain fart.
+You're just the same as you always were.
+The culvert empties out behind my house.
+How old is your apartment?
+Tom is probably not still in Boston.
+Are you sure that's yours?
+I eat the crab.
+I thought that your father's name was Tom.
+This problem is too difficult for grade school children to solve.
+Tom isn't absent today.
+Tom didn't let me say a word.
+We don't work together.
+Flammable substances should be stored properly.
+Yanni and Skura are born artists.
+Yanni and Skura have been dating actors.
+It's necessary to be accurate.
+Just look at what Tom has done.
+Yanni went into the mosque.
+Are you laughing at us?
+Tom wasn't miserable, but Mary was.
+Yanni took part in a Klan march.
+Can Tom play the piano?
+Yanni held his dog by the collar.
+Don't get me wrong, we're not promising you anything.
+Dad had been sick for four years prior to passing.
+You aren't the chosen ones.
+Yanni used to be an imam at a local mosque.
+Tom wanted to eat cereal, but his mother made him eat scrambled eggs.
+I try not to complain.
+I should've thought of it earlier.
+Yanni woke up in the middle of the night to the bell ringing.
+Yanni planted his ass down in Skura's chair.
+Yanni should really come with us.
+Go check and see if he's home.
+The rug is very dirty.
+Do you think there's been a misunderstanding?
+How's Tom's back?
+Tom hung up the towel.
+Would you wear that?
+Tom made a note of it.
+I don't have a place to sleep today.
+I couldn't kill anyone.
+Who is she, your girlfriend?
+I'll call Monday.
+It's obvious that the bus is delayed.
+Witnesses identified Tom.
+I wish I'd studied more.
+I don't have time for that now.
+I met Tom near the park.
+I heard you bought a house.
+Tom is acting like everything is normal.
+I wanted croissants.
+Tom looked reproachfully at Mary.
+I don't drink much soda.
+Tom used to do this.
+Tom liked us all.
+Yanni neglected to tell Skura that it started to rain.
+Yanni instantly loved Algiers.
+Tom ate my salad.
+Tom is a sun worshiper.
+According to the newspapers, it'll snow tomorrow.
+Do you still believe them?
+The printer ran out of paper.
+This restaurant has the best lasagna in town.
+Tom will tell you what he needs.
+Yanni is very active in daawah.
+I wonder what's in that box.
+You have gone to Adekar.
+Tom and Mary live in Boston, South Australia.
+Yanni needs to face this brutal reality.
+OK, I'll think about it.
+Everyone needs something like that.
+Let's be calm, people.
+Tom's cat is a calico.
+What did you take with you?
+He's helped the expansion of LGBT rights.
+Don't worry, I shan't forget.
+Go across the square.
+Who invented the typewriter?
+Tom has to stay there for another week.
+Tom's eating strawberries.
+Tom writes under a pseudonym.
+What did Tom give you this time?
+It seems somewhat strange to me.
+Tom didn't have a chance to escape.
+I looked out the window, but I didn't see any.
+Time is a mystery.
+I don't see any broken bones.
+Yanni genuinely believed he had found the love of his life.
+I really wanted to marry Tom.
+I don't think you'll do it.
+Her appearance is much better than yours.
+Please be careful of the closing doors.
+If we had obeyed Tom, we would probably be dead now.
+This teacher is arrogant and he's trying to put you down.
+It might be best for me to leave.
+Sell crazy someplace else. We're all stocked up here.
+I tried to discourage Tom from going there.
+It just works out that way.
+Wine is not for children.
+She dreams about an automobile.
+Tom gives Democrats a bad name.
+You did it without thinking about it.
+It took me a while to get here.
+This is the last game of the year.
+The president of France goes to Japan next month.
+Why did you shut the gate?
+Yanni was given a life sentence with a minimum term of forty years.
+It's a risk we took because we needed to.
+Tom isn't still at school.
+In Algeria, the state pays for almost everything.
+Everyone should grab a plate.
+Kids must learn to respect others.
+Yesterday there was an unfortunate accident.
+Lack of sleep is detrimental to your health.
+You left the window open.
+I think this lesson will be on the test.
+Did Tom say what time to expect him?
+She rented an apartment close to downtown.
+We are in the crosshairs of a spying device.
+Stop pretending to be something you aren't.
+We felt we had to keep trying.
+The team lost all games.
+Can I talk with Miss Brown?
+Tom expressed his concern.
+Dad used to beat Mom savagely.
+I should've been there yesterday.
+Yanni gave Skura a jar of fig jam.
+Yanni's death has left an immeasurable void in his family.
+No one seemed to be willing to go to sleep.
+How much paper do you need?
+Tom is a new driver.
+Yanni saw Skura walk out of the supermarket.
+Yanni caught Skura in a lie.
+They begged him to stay.
+You should definitely unsubscribe.
+How much does it cost to send a postcard to Australia?
+We had a ball.
+I hope something similar happens again in the near future.
+I don't plan on doing it.
+Fourteen months after the marriage, baby Yanni joined Ziri and Skura's family.
+Tom bought Mary a basket of fruit.
+Yanni and Skura were both in danger.
+I paid thirty dollars for all of these.
+A group of men wearing masks attacked Tom.
+Yanni purchased it.
+We're filling the swimming pool right now.
+Do you regularly have nosebleeds?
+I need to buy some garden shears.
+Can you buy me an ice cream?
+Few people think like this.
+Tom is over the worst of it.
+This is Yanni's left hand.
+The war was lost.
+I really enjoy driving.
+I don't really like cafeteria food.
+I can get you a horse and saddle.
+All Algerians fast during Ramadan including in Kabylie.
+Sea levels are going to rise drastically.
+Yanni has cuts on his knees.
+Yanni wants to take his shahada immediately.
+What are you going to do after school?
+Yanni is a qualified electrician.
+I wish everybody knew this.
+We stayed there for three weeks.
+Yanni is kissing Skura.
+Yanni noticed a bullseye in his windshield.
+What's Tom's answer?
+I don't believe the things he says at all.
+Unfortunately, Algiers is a city that sleeps.
+Yanni tried to sell Skura drugs and weed.
+Yanni started to slow down.
+This bridge has been undergoing renovations for three years.
+Tom is a better basketball player than you are.
+That isn't the only thing Tom found.
+She wasn't able to come because she was sick.
+Do you have insomnia?
+Only the thickest trunks could serve as firewood.
+Nothing is more nefarious than hopelessness.
+She doesn't mean it like that.
+Tell me why you would like to work for us.
+Don't break it, Yanni.
+Yanni heard Skura say it.
+Go outside for a walk.
+Yanni is so tiny he could sleep in my pocket.
+Yanni is Skrua's primary source of support.
+We fired our chauffeur.
+Do you remember the title or the author's name?
+That isn't how the word is pronounced.
+Why is Tom so heartless?
+Yanni and Skura got closer to each other.
+I sometimes mix up ribs and hips.
+I consider myself an extraordinarily happy person.
+Yanni bought Skura a giant hot dog.
+Her vision was clouded by tears.
+Mary is opening the roof light.
+She designs her clothes and then has a seamstress make them.
+You're a disappointment to the world.
+Tom hid inside a barrel.
+I never dreamed that this kind of thing could happen.
+Bouteflika went too far.
+To swear is to take God, or something holy, as a witness.
+After a short while the bus left.
+Should I go with you to the doctor?
+Please, shut up already.
+I hate making mistakes.
+Algeria has great opportunities.
+Yanni liked that.
+Yanni can do better.
+I'm glad that you're fine.
+Send me a friend request.
+Tom went to see Mary the other day.
+Tom didn't call Mary right away.
+Tom watched a movie about penguins.
+This summer is really hot!
+Is Algeria winning its battle against poverty?
+Algeria could give Mali access to its ports.
+Algeria's economy was hit by a severe economic crisis.
+Is it possible to walk on crutches with two broken legs?
+Tom's clothes were covered in mud.
+If he sees that you saw him, he'll leave.
+Tom didn't like the cookies that Mary baked.
+Yanni drifted away from reality.
+He played in the band.
+I think it's time to flip the pancakes over.
+I hope Tom and Mary can take care of John.
+He dislocated his right shoulder.
+It was actually very painful to watch.
+It can't be. It must be a measuring error.
+Yanni came back as a really bad kid.
+Ziri came face to face with a strange man.
+You're not in China.
+Ziri's house was abandoned.
+Ziri let himself loose.
+Ziri was throwing up.
+Ziri became a butcher.
+Ziri is a huntsman.
+Ziri is a wealthy doctor.
+Ziri heard that.
+Ziri was walking up the stairs.
+Ziri had a Beemer and was the envy of all his friends.
+Ziri needs a place where he can vent his rage.
+We're trying to cut back on overhead expenses.
+Ziri is done working.
+Ziri has got to wash his hair.
+What the hell is Ziri doing in Rima's apartment?
+Ziri has nothing to do with Rima.
+Ziri and his doctor are discussing other options.
+Ziri didn't really see anything.
+It's against company policy.
+Ziri is a really good writer.
+Ziri ate alone.
+Ziri couldn't get out of that.
+Ethiopia is a Chinese ally.
+Ziri has tons of stories to tell.
+Ziri was always moody.
+Who lives in the house across the street?
+Far from the road, there was a spring.
+Is there cheese on the plate?
+The basement was flooded.
+What you're saying doesn't make sense.
+Tom had no choice but to buy a new phone.
+Why did you all turn on me?
+Ziri's story is very juicy.
+Ziri can't hear Rima.
+Can you not slurp?
+She is detaining the boy.
+Excuses are useless.
+According to Tarrasch, the best attacking piece is the king's bishop.
+I can't make plans when you're always chopping and changing.
+Tom may be thirteen, but his soul is older than that.
+Tom looks tired. What has he been doing?
+I don't have any more questions.
+Where did you graduate from?
+Give me the name of my brother's murderer.
+I love translating sentences I like.
+A crocodile isn't an alligator.
+Ali drank tea with lemon.
+Why do you think I'm acting like this?
+I'd like to make an appointment.
+Tom isn't a pilot yet.
+This is more fun than doing homework.
+An algorithm is a recipe for solving a problem, step by step.
+We need to retaliate.
+We each have different degrees of love for our country.
+She's ill, so she didn't go to school.
+Is it usually raining in this city?
+No one is dead.
+Doing this takes my mind off of things.
+There are a variety of reasons older people are opting for rentals.
+Big brother is watching you.
+Tom is terrible at small talk.
+Ziri and Rima have the same father.
+What are these insinuations?
+Can I still make it?
+I don't mean to swamp you.
+When was the last time someone asked for your advice?
+I sidestepped the patch of ice on the sidewalk.
+Is something up with your car?
+Nobody can surpass Tom.
+I promise that is what I said.
+She suddenly burst out laughing.
+Don't touch me. I'm allergic to physical contact.
+Tom and Mary are really starting to do my head in.
+Which job would interest you?
+That man over there looks familiar.
+The children looked happy.
+She's after a better job.
+A rabbit got caught in the snare I had set.
+As he watched that scene, he remembered what she said.
+Ziri's tortoise is healthy.
+According to the report, he's alive.
+He isn't a person who likes to experiment.
+The bridge is blocked for traffic.
+I didn't accept that job because I was holding out for a better offer.
+Ziri was furious when he saw everyone's attention was on Rima.
+Do you ever wear earmuffs?
+The court's decision was not appealed.
+He's worried about his father's health.
+What are today's specials?
+Tom has a big head.
+He looked out with lucent and terrible eyes upon the world.
+The boss called Tatyana into his office to reprimand her.
+There's a sparrow on the windowsill.
+Tom adamantly denied being involved in the robbery.
+He'll be feeling down for a long time.
+Tom smiled at Mary shyly.
+What problem are they handling?
+We couldn't find the key anywhere.
+If you want to leave early, it's OK.
+I need to give you an injection.
+Whatever had happened in the past was now irrelevant.
+Is this a new iron curtain going down across Europe?
+Cats are the mascot of the Internet.
+How many Armenians live in Hungary?
+Tom is eating just now.
+He's a dishonest person. Don't have anything to do with him.
+Why doesn't my computer understand me?
+Tom can come over any time.
+The sound of the bell told them it was time to eat.
+How did you actually get hold of these rare books?
+This one is definitely better.
+Nan's cooking is the best.
+Ziri arrived at the cathedral.
+Ziri will live a long time.
+Tom chose the lesser evil.
+Mary told Tom that she had to go.
+Ziri is starting Thursday morning.
+Tom shouted for joy.
+Rima will meet a man, a rich one.
+Ziri stormed out of the restaurant.
+Tom has some peculiar habits.
+Some mass of children will eat the set of tortillas.
+What you tell Tom is up to you.
+Tom asked to be let in.
+Did you go to university?
+Quiet, otherwise he'll hear us.
+Rima finally married a handsome prince.
+Ziri was kicked out of school on his birthday.
+Is Tom still working as a French teacher?
+You really have to realize this.
+Get your hands off me!
+Ziri watched birds.
+Ziri's dog is shaking.
+Cats groom themselves to clean their furs.
+Algeria needs to build much more dams.
+I couldn't get into the store because all the doors were locked.
+We're from Spain.
+Ziri never took responsibility.
+They've told the truth without fear.
+I know your YouTube channel.
+Try to stand out at work.
+This ivy is starting to harm the tree.
+Heaths are tough plants.
+Ziri removed the carpet.
+Ziri is still out there.
+I cannot let you go.
+Please kiss off camera.
+Why should your kids do that?
+I look up the words in my dictionary.
+Ziri quickly attacked Rima.
+Who did you hear it from?
+The man threatened Tom with violence.
+How long were you in Caracas?
+A bad penny always comes back.
+There's a beauty parlor next to the station.
+Ziri has been trying to steal Rima away from Walid.
+What will the weather be like today?
+The spiders have spun their webs behind the cupboard.
+It is a very light yet healthy dish.
+Ziri is always putting Rima down.
+Ziri woke up from that weird feeling.
+There are those who believe in God and those who don't.
+I'm glad that you were able to do everything you wanted to do.
+I don't know how many times Tom has done that.
+Tensions have been rising between Algeria and its neighbor, Morocco.
+Everything is in Berber.
+I don't want to worry my mother.
+I opened the door wide.
+This box is about three times as large as that one.
+It's likely to be very hot tomorrow.
+Click twice on the browser's icon to open it.
+Three other suspects remain at large.
+Stop picking on people.
+Tom walked about restlessly.
+I wish I knew the answer.
+This is an idiom.
+I'm a detective, not an economist.
+My aunt has a cold.
+There are many different jobs Ziri can choose from.
+Ziri was so sick of listening to such nonsense.
+China will buy minerals from Algeria.
+Do they sell gobstoppers in the corner shop?
+Tom has just got married.
+Thank you for your insightful comments.
+I'll phone you when I've finished my meal.
+This clock is much more expensive than that one.
+Do you want some more sauce?
+We've got a bad moth infestation.
+They can't prove that to the police.
+No one knows that better than you.
+Tom has always wanted more.
+He had to have a hernia operation.
+I'm not a boy.
+Where's the stopper?
+Tom looked very shocked.
+Tom wanted to run away.
+I used to think this was boring.
+Tom signalled Mary to stop.
+What can you say about her?
+What makes you think that a black kite will be interested in eating seeds?
+She's raising a small black dog.
+Ziri tied the ewe's back legs to milk her.
+Ziri didn't want to return the ewe to her owners.
+It is five o'clock in the morning.
+Ziri no longer paid any attention to Rima.
+Please show it to me.
+Ziri was on the fourth floor.
+I don't know how to play checkers.
+Surprisingly, Ziri's dog was still alive.
+Humans communicate in a variety of ways.
+Ziri took pictures of the colorful butterflies.
+Tom has enough food for a month.
+Ziri collected some wood.
+Your dad makes wraps?
+I slipped on the pavement and nearly hit my head.
+Follow my instructions.
+Ziri decided to go back to camp.
+Ziri has a colorful uniform.
+Ziri left the light on.
+It was every man for himself now.
+The truck headed into the desert.
+None of those words inspired promise.
+Ziri started to get extremely worried.
+Ziri was still stuck in the woods.
+The sound of the river faded.
+Ziri made it across with no problem.
+Ziri had no idea what that mysterious beast was.
+Ziri waved Rima over towards the boat.
+Her car is ready.
+He was the first man to climb Mount Everest.
+Ziri wasn't harmed by the jackal.
+Ziri asked Rima about those pictures and her heart jumped.
+Ziri asked Rima why she did that.
+Ziri made it back to town.
+He told me you were right.
+You're no coward.
+Rima was dancing.
+This man is well known in his country.
+Maria likes cooking at night.
+Do you drink enough water?
+I didn't tell you to come.
+I never use a computer mouse.
+Ziri messed with Rima's kids.
+Ziri called Rima by her legal name.
+Tomorrow, I'll fly over the magnificent Himalayas.
+Rima played football.
+I wasted my day off on a social gaming event.
+Ziri entered Rima's apartment.
+We can only count on us.
+Algiers is a cultural melting pot.
+They suddenly jumped.
+We love literature.
+I was negative.
+He has that.
+We welcomed everyone.
+We were dedicated.
+Ziri and Rima came closer.
+Rima and Skura gained power.
+Ziri was born and raised in Algiers.
+My family is more important to me than anything else.
+The most magnificent fairy tale is life itself.
+Rima was doing OK.
+Ziri caught a glimpse of a magpie.
+We are still out.
+I can play music.
+Ziri called for Rima and her mom every few minutes.
+Ziri lives in an old house.
+Ziri always believed in keeping away bad luck.
+I'm very upset about the situation.
+I walk around the house naked.
+Do you mind if I invite him over?
+Ziri wrote various bad comments about Rima being arrogant.
+What Tom is going to do I can't say.
+Medlar tree flowers are very nice to look at.
+Daniel was sitting in front of his loquat trees.
+The current state of the planet is going to change.
+Zip your mouth, Donald. I'm not in the mood for this.
+Donald ate dinner at Jessica's favorite restaurant.
+After Daniel went around the whole beach, he still couldn't find Amanda.
+I am a femboy.
+Insects clean up the planet.
+Of course, David wants the scholarship.
+She is always so unconfident.
+James was embarrassed to be seen with Amanda.
+James pushed every button in the elevator.
+John was sitting on the lawn with everybody else.
+You are of German nationality.
+He accidentally stepped on my foot.
+My wife ran away with a coloured man.
+John never helped any nursing homes.
+I left the house without my phone.
+Preparing for natural disasters requires strategic planning.
+The army of the dead is approaching.
+The article is on the Berber language.
+See if you can catch this.
+Tom was in Prague yesterday.
+His body was found in a pool of blood.
+Please don't raise your voice at me.
+I slipped into my clothes as I ran down the stairs.
+It's literally down the street.
+Mark has an eating disorder.
+I breathed a sigh of relief.
+I'm not avoiding my responsibilities.
+Tom had no choice but to accept that job.
+These shoes feel a little tight.
+Michael sat down next to Linda.
+Michael kept flirting with Linda.
+Robert tripped and stumbled forward.
+Robert was the most handsome man Sandra had ever seen.
+Robert's dad left his mom after he was born.
+William teleported to the bar.
+Can you prove that ghosts don't exist?
+That boarding school and both boys and girls.
+Pass on our greetings to your mum.
+I felt like swearing, but I contained myself.
+Elias came to Sandra's town.
+Elias turned off his headlights.
+I was surprised to not have to do the same things as you.
+William is the type of person who loves to learn new things.
+Elias spent more time with his friends.
+Felix kicked Sandra's sand castles all down.
+Felix heard the screams in that area.
+The station reentered the atmosphere.
+Gunter will tell Amelia, too.
+Gunter started the cows.
+Everything appears to be ready.
+Jonas ran to Amelia's room, screaming.
+Jonas handed Rima an envelope.
+I'm going to be good.
+Karl was tidying up.
+Leon desperately called his friends for help.
+We take care of each other.
+Leon's house looked like an abandoned building.
+Lukas realized it was only five am.
+Lukas tried to shoot the drone down.
+Paul woke up to another pickup truck passing by.
+We've poured a huge amount of money into this project.
+Paul arrived at the scene first.
+Stefan drove his parents crazy.
+My favourite song changes each day.
+Stefan checked the women's bathroom and found a guy in a beanie there.
+Nothing seemed to be missing from Tobias's apartment.
+She is distrustful.
+Karaoke is a popular activity in Japan.
+Alberto figured Isabella had kids.
+It's really nice of you all to invite me to have dinner.
+Alberto had the book under his bed.
+Bruno is in the communications room.
+Bruno approached the shop.
+The sky is red because of the fires.
+Claudio was a pussy.
+Claudio didn't have a bag.
+Claudio kept looking back every five seconds.
+Damiano was stalking Isabella in the park.
+Damiano continued to repair the solar panels.
+The city of Paris is worth a detour.
+Flavio boarded the bus home.
+Flavio left Rima alone.
+You should always follow your dreams.
+Kabyle and Shawi are mutually intelligible to a large extent.
+Anyone can come in.
+Lorenzo slept with ease.
+The president claimed he made a deal with the aliens.
+Martino came down to the basement.
+He wants to leave here.
+Come, I'm waiting for you!
+She found herself alone on the other side of the world.
+Adriano looked up at the stars and made a wish.
+Female employment rates are rising in India.
+It looks like you were in a fight.
+Benedito used a hose to water the garden.
+Benedito watched in amazement as his billy goat clambered up a steep cliff.
+He loves her unconditionally.
+Carlos is a valuable colleague who contributes a lot to our company's success.
+The fern fronds drooped gracefully.
+Carlos made more couscous.
+Diego was getting really hungry.
+Everyone stopped chatting.
+Edmundo ended up in an unknown part of the city.
+Edmundo suddenly emerged and caught Rima.
+The search and rescue team will arrive in the morning.
+Walid is an Algerian naval architect.
+Tom ate half a jar of pickles while he was watching TV.
+Can you rephrase the question? I'm not sure if I really understand it.
+Gabriel waved his hand to get the waiter's attention.
+Gustavo took another step.
+I asked Tom not to drive fast.
+He signed the cheque.
+Antonio doesn't know how to save Rima.
+Rodrigo was taken out.
+Who was Mahatma Gandhi?
+What are you so mad about?
+Rodrigo was excited.
+Santiago was in a deranged state.
+I didn't want to tell anyone until I was certain.
+I undress you.
+Santiago found Rima's body.
+Boris works as a librarian.
+The wind is really strong.
+Boris noticed fresh bootprints in the snow.
+Boris drove the vehicle further.
+Dmitri got back to camp.
+Dmitri looked out the window.
+Dmitri stopped Rima's attack on Walid.
+Fyodor told how he previously hated his mother.
+Did Tom give up?
+You should apologize to Fyodor first.
+The referee has blown for a penalty.
+Fyodor tore the check into two pieces.
+Igor came out of the restaurant.
+Igor doesn't have the ability to read minds, you know.
+Igor and Walid laughed and embraced.
+Igor had to go to the doctor.
+Ivan asked Rima to tell the truth.
+I get up when they go to sleep.
+Ivan was fired afterwards.
+Miroslav found more blood in the bathroom.
+Miroslav went on a short hike.
+Miroslav knew that was a lie.
+Miroslav was able to move from failure to failure without losing his enthusiasm.
+Oleg was still at home.
+There is enough crime in Casablanca.
+Oleg has a stigma against witches.
+Leonid was sitting in his camp chair.
+There was a nail in the tire.
+I need to get my ax sharpened.
+Tom spends his summers trekking in the Rockies.
+I rang Tom up.
+It doesn't just depend on me.
+Read that billboard.
+We soon discovered what was causing the problem.
+My parents are here.
+I'm still don't agree with you on that.
+Am I cool?
+He spun the ball on his finger.
+He served the kids lemonade.
+She layered the cake with whipped cream and berries.
+Be careful not to spill your tea.
+Tom tried to stay still.
+Have you ever worked in sales?
+I think your laptop needs a software update.
+Have you considered a log cabin?
+You better do your homework.
+Embrace new challenges as opportunities for growth.
+Don't share personal information with strangers on your phone.
+Could you organize your belongings in the shared storage area?
+You don't understand, Tom.
+Are you my landlord?
+I'm not asleep any more.
+Let's find out if we're wrong.
+Long live the Kabyle people.
+His pupils worshipped him.
+Vladimir is a competitive pistol shooter.
+I did it exactly as Tom had wanted me to.
+You didn't take those computers to Taka.
+I got to Tifra.
+Are you on the run?
+Vladimir sat in Anna's rooms for hours, watching her.
+Tom has just tidied his room.
+How long was that bridge?
+Vladimir's eyelids were swollen from crying.
+Yuri came up to Mom and asked her quietly about when Martha would leave.
+Tom raced home.
+Will you open the curtains, please?
+Do you lie, too?
+The temperature has been fluctuating a lot.
+Did anything tickle your fancy?
+Boldi and Martha began to race just like they used to.
+Boldi wanted to participate in the math competition.
+Boldi went to scout camp.
+You'll keep trying, won't you?
+Gabor noticed a light blinking on the other end of the island.
+Gabor needs to upgrade his wardrobe.
+Gabor used Olivia to steal her family's money.
+My hearing isn't so good as yours.
+I found out before you did.
+My grandson visited me this morning.
+She left a few days ago.
+After work, he went out.
+Tom has got fatter since I last saw him.
+I had a talk with Tom yesterday.
+Janos asked Martha if she had a phone.
+I can come to yours at five.
+Janos had a very curious experience in the woods.
+Sounds travel pretty far.
+Tom planted a little peach tree.
+Kalman had a good education.
+The people of Austria are ethnically German.
+Kalman tried to enjoy that camping trip.
+Is Tom a doctor, or an engineer?
+Which do you prefer, summer or winter?
+Let me answer those questions later.
+Nobody will listen to me.
+I'm ironing the washing.
+What does Tom know about us?
+Mary needs to make the decision by herself.
+Tom was always in trouble.
+The night was silent and black.
+The black SUV parked in front of the house.
+You're a man, not a woman.
+Why does it rain on my birthday every year?
+Have you washed your feet?
+The situation is getting worse by the hour.
+Could it be possible that she still hasn't finished her homework.
+Our options are now limited.
+You sound pretty mad.
+When was the last time you played the accordion?
+We savored a beef burgers.
+This is a really good restaurant.
+Today I will not smoke.
+Are you saying I'm boring?
+Keep your aprons and dish towels hung up neatly.
+Don't leave utensils in the sink.
+I felt a sense of empathy towards the book's protagonist.
+I've lost my bank card.
+We may as well leave.
+I don't feel quite myself.
+He locked your jewellery in the safe.
+What bothers you about me, Tom?
+Where can I cross this river?
+What does recovery look like to you?
+It is difficult for him to act otherwise.
+What are you kids doing inside?
+Let me borrow your magnifying glass.
+I knew Tom would be able to persuade you.
+There might be better way to do this.
+I never had problems at school.
+It wasn't growing anymore.
+Welcome to our bakery.
+It isn't necessary to squash all the mosquitoes.
+Thanks for believing me.
+Did you ask any questions?
+Even though Tom was rich, he wasn't happy.
+She regretted wasting her money.
+I had to coordinate the tasks of twenty people.
+I've made you good coffee and good pie.
+I was born in Zhejiang.
+He gets gifts.
+I'm going to eat something else.
+Nothing depends on you anymore.
+Mary listened to music while she learned vocabulary.
+They argued about a triviality.
+When it gets cold, the turtles become torpid.
+Tom helped pay for it.
+That sounds plausible.
+They are so proud of their son.
+I only want to speak Esperanto.
+You will release the prisoners.
+They're angry with you.
+Both Tom and Mary don't want to go to Boston.
+Tell Tom the importance of the meeting.
+Our place is perfect.
+Tom said he regretted lying to Mary.
+I hope it's warm enough tomorrow to go swimming.
+I know a lot about you already.
+I would've introduced you to Tom if I'd known you wanted to be introduced.
+I want to do my job well.
+We don't know what we want.
+Are you billing me this time?
+I feel like we've met before.
+I watch a lot of videos.
+Did you prepare the dinner?
+Our mothers missed us.
+How can anyone get away from him?
+Adam followed the road of perdition.
+You fooled them.
+Blessed are the poor.
+I prefer films in which nothing happens.
+And what does it affect?
+The main theme of this book is the American Revolution.
+Just ignore what you don't like.
+I'm on tilt.
+Captured by the enemy, he decides to commit suicide.
+The clock is five minutes late.
+She was forty.
+The cowboys worked together to corral the cattle.
+I am living in a luxurious palace.
+I should've called Tom before I went to see him.
+The accident happened right in front of Tom's house.
+Tom and Mary are really annoying.
+He's far stronger than you.
+Tom was behind the counter.
+I don't have time for these people.
+Tom's a shady fellow.
+It led to him losing his money.
+It didn't get better.
+I don't find that many people who like classical music.
+I'm nobody's friend.
+Some languages are harder than others.
+It's the parents' duty to teach their children good behavior.
+You will have to work all day on it.
+I am not going to the hospital.
+I searched the whole house.
+Sami needed a pee break.
+It rains a lot all year round.
+You guys all of a sudden got really busy.
+He hasn't calmed down yet.
+You have nothing to say.
+I'm not willing to abandon you.
+Are you betting on the match?
+All university students have free access to the university library.
+They chose me.
+He left prison.
+Ziri held the basket tightly.
+They laughed at you.
+The day is breaking, it's still night.
+Ziri added bananas to the pancakes.
+Ziri didn't want to see Rima going the same path.
+They mention him in good terms.
+Ziri thought he was in his back.
+He received everything they provided him.
+London seems tiny compared to Tokyo.
+They gathered together.
+She treated him unfairly.
+Yidir is not the kind to meddle in other people's affairs.
+Gather your things and go!
+Don't swallow that bread.
+Your guardian angel protects you.
+I think Tom was really disappointed.
+Turn off the faucet!
+You should be the boss.
+I can't go to sleep that early.
+This will no doubt become precedent.
+It's hard to come up with great ideas.
+The night sky is filled with constellations that have guided explorers for centuries.
+A man is looking for us.
+The fire spread faster than anyone could imagine.
+You had me at hello.
+Trust is fragile in a world of betrayal.
+Mary tapped her fingers on the desk.
+Patience grows where words falter.
+What truths does the river whisper?
+How late do you usually stay at the office?
+Had we known earlier, we could have prepared.
+She talked about human rights.
+They found the outlaw's tracks near the river.
+How about dinner tomorrow night?
+Would you stand by him no matter what?
+Winter begins in December.
+I'm buying a flower.
+Can other people understand that?
+A diagram has value in explaining a text.
+Your father went to France.
+I'm going to travel to england.
+I washed them.
+He can't start a business out of the blue.
+The fun is just beginning.
+He's a prestidigitator.
+He doesn't like math much.
+She can't take anything outside.
+Corn is abundant in the Midwest.
+She was as shocked as Mom.
+Come on, it happened like that.
+I think I sprained my ankle.
+She was working.
+We miss our homes and schools.
+The virus has crossed the species barrier.
+Please be friendly to the robot.
+We accompanied the kids to the club.
+They came to deliver the car.
+They learnt from the best.
+Ziri has a great idea.
+I just don't want to get in trouble.
+The two got into a verbal altercation on the topic of pineapple on pizza.
+Can your friend cook?
+He was trying to feed the dogs.
+I walked quickly down the road.
+I didn't find the path on Google Earth.
+I won't give you any of my apples.
+He was busy making TikToks.
+He peeled the eggs.
+The larger the income, the more tax.
+Darling, you have the simplicity of a child.
+He hurried to leave the casino.
+Improved soil health directly contributes to higher crop productivity in agricultural regions.
+Tom wants to produce weapons, which I don't understand.
+He was really skating well for a while.
+He was trapped inside the cabin.
+He already has plans tonight.
+He wanted to taste space food.
+He provides extra help to struggling students.
+Bend your head forward.
+We have the reports.
+The road to him is paved.
+Next time, I'll invite you.
+Mary kissed Cookie on the head.

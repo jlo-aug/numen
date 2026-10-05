@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Numen launcher foreground: a keycap with an N and a small amber "on" light. Safe zone: 66dp circle. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <group
+        android:pivotX="54"
+        android:pivotY="54"
+        android:scaleX="1.12"
+        android:scaleY="1.12">
+        <!-- Key body (the side you see below the top face) -->
+        <path
+            android:fillColor="#B4B9E0"
+            android:pathData="M41,33 H67 A11,11 0 0 1 78,44 V70 A11,11 0 0 1 67,81 H41 A11,11 0 0 1 30,70 V44 A11,11 0 0 1 41,33 Z" />
+        <!-- Key top -->
+        <path
+            android:fillColor="#F5F6FC"
+            android:pathData="M41,27 H67 A11,11 0 0 1 78,38 V64 A11,11 0 0 1 67,75 H41 A11,11 0 0 1 30,64 V38 A11,11 0 0 1 41,27 Z" />
+        <!-- N -->
+        <path
+            android:fillColor="#2B2F6B"
+            android:pathData="M45,40 H49.6 L58.4,53.5 V40 H63 V62 H58.4 L49.6,48.5 V62 H45 Z" />
+        <!-- Amber light -->
+        <path
+            android:fillColor="#FFB84D"
+            android:pathData="M72,36 m-3.2,0 a3.2,3.2 0 1,0 6.4,0 a3.2,3.2 0 1,0 -6.4,0" />
+    </group>
+</vector>

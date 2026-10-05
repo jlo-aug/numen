@@ -1,0 +1,164 @@
+package it.palsoftware.pastiera.data.mappings
+
+import android.view.KeyEvent
+import it.palsoftware.pastiera.AltModifierBinding
+import it.palsoftware.pastiera.SettingsManager
+import it.palsoftware.pastiera.SymPagesConfig
+import it.palsoftware.pastiera.inputmethod.DeviceSpecific
+import org.junit.After
+import org.junit.Assert.assertEquals
+import org.junit.Assert.assertTrue
+import org.junit.Test
+import org.junit.runner.RunWith
+import org.robolectric.RobolectricTestRunner
+import org.robolectric.RuntimeEnvironment
+import org.robolectric.annotation.Config
+
+@RunWith(RobolectricTestRunner::class)
+@Config(sdk = [33])
+class KeyMappingLoaderTest {
+
+    @After
+    fun tearDown() {
+        val context = RuntimeEnvironment.getApplication()
+        SettingsManager.setPhysicalKeyboardProfileOverride(context, "auto")
+        SettingsManager.setAltModifierBinding(context, AltModifierBinding.DeviceSym)
+        SettingsManager.setSymPagesConfig(context, SymPagesConfig())
+        DeviceSpecific.clearTestOverrides()
+    }
+
+    @Test
+    fun resolveAltModifierMappings_mp01ManualOverride_exposesCustomDedicatedKeys() {
+        val context = RuntimeEnvironment.getApplication()
+        SettingsManager.setPhysicalKeyboardProfileOverride(context, "mp01")
+
+        val mappings = AltModifierMappingResolver.resolve(context.assets, context)
+
+        assertTrue(mappings.isNotEmpty())
+        assertEquals("&", mappings[KeyEvent.KEYCODE_Q])
+        assertEquals("0", mappings[666])
+        assertEquals(".", mappings[667])
+    }
+
+    @Test
+    fun resolveAltModifierMappings_unknownDevice_usesVirtualDeviceSymProfile() {
+        val context = RuntimeEnvironment.getApplication()
+        SettingsManager.setPhysicalKeyboardProfileOverride(context, "auto")
+        DeviceSpecific.setBuildFingerprintForTests(
+            brand = "google",
+            manufacturer = "google",
+            model = "Pixel 7a",
+            device = "lynx",
+            product = "lynx"
+        )
+
+        val mappings = AltModifierMappingResolver.resolve(context.assets, context)
+
+        assertEquals("virtual", DeviceSymProfileResolver.resolve(context))
+        assertTrue(mappings.size >= 26)
+        assertEquals("-", mappings[KeyEvent.KEYCODE_U])
+        assertEquals("0", mappings[KeyEvent.KEYCODE_Q])
+        assertEquals("?", mappings[KeyEvent.KEYCODE_M])
+    }
+
+    @Test
+    fun resolveAltModifierMappings_originalTitanAutoDetection_usesOriginalTitanAsset() {
+        val context = RuntimeEnvironment.getApplication()
+        SettingsManager.setPhysicalKeyboardProfileOverride(context, "auto")
+        DeviceSpecific.setBuildFingerprintForTests(
+            brand = "Unihertz",
+            manufacturer = "A-gold",
+            model = "Titan",
+            device = "Titan",
+            product = "Titan",
+            board = "g61v71c2k_dfl_tee",
+            display = "Titan_20221121"
+        )
+
+        val mappings = AltModifierMappingResolver.resolve(context.assets, context)
+
+        assertTrue(mappings.size >= 26)
+        assertEquals(":", mappings[KeyEvent.KEYCODE_Q])
+        assertEquals("1", mappings[KeyEvent.KEYCODE_U])
+        assertEquals("9", mappings[KeyEvent.KEYCODE_M])
+    }
+
+    @Test
+    fun loadDeviceSymMappings_clicksBuiltInProfiles_matchPrintedLegends() {
+        val context = RuntimeEnvironment.getApplication()
+
+        listOf("clicks_razr", "clicks_pixel").forEach { profile ->
+            SettingsManager.setPhysicalKeyboardProfileOverride(context, profile)
+            val mappings = DeviceSymMappingRepository.load(context.assets, context)
+
+            assertEquals("#", mappings[KeyEvent.KEYCODE_Q])
+            assertEquals("1", mappings[KeyEvent.KEYCODE_W])
+            assertEquals("_", mappings[KeyEvent.KEYCODE_U])
+            assertEquals(";", mappings[KeyEvent.KEYCODE_J])
+            assertEquals("%", mappings[KeyEvent.KEYCODE_V])
+            assertEquals("?", mappings[KeyEvent.KEYCODE_B])
+            assertEquals("\$", mappings[KeyEvent.KEYCODE_PERIOD])
+            assertEquals("0", mappings[KeyEvent.KEYCODE_CTRL_LEFT])
+        }
+
+        SettingsManager.setPhysicalKeyboardProfileOverride(context, "clicks_power")
+        val powerMappings = DeviceSymMappingRepository.load(context.assets, context)
+        assertEquals("0", powerMappings[KeyEvent.KEYCODE_CTRL_LEFT])
+    }
+
+    @Test
+    fun resolveAltModifierMappings_firstEnabledLayer_ignoresDisabledDeviceSym() {
+        val context = RuntimeEnvironment.getApplication()
+        SettingsManager.setSymPagesConfig(
+            context,
+            SymPagesConfig(deviceEnabled = false, emojiEnabled = false, symbolsEnabled = true)
+        )
+        SettingsManager.setAltModifierBinding(context, AltModifierBinding.FirstEnabledSymKeyLayer)
+
+        val mappings = AltModifierMappingResolver.resolve(context.assets, context)
+
+        assertEquals(";", mappings[KeyEvent.KEYCODE_S])
+        assertEquals("°", mappings[KeyEvent.KEYCODE_O])
+    }
+
+    @Test
+    fun loadSymPage2Mappings_exposesExpandedTypographyDefaults() {
+        val context = RuntimeEnvironment.getApplication()
+
+        val mappings = KeyMappingLoader.loadSymKeyMappingsPage2(context.assets)
+
+        assertEquals(";", mappings[KeyEvent.KEYCODE_S])
+        assertEquals("–", mappings[KeyEvent.KEYCODE_F])
+        assertEquals("„", mappings[KeyEvent.KEYCODE_J])
+        assertEquals("“", mappings[KeyEvent.KEYCODE_K])
+        assertEquals("&", mappings[KeyEvent.KEYCODE_C])
+        assertEquals("°", mappings[KeyEvent.KEYCODE_O])
+        assertEquals("^", mappings[KeyEvent.KEYCODE_V])
+        assertEquals("»", mappings[KeyEvent.KEYCODE_Z])
+        assertEquals("«", mappings[KeyEvent.KEYCODE_X])
+    }
+
+    @Test
+    fun loadCtrlMappings_exposesWordNavigationDefaults() {
+        val context = RuntimeEnvironment.getApplication()
+
+        val mappings = KeyMappingLoader.loadCtrlKeyMappings(context.assets, null)
+
+        assertEquals(KeyMappingLoader.CtrlMapping("action", "move_word_left"), mappings[KeyEvent.KEYCODE_N])
+        assertEquals(KeyMappingLoader.CtrlMapping("action", "move_word_right"), mappings[KeyEvent.KEYCODE_M])
+        assertEquals(KeyMappingLoader.CtrlMapping("action", "expand_selection_word_left"), mappings[KeyEvent.KEYCODE_U])
+        assertEquals(KeyMappingLoader.CtrlMapping("action", "expand_selection_word_right"), mappings[KeyEvent.KEYCODE_I])
+    }
+
+    @Test
+    fun loadCtrlMappings_mapsCtrlBToKeyboardModeToggleCommand() {
+        val context = RuntimeEnvironment.getApplication()
+
+        val mappings = KeyMappingLoader.loadCtrlKeyMappings(context.assets, null)
+
+        assertEquals(
+            KeyMappingLoader.CtrlMapping("command", "pastiera.toggle_software_keyboard_mode"),
+            mappings[KeyEvent.KEYCODE_B]
+        )
+    }
+}

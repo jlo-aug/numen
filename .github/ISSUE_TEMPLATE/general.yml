@@ -1,0 +1,50 @@
+name: Bug or idea
+description: Report a problem with Numen or suggest an improvement.
+title: ""
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Numen is built for English on the Unihertz Titan 2 Elite. Reports from other devices or
+        languages won't be worked on. Only the description is required.
+
+  - type: dropdown
+    id: issue_type
+    attributes:
+      label: Type
+      options:
+        - Bug
+        - Autocorrect got a word wrong
+        - Idea / feature request
+    validations:
+      required: true
+
+  - type: textarea
+    id: description
+    attributes:
+      label: What happened?
+      description: For autocorrect issues, include what you typed and what it became.
+    validations:
+      required: true
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: Steps to reproduce
+      placeholder: |
+        1. Open ...
+        2. Type ...
+        3. See ...
+
+  - type: input
+    id: device
+    attributes:
+      label: Android version
+      placeholder: e.g. Android 16 (Titan 2 Elite)
+
+  - type: input
+    id: version
+    attributes:
+      label: Numen version
+      description: Settings → About.
+      placeholder: e.g. 1.0.0

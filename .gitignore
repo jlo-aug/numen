@@ -1,0 +1,59 @@
+*.iml
+.gradle
+/local.properties
+/.idea/caches
+/.idea/libraries
+/.idea/modules.xml
+/.idea/workspace.xml
+/.idea/navEditor.xml
+/.idea/assetWizardSettings.xml
+.DS_Store
+/build
+/captures
+.release
+/release
+.externalNativeBuild
+.cxx
+local.properties
+
+# Keystore files (security)
+*.jks
+*.keystore
+keystore.properties
+release/keystore.properties
+
+# Cursor rules (workspace-specific)
+.cursor/
+
+# Build scripts (local)
+assembla_release.sh
+
+# Local build metadata
+app/build.properties
+
+# Local F-Droid repo workspace
+.fdroid/
+debug-logs/
+
+# Local prediction benchmark workspace
+.prediction-bench/
+
+# Local agent instructions
+AGENTS.md
+CLAUDE.md
+
+# Numen: release APKs go to GitHub Releases, not the repository.
+*.apk
+numen-icon-preview.png
+numen-preview.gif
+.kotlin/
+# Editor settings and the legacy dictionary backup (only used by an old conversion script).
+.idea/
+.vscode/
+dict_backup/
+
+# Local Claude Code session files.
+.claude/
+
+# Launch assets (Reddit post images), kept out of the repo.
+press/

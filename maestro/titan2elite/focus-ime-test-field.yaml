@@ -1,0 +1,8 @@
+appId: app.numen.keyboard
+name: Focus Pastiera IME test field
+---
+- tapOn:
+    text: "Clear"
+    optional: true
+- assertVisible: "Type here with the physical keyboard…"
+- tapOn: "Type here with the physical keyboard…"
