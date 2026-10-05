@@ -93,7 +93,7 @@ class TypoBenchmarkTest {
 
     /** Names and slang the dictionary may not know: ideally left alone. */
     private val unknownButValid = listOf(
-        "Aurelian", "OpenBubbles", "Ximena", "Unihertz", "Plektra", "SwiftKey", "gonna", "wanna",
+        "Obtainium", "OpenBubbles", "Ximena", "Unihertz", "Plektra", "SwiftKey", "gonna", "wanna",
         "tbh", "imo", "btw", "yall", "lol", "omw", "Niagara", "Sami", "Mennad", "bf", "xo", "ur"
     )
 
