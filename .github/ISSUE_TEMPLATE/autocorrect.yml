@@ -1,0 +1,17 @@
+name: Autocorrect miss
+description: Autocorrect changed a word it shouldn't have, or missed a typo.
+title: "Autocorrect: "
+labels: ["autocorrect"]
+body:
+  - type: textarea
+    id: miss
+    attributes:
+      label: What happened?
+      description: |
+        Plain words are perfect, no logs needed. Just the few words around the mistake, never a
+        whole message. One line per miss is fine.
+      placeholder: |
+        I typed "get dome food" and it stayed "dome" (meant "some")
+        I typed "Mennad" and it became "Menand"
+    validations:
+      required: true

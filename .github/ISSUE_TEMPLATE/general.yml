@@ -14,7 +14,6 @@ body:
       label: Type
       options:
         - Bug
-        - Autocorrect got a word wrong
         - Idea / feature request
     validations:
       required: true
@@ -23,7 +22,6 @@ body:
     id: description
     attributes:
       label: What happened?
-      description: For autocorrect issues, include what you typed and what it became.
     validations:
       required: true
 
