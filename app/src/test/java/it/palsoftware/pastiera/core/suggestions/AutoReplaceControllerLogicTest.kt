@@ -1107,7 +1107,7 @@ class AutoReplaceControllerLogicTest {
         assertEquals("of the ", typeWordAndSpace("ofthe", aggressive = true, *words))
         // Known compound words and rare fragments are never split; default mode never splits.
         assertEquals("username ", typeWordAndSpace("username", aggressive = true, *words))
-        assertNull(AutoReplaceController.findWordSplit("hellow") { mapOf("hell" to 110, "ow" to 20)[it] ?: 0 })
+        assertNull(AutoReplaceController.findWordSplit("hellow", { mapOf("hell" to 110, "ow" to 20)[it] ?: 0 }))
         assertEquals("hellohow ", typeWordAndSpace("hellohow", aggressive = false, *words))
     }
 
@@ -1242,9 +1242,9 @@ class AutoReplaceControllerLogicTest {
     @Test
     fun aggressiveAutoReplaceStillProtectsKnownWordsAndFirstLetters() {
         assertEquals("form ", typeWordAndSpace("form", aggressive = true, "form" to 100, "from" to 1000))
-        // A first-letter slip is only fixed toward a very common word...
-        assertEquals("qorld ", typeWordAndSpace("qorld", aggressive = true, "world" to 120))
-        assertEquals("world ", typeWordAndSpace("qorld", aggressive = true, "world" to 200))
+        // A first-letter slip is only fixed toward a common word...
+        assertEquals("qorld ", typeWordAndSpace("qorld", aggressive = true, "world" to 100))
+        assertEquals("world ", typeWordAndSpace("qorld", aggressive = true, "world" to 120))
         // ...and only when it is a classic slip (neighbouring key or swapped first letters).
         assertEquals("porld ", typeWordAndSpace("porld", aggressive = true, "world" to 200))
         // Names stay untouched.

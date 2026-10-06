@@ -1,0 +1,7 @@
+en_triples.txt: English word-triple counts that help Numen's autocorrect pick a fix from the two
+words before. Built with tools/build_context_triples.py from:
+
+- Tatoeba (https://tatoeba.org) English sentences, licensed under the Creative Commons
+  Attribution 2.0 France License (CC BY 2.0 FR). Only word-triple counts are included.
+
+This file is distributed under CC BY 2.0 FR.

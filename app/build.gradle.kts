@@ -156,8 +156,8 @@ android {
             // Numen: a distinct app (Pastiera's forking policy requires its own identity), with
             // its own version line and no update checks against Pastiera's releases.
             applicationId = "app.numen.keyboard"
-            versionCode = nightlyVersionCode ?: 100
-            versionName = "1.0.0"
+            versionCode = nightlyVersionCode ?: 101
+            versionName = "1.0.1"
             manifestPlaceholders["appLabel"] = "Numen"
             manifestPlaceholders["imeLabel"] = "Numen"
             buildConfigField("boolean", "UPSTREAM_BRANDING", "false")

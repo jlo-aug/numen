@@ -190,6 +190,29 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
     }
 
     @Test
+    fun capsLockSurvivesTheInvisibleKeyboardSteppingAsideForAScroll() {
+        tapShift(2_500L)
+        tapShift(2_620L)
+        assertTrue(modifierController().capsLockEnabled)
+
+        setField(service, "steppedAsideForSwipe", true)
+        service.onWindowHidden()
+        assertTrue(modifierController().capsLockEnabled)
+
+        // The flag is spent: a real dismissal afterwards still resets, as before.
+        service.onWindowHidden()
+        assertFalse(modifierController().capsLockEnabled)
+    }
+
+    @Test
+    fun dismissingTheKeyboardStillTurnsCapsLockOff() {
+        tapShift(2_500L)
+        tapShift(2_620L)
+        service.onWindowHidden()
+        assertFalse(modifierController().capsLockEnabled)
+    }
+
+    @Test
     fun clicksPower_bouncedShiftTapDoesNotEnableCapsLock() {
         val context = RuntimeEnvironment.getApplication()
         SettingsManager.setPhysicalKeyboardProfileOverride(context, "clicks_power")

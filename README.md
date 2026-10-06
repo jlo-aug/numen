@@ -14,10 +14,12 @@ Patrick Zauner and contributors. It is not an official Pastiera release.
 
 - **Hidden bar.** Nothing pops up while you type on the keys. Press SYM to show the bar.
 - **Stronger autocorrect**, on by default. Fixes missing, extra and swapped letters, wrong
-  neighbouring keys, missed spaces and badly mangled long words ("instalaltion" → "installation").
-  Leaves names, slang, contractions, email addresses and links alone.
+  neighbouring keys, missed spaces and badly mangled long words ("instalaltion" → "installation"),
+  and picks the fix that fits the words before it ("pick up some kilk" → "milk"). Knows common
+  misspellings ("arguement" → "argument") and fixes slips on names you've typed in the
+  conversation. Leaves names, slang, contractions, email addresses and links alone.
 - **Sentence-aware fixes**, on by default. Catches real words in the wrong place ("get dome food"
-  → "get some food", "wagged it's tail" → "wagged its tail").
+  → "get some food", "wagged it's tail" → "wagged its tail", "ill check" → "I'll check").
 - **Undo.** Backspace right after a correction undoes it. A word you undo and keep twice is
   learned.
 - **Typing stats** on the home screen: words, typos fixed, speed and favourite word.
@@ -31,13 +33,13 @@ download their dictionary in Settings. Numen is only tested on the Titan 2 Elite
 Both apps typed the same 19,500 words of everyday messages, with a typo in 12% of words
 (`ChatSimulationTest`). Pastiera's automatic correction was switched on; it's off by default.
 
-| | Pastiera 0.86 | Numen 1.0 |
+| | Pastiera 0.86 | Numen 1.0.1 |
 |---|---|---|
-| Typos fixed | 24% | 61% |
-| Correct words changed by mistake | 1 in 160 | 1 in 3,700 |
-| Missed letters fixed ("helo") | 3 of 366 | 223 of 362 |
-| Extra letters fixed ("helllo") | 0 of 400 | 311 of 399 |
-| Missed spaces fixed ("seeyou") | 0 of 130 | 97 of 130 |
+| Typos fixed | 24% | 76% |
+| Correct words changed by mistake | 1 in 160 | 1 in 4,600 |
+| Missed letters fixed ("helo") | 3 of 366 | 284 of 361 |
+| Extra letters fixed ("helllo") | 0 of 400 | 368 of 399 |
+| Missed spaces fixed ("seeyou") | 0 of 130 | 111 of 130 |
 
 ## Install
 
@@ -85,5 +87,6 @@ character you meet on first launch is the numen of your keyboard.
   developed by Patrick Zauner and Andrea Palumbo, with the contributors listed in the app's About
   screen.
 - Word data: Simple English Wikipedia (CC BY-SA 4.0), Tatoeba (CC BY 2.0 FR), Google Books Ngram
-  2-grams via orgtre/google-books-ngram-frequency (CC BY 3.0) and SCOWL (Kevin Atkinson). See
-  [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+  2-grams via orgtre/google-books-ngram-frequency (CC BY 3.0), SCOWL (Kevin Atkinson), Wikipedia's
+  lists of common misspellings (CC BY-SA 4.0) and US Social Security Administration baby names
+  (public domain). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).

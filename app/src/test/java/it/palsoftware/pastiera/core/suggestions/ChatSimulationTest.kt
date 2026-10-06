@@ -107,6 +107,50 @@ class ChatSimulationTest {
     }
 
     @Test
+    fun neighbourKeySlipsAndTheWordBeforePickTheFix() {
+        val context = RuntimeEnvironment.getApplication()
+        val (controller, _) = englishController(context)
+        val cases = listOf(
+            // Field reports: a slip on the first letter, and a slip into a day of the week.
+            "Vool plan" to "Cool plan",
+            "see you on fridat then" to "see you on Friday then",
+            // The word before picks between equally likely slips.
+            "can you pick up some kilk on the way" to "can you pick up some milk on the way",
+            "I will be able fo come" to "I will be able to come",
+            // A name written twice in the conversation: a slip on it is fixed.
+            "Ximena is here. I told Ximena. Ximwna said hi and I told Ximwna thanks" to
+                "Ximena is here. I told Ximena. Ximena said hi and I told Ximena thanks",
+            // A capitalized slip on a day, an extra letter on a sentence's first word, short words.
+            "See you next Sudnay then" to "See you next Sunday then",
+            "Thefy made it" to "They made it",
+            "I don't know wat happened" to "I don't know what happened",
+            "Why do people ike it" to "Why do people like it",
+            // Well-known misspellings have one fix.
+            "I did not recieve it" to "I did not receive it",
+            "Your arguement is fine" to "Your argument is fine",
+            // A first name stays, even one slip from a common word.
+            "Ali drank tea" to "Ali drank tea",
+            // A missed space next to a name; brand names and code stay.
+            "andMary went home" to "and Mary went home",
+            "Tomis here" to "Tom is here",
+            "my iPhone works" to "my iPhone works",
+            "myVariable is set" to "myVariable is set",
+            // Field report: texting shorthand, and a far-key swap is no slip.
+            "my pref would be tacos" to "my pref would be tacos",
+            // Slang and words held for emphasis stay; one extra key is still a slip.
+            "ngl im tryna lowkey yeet it rn" to "ngl I'm tryna lowkey yeet it rn",
+            "lmk if u wanna hmu tmrw" to "lmk if u wanna hmu tmrw",
+            "that was sooo good pleaseee come" to "that was sooo good pleaseee come",
+            "we alll went" to "we all went"
+        )
+        val wrong = cases.mapNotNull { (typed, expected) ->
+            type(context, controller, typed).takeIf { it != expected }?.let { "$typed -> $it (want $expected)" }
+        }
+        controller.destroy()
+        assertEquals(emptyList<String>(), wrong)
+    }
+
+    @Test
     fun contractionsFollowTheSentence() {
         // Numen only: Pastiera's build keeps its original text replacements.
         org.junit.Assume.assumeFalse(it.palsoftware.pastiera.BuildConfig.UPSTREAM_BRANDING)
@@ -117,6 +161,13 @@ class ChatSimulationTest {
             "ok ill call you" to "ok I'll call you",
             "its raining again" to "it's raining again",
             "dont worry" to "don't worry",
+            // Field report: the next word shows "ill" was "I'll".
+            "thanks for your projects ill quit soon" to "thanks for your projects I'll quit soon",
+            "I think it was 12 gallons ill check my old phone again" to "I think it was 12 gallons I'll check my old phone again",
+            "Ok, ill call you" to "Ok, I'll call you",
+            "I ll quit now" to "I'll quit now",
+            "I don t know" to "I don't know",
+            "she fell ill and stayed home" to "she fell ill and stayed home",
             "He was very ill" to "He was very ill",
             "the dog wagged its tail" to "the dog wagged its tail",
             "Have you got your ID" to "Have you got your ID",
@@ -382,7 +433,7 @@ class ChatSimulationTest {
         const val BOUNDARY_PUNCTUATION = ".,!?;:"
         /** Guards (as of 2026-10-05: 0.3 per thousand changed, 61-64% fixed); tighten as heuristics improve. */
         const val MAX_FALSE_CHANGES_PER_THOUSAND = 1
-        const val MIN_FIXED_PERCENT = 58
+        const val MIN_FIXED_PERCENT = 72
 
         val KEY_POSITIONS: Map<Char, Pair<Int, Int>> = buildMap {
             "qwertyuiop".forEachIndexed { i, c -> put(c, 0 to i) }

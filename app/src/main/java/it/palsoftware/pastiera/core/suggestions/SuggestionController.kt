@@ -67,6 +67,8 @@ class SuggestionController(
         },
         autoSpacePunctuationProvider = { settingsProvider().autoSpacePunctuation }
     )
+    /** Words written in this conversation; never saved. Declared before the controller that reads it. */
+    private val recentWords = RecentWords()
     private var autoReplaceController = createAutoReplaceController()
     private val nextWordPredictor = nextWordPredictorOverride ?: NextWordPredictor(UserNGramStore(appContext))
     private val extraSuggestionEngines = mutableMapOf<String, SuggestionLanguageEngine>()
@@ -120,7 +122,14 @@ class SuggestionController(
             ),
             learnWord = ::addUserWord,
             realWordReplacementAllowed = ::allowsRealWordReplacement,
-            isLearningAllowed = isLearningAllowed
+            isLearningAllowed = isLearningAllowed,
+            pairCount = { first, second ->
+                contextState.get()?.takeIf { it.language == currentLocale.language }?.pairs?.count(first, second) ?: 0
+            },
+            recentWords = recentWords,
+            tripleCount = { first, second, third ->
+                contextState.get()?.takeIf { it.language == currentLocale.language }?.triples?.count(first, second, third) ?: 0
+            }
         )
     }
     
@@ -403,6 +412,7 @@ class SuggestionController(
             }
         }
         lastBoundaryWord = completedWord
+        if (isLearningAllowed()) completedWord?.let(recentWords::record)
         if (typingStats != null && isStatsAllowed()) {
             completedWord?.let(typingStats::onWord)
             if (result.replaced) typingStats.onTypoFixed()
@@ -435,7 +445,8 @@ class SuggestionController(
     private class ContextState(
         val language: String,
         val corrector: ContextCorrector? = null,
-        val pairs: PairCounts? = null
+        val pairs: PairCounts? = null,
+        val triples: TripleCounts? = null
     )
 
     private val contextState = AtomicReference<ContextState?>(null)
@@ -473,7 +484,21 @@ class SuggestionController(
                 isProtected = { word -> dictionaryRepository.isUserOrSlangWord(word) },
                 rejected = contextRejected
             )
-            contextState.compareAndSet(requested, ContextState(language, corrector, pairs))
+            // Optional: ranks autocorrect fixes by the two words before.
+            val triples = try {
+                appContext.assets.open("common/dictionaries/${language}_triples.txt")
+                    .bufferedReader().useLines { lines -> TripleCounts.parse(lines.onEach { ensureActive() }) }
+            } catch (_: java.io.IOException) {
+                null
+            } catch (error: RuntimeException) {
+                if (error is CancellationException) throw error
+                Log.w("PastieraIME", "Word triples for $language unreadable", error)
+                null
+            } catch (error: OutOfMemoryError) {
+                Log.w("PastieraIME", "No memory for word triples", error)
+                null
+            }
+            contextState.compareAndSet(requested, ContextState(language, corrector, pairs, triples))
         }
         return null
     }

@@ -272,8 +272,12 @@ class TypoBenchmarkTest {
     }
 
     private companion object {
-        /** Raise as accuracy improves; never lower without a reason. */
-        const val MIN_FIXED = 132
+        /**
+         * Raise as accuracy improves; never lower without a reason. 132 -> 131 (Oct 2026): neighbour-key
+         * slips now weigh as much as a missed letter, so context-free ties ("mondy", "ot", "nd") can
+         * go the other way here; with the words before, ChatSimulationTest fixes 15 points more.
+         */
+        const val MIN_FIXED = 131
         // Precision is measured on held-out text (tools/eval_context_correction.py), not here.
         const val MIN_SENTENCE_FIXES = 14
     }

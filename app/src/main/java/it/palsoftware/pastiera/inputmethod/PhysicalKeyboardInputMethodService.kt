@@ -3618,6 +3618,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     
     override fun onWindowShown() {
         super.onWindowShown()
+        steppedAsideForSwipe = false
         keyboardVisibilityController.onImeWindowVisibilityChanged(shown = true)
         updateStatusBarText()
         attachTrackpadDecorViewMotionHook("onWindowShown")
@@ -3648,22 +3649,23 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             InputDevice.getDevice(event.deviceId)?.name.equals("touchPad", ignoreCase = true)
         if (!fromTouchpad) return
         when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> collapsedTrackpadDown = event.x to event.y
-            MotionEvent.ACTION_MOVE -> {
-                // Only a real swipe hides it, not a finger resting on or pressing the keys.
-                val (startX, startY) = collapsedTrackpadDown ?: return
-                val slop = ViewConfiguration.get(this).scaledTouchSlop
-                if (kotlin.math.hypot(event.x - startX, event.y - startY) > slop) {
-                    collapsedTrackpadDown = null
-                    Log.d(TRACKPAD_DEBUG_TAG, "Collapsed IME window received a touchpad swipe; hiding it")
-                    requestHideSelf(0)
-                }
+            MotionEvent.ACTION_DOWN -> collapsedSwipeDetector.onTouchDown(event.x, event.y)
+            MotionEvent.ACTION_MOVE -> if (collapsedSwipeDetector.onTouchMove(event.x, event.y, event.eventTime)) {
+                Log.d(TRACKPAD_DEBUG_TAG, "Collapsed IME window received a touchpad swipe; hiding it")
+                // Only stepping aside so the app can scroll: the field keeps Caps Lock and friends.
+                steppedAsideForSwipe = true
+                requestHideSelf(0)
             }
-            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> collapsedTrackpadDown = null
+            MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL -> collapsedSwipeDetector.onTouchEnd()
         }
     }
 
-    private var collapsedTrackpadDown: Pair<Float, Float>? = null
+    private val collapsedSwipeDetector = TypingAwareSwipeDetector(
+        slopPx = { ViewConfiguration.get(this).scaledTouchSlop.toFloat() }
+    )
+
+    /** The window was hidden by [releaseCollapsedSurfaceForTrackpad], not dismissed by the user. */
+    private var steppedAsideForSwipe = false
 
     private fun attachTrackpadDecorViewMotionHook(reason: String) {
         val decorView = window?.window?.decorView
@@ -4124,7 +4126,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             candidatesBarController.resetSuggestionActionMode()
         }
         multiTapController.finalizeCycle()
-        resetModifierStates(preserveNavMode = true)
+        if (steppedAsideForSwipe) steppedAsideForSwipe = false else resetModifierStates(preserveNavMode = true)
         suggestionController.onContextReset()
     }
     
@@ -4420,6 +4422,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
 
     override fun onKeyDown(keyCode_: Int, event_: KeyEvent?): Boolean {
         val perfStart = ImePerfLogger.mark()
+        event_?.let { collapsedSwipeDetector.onKeyDown(keyCode_, it.eventTime) }
         // Count every physical key press for typing speed, whatever path it takes next.
         if (event_ != null && event_.repeatCount == 0 && (event_.isPrintingKey || keyCode_ == KeyEvent.KEYCODE_DEL) &&
             ::suggestionController.isInitialized && (currentInputEditorInfo?.inputType ?: 0) != android.text.InputType.TYPE_NULL
@@ -5128,6 +5131,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     override fun onKeyUp(keyCode_: Int, event_: KeyEvent?): Boolean {
+        event_?.let { collapsedSwipeDetector.onKeyUp(keyCode_, it.eventTime) }
         if (!replayingProtectedNumberKey) {
             when (val result = accidentalKeyPressFilter.onKeyUp(keyCode_, event_)) {
                 is AccidentalKeyPressFilter.KeyUpResult.Suppressed -> {

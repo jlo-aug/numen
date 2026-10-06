@@ -8,6 +8,7 @@ import android.util.Log
 import java.text.Normalizer
 import java.util.Locale
 import it.palsoftware.pastiera.inputmethod.DebugCaptureStore
+import kotlin.math.ln
 
 class AutoReplaceController(
     private val repository: DictionaryRepository,
@@ -25,7 +26,13 @@ class AutoReplaceController(
     private val realWordReplacementAllowed: (previous: String?, word: String, replacement: String) -> Boolean =
         { _, _, _ -> true },
     /** False in fields that ask the keyboard not to learn, such as incognito tabs. */
-    private val isLearningAllowed: () -> Boolean = { true }
+    private val isLearningAllowed: () -> Boolean = { true },
+    /** How often [second] follows [first] in everyday text (lowercase); 0 when unknown or not loaded. */
+    private val pairCount: (first: String, second: String) -> Int = { _, _ -> 0 },
+    /** Words written in this conversation, filled by the caller. */
+    private val recentWords: RecentWords = RecentWords(),
+    /** How often [third] follows [first] [second] (lowercase); 0 when unknown or not loaded. */
+    private val tripleCount: (first: String, second: String, third: String) -> Int = { _, _, _ -> 0 }
 ) {
     private fun triggerFromBoundaryChar(boundaryChar: Char?): DebugCaptureStore.AutoCorrectionTrigger {
         return when (boundaryChar) {
@@ -51,15 +58,29 @@ class AutoReplaceController(
     )
 
     companion object {
-        private const val AGGRESSIVE_CANDIDATE_LIMIT = 8
+        private const val AGGRESSIVE_CANDIDATE_LIMIT = 24
         private const val UNDO_CONTEXT_LENGTH = 64
         // Aggressive ranking: typo likelihood dominates, word frequency (0..~220) breaks ties.
         private const val FREQUENCY_WEIGHT = 0.6
+        // Bonus for a candidate that often follows the word before, saturating at this pair count.
+        private const val CONTEXT_WEIGHT = 0.8
+        private const val CONTEXT_SATURATION_COUNT = 1000.0
+        // The same for the two words before.
+        private const val TRIPLE_WEIGHT = 0.3
+        private const val TRIPLE_SATURATION_COUNT = 100.0
+
+        private fun saturating(count: Int, saturation: Double): Double =
+            if (count <= 0) 0.0 else minOf(1.0, ln(1.0 + count) / ln(1.0 + saturation))
+        // Bonus for a candidate written earlier in this conversation, and how likely a slip onto
+        // such a word must be (a neighbouring key, swapped letters, or one missed or extra letter).
+        private const val RECENT_WORD_BONUS = 0.2
+        private const val RECENT_SLIP_MIN_LIKELIHOOD = 0.65
+        private const val RECENT_SLIP_MAX_COMMON_FREQUENCY = 140
         private const val MAX_FREQUENCY = 220.0
         // Long words are rarely mistyped into other words, so far-key substitutions are allowed.
         private const val PROXIMITY_FILTER_MAX_LENGTH = 7
-        // A first-letter slip may only become a very common word, so "lol" never becomes "mol".
-        private const val FIRST_LETTER_FIX_MIN_FREQUENCY = 160
+        // A first-letter slip may only become a common word ("vool" -> "cool"), never a rare one.
+        private const val FIRST_LETTER_FIX_MIN_FREQUENCY = 115
         private const val ADDRESS_LOOKBACK = 64
         private const val MIN_SPLIT_WORD_LENGTH = 4
         // deepFix tuning: fix badly mangled common words but leave rare unknown words alone.
@@ -71,19 +92,22 @@ class AutoReplaceController(
         private const val DEEP_FIX_MAX_COST = 1.25
         private const val DEEP_FIX_MIN_MARGIN = 0.3
         private const val DEEP_FIX_CANDIDATE_LIMIT = 6000
-        private const val TWO_LETTER_FIX_MIN_FREQUENCY = 170
+        private const val TWO_LETTER_FIX_MIN_FREQUENCY = 150
         private const val TWO_LETTER_FIX_MIN_MARGIN = 0.15
-        // A missed first letter is only fixed in longer words ("ubject" -> "subject"), since
-        // short words lose too much of their shape.
-        private const val MISSED_FIRST_LETTER_MIN_LENGTH = 5
+        // A missed first letter ("ike" -> "like", "ubject" -> "subject") is fixed only toward a
+        // common word.
+        private const val MISSED_FIRST_LETTER_MIN_LENGTH = 3
         private const val MISSED_FIRST_LETTER_MIN_FREQUENCY = 110
         // A capitalised word may be a name, so at a sentence start it is only fixed by a likely
         // slip to a common lowercase word.
-        private const val SENTENCE_START_FIX_MIN_FREQUENCY = 120
-        private const val SENTENCE_START_FIX_MIN_LIKELIHOOD = 0.7
+        private const val SENTENCE_START_FIX_MIN_FREQUENCY = 115
+        private const val SENTENCE_START_FIX_MIN_LIKELIHOOD = 0.65
         // A lowercase slip only becomes a name or place when that name is common.
         private const val PROPER_NOUN_FIX_MIN_FREQUENCY = 130
         private const val PROPER_NOUN_CLASSIC_SLIP_MIN_FREQUENCY = 100
+        private const val PROPER_NOUN_SLIP_MIN_LENGTH = 5
+        // Up to this length, swapping a letter for a far key is not a slip ("pref" is not "prey").
+        private const val FAR_KEY_SWAP_MAX_LENGTH = 5
         // typoLikelihood of a missed letter, swapped letters or a doubled key.
         private const val CLASSIC_SLIP_LIKELIHOOD = 0.8
         // Letters that usually end a word on purpose rather than by a slip.
@@ -100,12 +124,35 @@ class AutoReplaceController(
         // Both halves of a split must be common words, and two-letter halves very common.
         private const val MIN_SPLIT_PART_FREQUENCY = 100
         private const val MIN_SPLIT_SHORT_PART_FREQUENCY = 150
+        // A missed space after or before a little everyday word ("of", "by", "the").
+        private const val GLUE_WORD_MAX_LENGTH = 4
+        private const val GLUE_WORD_MIN_FREQUENCY = 170
+        private const val GLUE_OTHER_MIN_LENGTH = 4
+        // A missed space next to a name ("andMary", "Tomis"); surname endings never split ("Peterson").
+        private const val NAME_SPLIT_MIN_WORD_FREQUENCY = 120
+        // Contractions whose apostrophe is often typed as a space ("I ll"). Only unambiguous ones.
+        private val SPACED_CONTRACTIONS = buildSet {
+            listOf("i", "you", "we", "they", "he", "she", "it", "that", "there", "who", "what").forEach { add("$it'll") }
+            listOf("i", "you", "we", "they", "he", "she", "that", "there", "who").forEach { add("$it'd") }
+            listOf("i", "you", "we", "they", "could", "would", "should", "might", "must", "who").forEach { add("$it've") }
+            listOf("you", "we", "they", "who", "what").forEach { add("$it're") }
+            add("i'm")
+            listOf("it", "that", "what", "there", "let").forEach { add("$it's") }
+            listOf("don", "can", "won", "isn", "aren", "wasn", "weren", "didn", "doesn", "hasn", "haven", "hadn",
+                "couldn", "wouldn", "shouldn", "mustn", "ain").forEach { add("$it't") }
+        }
+        private val SURNAME_ENDINGS = setOf("son", "sen", "ton", "ley", "ford", "berg", "stein", "man", "field", "wood", "worth", "by", "er", "ing", "ville")
 
         /**
          * Fixes a two-letter non-word ("si" -> "is") towards a very common word, only when that
          * fix clearly beats every other.
          */
-        internal fun twoLetterFix(word: String, frequencyOf: (String) -> Int, isNeighborKey: (Char, Char) -> Boolean): String? {
+        internal fun twoLetterFix(
+            word: String,
+            frequencyOf: (String) -> Int,
+            isNeighborKey: (Char, Char) -> Boolean,
+            contextFit: (String) -> Double = { 0.0 }
+        ): String? {
             if (word.length != 2 || !word.all { it in 'a'..'z' }) return null
             val candidates = buildSet {
                 add(word.reversed())
@@ -115,7 +162,8 @@ class AutoReplaceController(
             val ranked = candidates
                 .filter { candidate -> frequencyOf(candidate) >= TWO_LETTER_FIX_MIN_FREQUENCY }
                 .map { candidate ->
-                    candidate to typoLikelihood(word, candidate, isNeighborKey) + FREQUENCY_WEIGHT * frequencyOf(candidate) / MAX_FREQUENCY
+                    candidate to typoLikelihood(word, candidate, isNeighborKey) +
+                        FREQUENCY_WEIGHT * frequencyOf(candidate) / MAX_FREQUENCY + contextFit(candidate)
                 }
                 .sortedByDescending { (_, score) -> score }
             val (best, score) = ranked.firstOrNull() ?: return null
@@ -193,7 +241,24 @@ class AutoReplaceController(
         }
 
         /** Best "left right" split of a word typed without its space, or null if none is convincing. */
-        internal fun findWordSplit(word: String, frequencyOf: (String) -> Int): String? {
+        /**
+         * A real word with its last letter held for emphasis ("sooo", "pleaseee"), not a slip. Three
+         * letters where the doubled form is a word ("alll") is one extra key instead.
+         */
+        internal fun isStretchedForEmphasis(word: String, isKnown: (String) -> Boolean): Boolean {
+            val last = word.lastOrNull()?.takeIf { it.isLetter() } ?: return false
+            val run = word.takeLastWhile { it.equals(last, ignoreCase = true) }.length
+            if (run < 3) return false
+            val stem = word.dropLast(run)
+            val doubled = isKnown(stem + last + last)
+            return if (run == 3) isKnown(stem + last) && !doubled else isKnown(stem + last) || doubled
+        }
+
+        internal fun findWordSplit(
+            word: String,
+            frequencyOf: (String) -> Int,
+            isKnownWord: (String) -> Boolean = { false }
+        ): String? {
             if (word.length < MIN_SPLIT_WORD_LENGTH || !word.all { it.isLetter() }) return null
             var best: String? = null
             var bestScore = 0
@@ -206,7 +271,16 @@ class AutoReplaceController(
                     best = "$left $right"
                 }
             }
-            return best
+            if (best != null) return best
+            // A very common little word glued to a rarer real one ("ofnausea", "tormentedby").
+            return (2..word.length - 2).map { word.substring(0, it) to word.substring(it) }
+                .filter { (left, right) ->
+                    val (common, other) = if (frequencyOf(left.lowercase()) >= frequencyOf(right.lowercase())) left to right else right to left
+                    common.length <= GLUE_WORD_MAX_LENGTH && frequencyOf(common.lowercase()) >= GLUE_WORD_MIN_FREQUENCY &&
+                        other.length >= GLUE_OTHER_MIN_LENGTH && isKnownWord(other)
+                }
+                .singleOrNull()
+                ?.let { (left, right) -> "$left $right" }
         }
 
         private fun splitPartScore(part: String, frequencyOf: (String) -> Int): Int {
@@ -297,7 +371,7 @@ class AutoReplaceController(
                 hasSingleRepeatedCharInsertion(typed, word) || hasSingleRepeatedCharInsertion(word, typed) -> 1.0
                 isAdjacentTransposition(typed, word) -> 0.9
                 isSingleInsertion(typed, word) -> 0.8
-                substitution != null && isNeighborKey(substitution.first, substitution.second) -> 0.7
+                substitution != null && isNeighborKey(substitution.first, substitution.second) -> 0.8
                 isSingleInsertion(word, typed) && isFatFingerInsertion(typed, word, isNeighborKey) -> 0.65
                 isSingleInsertion(word, typed) -> 0.5
                 substitution != null -> 0.4
@@ -411,7 +485,8 @@ class AutoReplaceController(
          */
         internal fun previousWordFor(textBeforeWord: String): String? {
             val trimmed = textBeforeWord.trimEnd(' ')
-            if (trimmed.isEmpty() || trimmed.last() == '\n' || trimmed.last() in ".!?") return PairCounts.SENTENCE_START
+            // After a comma or colon a new clause starts, much like a sentence ("Ok, ill call").
+            if (trimmed.isEmpty() || trimmed.last() == '\n' || trimmed.last() in ".!?,;:") return PairCounts.SENTENCE_START
             if (trimmed.length == textBeforeWord.length) return null // Glued to something.
             val token = normalizeApostrophes(trimmed.takeLastWhile { it.isLetter() || it == '\'' || it == '’' })
             if (token.isEmpty() || token.length == trimmed.length && textBeforeWord.length >= PREVIOUS_WORD_LOOKBACK) {
@@ -508,6 +583,14 @@ class AutoReplaceController(
             }
             val lengthDelta = candidate.candidate.length - input.length
             if (lengthDelta == 0) {
+                // A far-key swap in a short word is rarely a slip, and short words have many such
+                // neighbours ("pref" is not "prey").
+                if (settings.aggressiveAutoReplace && !isOrthographicVariant && !isCaseVariant &&
+                    input.length <= FAR_KEY_SWAP_MAX_LENGTH
+                ) {
+                    val substitution = singleSubstitution(input.lowercase(), candidate.candidate.lowercase())
+                    if (substitution != null && !isNeighborKey(substitution.first, substitution.second)) return false
+                }
                 return isOrthographicVariant || isCaseVariant || !changesFirstLetter(input, candidate.candidate) ||
                     (settings.aggressiveAutoReplace && isPlausibleFirstLetterTypo(input, candidate.candidate, isNeighborKey) &&
                         frequencyOf(candidate.candidate) >= FIRST_LETTER_FIX_MIN_FREQUENCY)
@@ -748,17 +831,6 @@ class AutoReplaceController(
             return ReplaceResult(false, boundaryCommitted)
         }
 
-        if (settings.aggressiveAutoReplace && isCamelCaseName(word)) {
-            val boundaryCommitted = commitBoundaryAndReset(tracker, inputConnection, boundaryChar, settings)
-            DebugCaptureStore.recordAutoCorrectionAttempt(
-                before = word,
-                trigger = trigger,
-                outcome = DebugCaptureStore.AutoCorrectionOutcome.SKIPPED,
-                reason = "camel_case_name"
-            )
-            return ReplaceResult(false, boundaryCommitted)
-        }
-
         // Replaces the word with a fix found outside the suggestion engine; Backspace undoes it.
         fun commitDirectReplacement(replacement: String, source: String): ReplaceResult {
             inputConnection.beginBatchEdit()
@@ -777,6 +849,23 @@ class AutoReplaceController(
                 kind = SuggestionKind.CURRENT_WORD.name
             )
             return ReplaceResult(true, boundaryCommitted, replacement)
+        }
+
+        if (settings.aggressiveAutoReplace && isCamelCaseName(word)) {
+            // The one camel-case slip worth fixing: a missed space before a name ("andMary").
+            if (isEnglish && !rejectedWords.contains(word.lowercase()) &&
+                !(knownWordProvider?.invoke(word) ?: repository.isKnownWord(word))
+            ) {
+                nameSplit(word)?.let { split -> return commitDirectReplacement(split, "NAME_SPLIT") }
+            }
+            val boundaryCommitted = commitBoundaryAndReset(tracker, inputConnection, boundaryChar, settings)
+            DebugCaptureStore.recordAutoCorrectionAttempt(
+                before = word,
+                trigger = trigger,
+                outcome = DebugCaptureStore.AutoCorrectionOutcome.SKIPPED,
+                reason = "camel_case_name"
+            )
+            return ReplaceResult(false, boundaryCommitted)
         }
 
         // A word spelled exactly this way in a dictionary ("VMware") is not a slip.
@@ -892,13 +981,82 @@ class AutoReplaceController(
         }
         val textBeforeWord = inputConnection.getTextBeforeCursor(word.length + SPLIT_LOOKBACK, 0)
             ?.toString().orEmpty().dropLast(word.length)
+        // The words before decide between equally likely slips ("some kilk" -> "milk", not "kill").
+        val textBeforeForContext by lazy {
+            inputConnection.getTextBeforeCursor(word.length + PREVIOUS_WORD_LOOKBACK, 0)?.toString().orEmpty().dropLast(word.length)
+        }
+        val previousWord by lazy { previousWordFor(textBeforeForContext) }
+        val wordBeforePrevious by lazy {
+            val previous = previousWord
+            if (previous == null || previous == PairCounts.SENTENCE_START) {
+                null
+            } else {
+                val trimmed = textBeforeForContext.trimEnd(' ')
+                previousWordFor(trimmed.dropLast(trimmed.takeLastWhile { it.isLetter() || it == '\'' || it == '’' }.length))
+            }
+        }
+        // A slip on a word written twice in this conversation, such as a friend's name.
+        val recentSlipFix: () -> String? = {
+            if (settings.aggressiveAutoReplace && isEnglish && !rejectedWords.contains(wordLower) && word.all { it.isLetter() }) {
+                recentWords.slipTarget(word) { typed, recent ->
+                    // Names and words the dictionary lacks; common words already have their own fixes.
+                    repository.getExactWordFrequency(recent) < RECENT_SLIP_MAX_COMMON_FREQUENCY &&
+                        kotlin.math.abs(typed.length - recent.length) <= 1 &&
+                        typoLikelihood(typed, recent, suggestionEngine::isNeighborKey) >= RECENT_SLIP_MIN_LIKELIHOOD
+                }?.takeIf { !(knownWordProvider?.invoke(word) ?: repository.isKnownWord(word)) }
+            } else {
+                null
+            }
+        }
+        val contextFit: (String) -> Double = { candidate ->
+            val lower = candidate.lowercase()
+            val pairs = previousWord?.let { pairCount(it, lower) } ?: 0
+            val triples = previousWord?.let { previous -> wordBeforePrevious?.let { tripleCount(it, previous, lower) } } ?: 0
+            saturating(pairs, CONTEXT_SATURATION_COUNT) * CONTEXT_WEIGHT + saturating(triples, TRIPLE_SATURATION_COUNT) * TRIPLE_WEIGHT
+        }
+        // A space typed for the apostrophe: "I ll" -> "I'll", "don t" -> "don't".
+        if (settings.aggressiveAutoReplace && isEnglish && !rejectedWords.contains(wordLower)) {
+            val previous = textBeforeForContext.removeSuffix(" ").takeLastWhile { it.isLetter() }
+            val beforePrevious = textBeforeForContext.removeSuffix(" ").dropLast(previous.length).lastOrNull()
+            if (textBeforeForContext.endsWith(" ") && previous.isNotEmpty() && (beforePrevious == null || !beforePrevious.isLetterOrDigit()) &&
+                "${previous.lowercase()}'$wordLower" in SPACED_CONTRACTIONS
+            ) {
+                val typed = "$previous $word"
+                val joined = "$previous'$word"
+                inputConnection.beginBatchEdit()
+                inputConnection.deleteSurroundingText(typed.length, 0)
+                inputConnection.commitText(joined, 1)
+                lastReplacement = LastReplacement(originalWord = typed, replacedWord = joined)
+                tracker.reset()
+                inputConnection.endBatchEdit()
+                val boundaryCommitted = boundaryChar != null && commitBoundary(inputConnection, boundaryChar, settings)
+                DebugCaptureStore.recordAutoCorrectionCommit(
+                    before = typed, after = joined, trigger = trigger, source = "SPACED_CONTRACTION",
+                    distance = 1, kind = SuggestionKind.CURRENT_WORD.name
+                )
+                return ReplaceResult(true, boundaryCommitted, joined)
+            }
+        }
+        if (settings.aggressiveAutoReplace && isEnglish && !isKnown(word) && !repository.isFirstName(word) &&
+            !rejectedWords.contains(wordLower) && word.all { it.isLetter() }
+        ) {
+            nameSplit(word)?.let { split -> return commitDirectReplacement(split, "NAME_SPLIT") }
+        }
         val keepReason = when {
             settings.aggressiveAutoReplace && word.any { it.isDigit() } -> "contains_digit" // "3pm", "5km"
+            settings.aggressiveAutoReplace && isStretchedForEmphasis(word, isKnown) -> "emphasis" // "sooo", "pleaseee"
             isEnglish && apostropheSplit == null &&
                 isWordWithClitic(word, isKnown, rootMayBeName = isCapitalizedName(word, textBeforeWord)) -> "word_with_clitic"
+            // A capitalized first name ("Ali") is meant, even where it could be a slip ("All").
+            settings.aggressiveAutoReplace && word.first().isUpperCase() && word.drop(1).all { it.isLowerCase() } &&
+                repository.isFirstName(word) && !isKnown(word) -> "first_name"
             settings.aggressiveAutoReplace && isCapitalizedName(word, textBeforeWord) -> "capitalized_name"
             settings.aggressiveAutoReplace && word.all { it.isLowerCase() } && repository.isRecognizedWord(word) -> "recognized_word"
             else -> null
+        }
+        if (keepReason == "capitalized_name") {
+            recentSlipFix()?.let { fixed -> return commitDirectReplacement(fixed, "RECENT_WORD") }
+            properNounSlipFix(word, settings)?.let { fixed -> return commitDirectReplacement(fixed, "PROPER_NOUN") }
         }
         if (keepReason != null) {
             val boundaryCommitted = commitBoundaryAndReset(tracker, inputConnection, boundaryChar, settings)
@@ -911,10 +1069,16 @@ class AutoReplaceController(
             return ReplaceResult(false, boundaryCommitted)
         }
 
+        // A well-known misspelling ("recieve") has one known fix; never applied to a real word.
+        if (settings.aggressiveAutoReplace && isEnglish && !isKnown(word) && !rejectedWords.contains(wordLower)) {
+            repository.commonMisspellingFix(word)?.let { fixed ->
+                return commitDirectReplacement(applyCasing(fixed, word), "COMMON_MISSPELLING")
+            }
+        }
         if (settings.aggressiveAutoReplace && isEnglish && !isKnown(word) && !rejectedWords.contains(word.lowercase()) &&
             (word.all { it.isLowerCase() } || isSentenceStartCapital(word, textBeforeWord))
         ) {
-            twoLetterFix(word.lowercase(), repository::getExactWordFrequency, suggestionEngine::isNeighborKey)?.let { fixed ->
+            twoLetterFix(word.lowercase(), repository::getExactWordFrequency, suggestionEngine::isNeighborKey, contextFit)?.let { fixed ->
                 return commitDirectReplacement(applyCasing(fixed, word), "TWO_LETTER")
             }
         }
@@ -955,7 +1119,9 @@ class AutoReplaceController(
                 }
                 .maxByOrNull { candidate ->
                     typoLikelihood(word, candidate.candidate, suggestionEngine::isNeighborKey) +
-                        FREQUENCY_WEIGHT * repository.getExactWordFrequency(candidate.candidate) / MAX_FREQUENCY
+                        FREQUENCY_WEIGHT * repository.getExactWordFrequency(candidate.candidate) / MAX_FREQUENCY +
+                        contextFit(candidate.candidate) +
+                        if (recentWords.count(candidate.candidate) > 0) RECENT_WORD_BONUS else 0.0
                 }
         } else {
             recomposedCandidates.firstOrNull()
@@ -996,12 +1162,16 @@ class AutoReplaceController(
                 top.candidate.length <= (word.length * maxLengthRatio).toInt() ||
                 hasSingleRepeatedCharInsertion(word, top.candidate)) // Max length ratio check on full text
 
+        if (!shouldReplace && !isKnownWord && !isRejected) {
+            recentSlipFix()?.let { fixed -> return commitDirectReplacement(applyCasing(fixed, word), "RECENT_WORD") }
+        }
+
         // Aggressive mode splits a missed space ("hellohow" -> "hello how") when the one-word
         // fix is weak.
         val split = if (settings.aggressiveAutoReplace && isEnglish && !isKnownWord && !isRejected && apostropheSplit == null &&
             !isCapitalizedName(word, textBeforeWord)
         ) {
-            findWordSplit(word) { part -> repository.getExactWordFrequency(part) }
+            findWordSplit(word, { part -> repository.getExactWordFrequency(part) }, isKnown)
         } else {
             null
         }
@@ -1241,6 +1411,56 @@ class AutoReplaceController(
      * A lowercase slip only becomes a name when the name is common or the slip classic. A
      * capitalised word may itself be a name, so it needs a likely slip to a common word.
      */
+    /**
+     * A missed space next to a name: "andMary" (a lowercase word, then a capital) or "Tomis" (a
+     * name, then a common word). Brand-style words ("iPhone", "YouTube") and surnames never split.
+     */
+    private fun nameSplit(word: String): String? {
+        if (word.length < MIN_SPLIT_WORD_LENGTH + 1) return null
+        val capitals = (1 until word.length).filter { word[it].isUpperCase() }
+        fun isNameLike(part: String) = part.length >= 2 && part.first().isUpperCase() && part.drop(1).all { it.isLowerCase() } &&
+            (repository.isFirstName(part) || repository.getExactWordFrequency(part) >= PROPER_NOUN_CLASSIC_SLIP_MIN_FREQUENCY &&
+                repository.getExactWordFrequency(part.lowercase()) < repository.getExactWordFrequency(part)) // "Boston", not "Variable"
+        fun isCommon(part: String) = repository.getExactWordFrequency(part) >=
+            if (part.length <= 2) MIN_SPLIT_SHORT_PART_FREQUENCY else NAME_SPLIT_MIN_WORD_FREQUENCY
+        if (word.first().isLowerCase() && capitals.size == 1) {
+            val left = word.substring(0, capitals[0])
+            val right = word.substring(capitals[0])
+            return "$left $right".takeIf { left.length >= 2 && isCommon(left) && isNameLike(right) }
+        }
+        if (word.first().isUpperCase() && capitals.isEmpty()) {
+            return (2..word.length - 2)
+                .map { word.substring(0, it) to word.substring(it) }
+                .filter { (name, rest) -> isNameLike(name) && isCommon(rest) && rest !in SURNAME_ENDINGS }
+                .maxByOrNull { (_, rest) -> repository.getExactWordFrequency(rest) }
+                ?.let { (name, rest) -> "$name $rest" }
+        }
+        return null
+    }
+
+    /**
+     * A capitalized word mid-sentence that is no known name may be a slip on a common proper noun
+     * ("next Sudnay" -> "Sunday"). Only a classic slip onto a single such word counts.
+     */
+    private fun properNounSlipFix(word: String, settings: SuggestionSettings): String? {
+        if (!settings.aggressiveAutoReplace || !isEnglish || word.length < PROPER_NOUN_SLIP_MIN_LENGTH ||
+            !word.all { it.isLetter() } || word.drop(1).any { it.isUpperCase() } || rejectedWords.contains(word.lowercase()) ||
+            (knownWordProvider?.invoke(word) ?: repository.isKnownWord(word))
+        ) {
+            return null
+        }
+        return suggestionEngine.suggest(word, limit = AGGRESSIVE_CANDIDATE_LIMIT, useKeyboardProximity = true, useEditTypeRanking = true)
+            .map { it.candidate }
+            .filter { candidate ->
+                candidate.first().isUpperCase() && candidate.drop(1).all { it.isLowerCase() } &&
+                    !candidate.equals(word, ignoreCase = true) &&
+                    repository.getExactWordFrequency(candidate) >= PROPER_NOUN_CLASSIC_SLIP_MIN_FREQUENCY &&
+                    typoLikelihood(word, candidate, suggestionEngine::isNeighborKey) >= CLASSIC_SLIP_LIKELIHOOD
+            }
+            .distinct()
+            .singleOrNull()
+    }
+
     private fun isPlausibleForCasing(word: String, candidate: String): Boolean {
         val frequency = repository.getExactWordFrequency(candidate)
         val candidateIsName = candidate.firstOrNull()?.isUpperCase() == true

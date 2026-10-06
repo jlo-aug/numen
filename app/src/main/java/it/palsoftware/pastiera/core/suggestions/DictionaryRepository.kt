@@ -49,6 +49,12 @@ interface DictionaryRepository {
      * it and its casing alone.
      */
     fun isRecognizedWord(word: String): Boolean = false
+
+    /** A common first name (any case), from common/dictionaries/<lang>_names.txt. */
+    fun isFirstName(word: String): Boolean = false
+
+    /** The fix for a well-known misspelling ("recieve" -> "receive"), from <lang>_misspellings.txt. */
+    fun commonMisspellingFix(word: String): String? = null
 }
 
 /**
@@ -125,6 +131,8 @@ class AndroidDictionaryRepository(
     @Volatile private var topCommonEntriesCache: List<DictionaryEntry>? = null
     @Volatile private var localeExtraWords: Set<String> = emptySet()
     @Volatile private var knownWords: KnownWords = KnownWords.EMPTY
+    @Volatile private var firstNames: KnownWords = KnownWords.EMPTY
+    @Volatile private var misspellings: Map<String, String> = emptyMap()
     @Volatile override var isReady: Boolean = false
         internal set
     @Volatile private var loadStarted: Boolean = false
@@ -192,6 +200,8 @@ class AndroidDictionaryRepository(
                     localeExtraWords = localeExtras.mapTo(HashSet()) { normalize(it.word) }
                 }
                 knownWords = loadKnownWords()
+                firstNames = loadWordList("names")
+                misspellings = loadMisspellings()
 
                 // Always add user entries
                 val userEntries = userDictionaryStore.loadUserEntries(context)
@@ -296,6 +306,10 @@ class AndroidDictionaryRepository(
     }
 
     override fun isRecognizedWord(word: String): Boolean = isReady && word in knownWords
+
+    override fun isFirstName(word: String): Boolean = isReady && word in firstNames
+
+    override fun commonMisspellingFix(word: String): String? = if (isReady) misspellings[word.lowercase()] else null
 
     override fun isUserOrSlangWord(word: String): Boolean {
         if (!isReady) return false
@@ -564,8 +578,21 @@ class AndroidDictionaryRepository(
     }
 
     /** Real words beyond the dictionary for this language (common/dictionaries/<lang>_known.txt). */
-    private fun loadKnownWords(): KnownWords = try {
-        assets.open("common/dictionaries/${baseLocale.language}_known.txt")
+    private fun loadKnownWords(): KnownWords = loadWordList("known")
+
+    /** "typo->fix" lines from common/dictionaries/<lang>_misspellings.txt; '#' lines are skipped. */
+    private fun loadMisspellings(): Map<String, String> = try {
+        assets.open("common/dictionaries/${baseLocale.language}_misspellings.txt").bufferedReader().useLines { lines ->
+            lines.filter { it.isNotEmpty() && !it.startsWith("#") }
+                .mapNotNull { line -> line.split("->").takeIf { it.size == 2 }?.let { (typo, fix) -> typo to fix } }
+                .toMap(HashMap())
+        }
+    } catch (_: java.io.IOException) {
+        emptyMap() // Most languages have no list.
+    }
+
+    private fun loadWordList(kind: String): KnownWords = try {
+        assets.open("common/dictionaries/${baseLocale.language}_$kind.txt")
             .bufferedReader().useLines { KnownWords.parse(it) }
     } catch (_: java.io.IOException) {
         KnownWords.EMPTY // Most languages have no list.

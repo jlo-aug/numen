@@ -64,8 +64,10 @@ class ContextCorrector(
         if (word.first().isUpperCase() && before != PairCounts.SENTENCE_START) return null
         val previous = before.lowercase()
         val next = after.lowercase()
+        // A contraction's next word is often only counted after its subject ("I quit", not "I'll quit").
         fun usage(form: String) =
-            (pairCount(previous, form) + 1L) * (pairCount(form, next) + 1L)
+            (pairCount(previous, form) + 1L) *
+                (maxOf(pairCount(form, next), CONTRACTION_SUBJECTS[form]?.let { pairCount(it, next) } ?: 0) + 1L)
         val otherUsage = usage(other)
         if (otherUsage < CONFUSABLE_MIN_USAGE || otherUsage < usage(typed) * CONFUSABLE_RATIO) return null
         // A noun stays after words that introduce one ("kick his butt").
@@ -74,7 +76,7 @@ class ContextCorrector(
         ) {
             return null
         }
-        return if (word.first().isUpperCase()) other.replaceFirstChar { it.uppercase() } else other
+        return if (word.first().isUpperCase() || other.startsWith("i'")) other.replaceFirstChar { it.uppercase() } else other
     }
 
     /** A slip may change the first letter but never drop or add one ("hone" is not "one"). */
@@ -107,7 +109,8 @@ class ContextCorrector(
 
     companion object {
         /** Typed form -> the form it is often a mistake for; "but" never becomes "butt". */
-        private val CONFUSABLES = mapOf("its" to "it's", "it's" to "its", "butt" to "but")
+        private val CONFUSABLES = mapOf("its" to "it's", "it's" to "its", "butt" to "but", "ill" to "i'll")
+        private val CONTRACTION_SUBJECTS = mapOf("i'll" to "i")
         /** Confusables that are nouns in their own right, kept wherever a noun fits. */
         private val NOUN_CONFUSABLES = setOf("butt")
         private val NOUN_MARKERS = setOf(

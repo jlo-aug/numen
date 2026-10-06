@@ -98,6 +98,25 @@ documentation trail, so their exact upstream corpus IDs are not fully reconstruc
 
 Only aggregated counts are included. The file is distributed under CC BY-SA 4.0.
 
+## English word-triple counts (autocorrect ranking)
+
+`app/src/main/assets/common/dictionaries/en_triples.txt` contains word-triple counts built by
+`tools/build_context_triples.py` (details in `app/src/main/assets/common/dictionaries/en_triples_NOTICE.txt`) from
+Tatoeba English sentences (https://tatoeba.org), CC BY 2.0 FR. Only aggregated counts are included.
+
+## English common misspellings (Wikipedia)
+
+`app/src/main/assets/common/dictionaries/en_misspellings.txt` lists common misspellings and their fixes, built by
+`tools/build_misspellings.py` from Wikipedia's "Lists of common misspellings/For machines"
+(https://en.wikipedia.org/wiki/Wikipedia:Lists_of_common_misspellings/For_machines), CC BY-SA 4.0.
+The file is distributed under CC BY-SA 4.0.
+
+## English first names (US Social Security Administration)
+
+`app/src/main/assets/common/dictionaries/en_names.txt` lists common first names that autocorrect leaves alone, built by
+`tools/build_first_names.py` from US Social Security Administration baby-name data (public domain, a work of the
+US government), via the top-1000-per-year table at https://github.com/hadley/data-baby-names.
+
 ## English recognised words (SCOWL)
 
 `app/src/main/assets/common/dictionaries/en_known.txt` lists real English words that autocorrect leaves alone, built by
