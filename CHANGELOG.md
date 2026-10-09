@@ -1,6 +1,6 @@
 # Changelog
 
-## Numen 1.0.2 (October 2026)
+## Numen 1.2 (October 2026)
 
 - Number lock: double-tap Alt to type numbers and symbols, and it now stays on after Space until
   you tap Alt again.
