@@ -34,11 +34,11 @@ MIN_FREQUENCY_GAIN = 25
 START = "<s>"
 END = "</s>"
 
-# Physical key grid used by SuggestionEngine (row, column) for QWERTY.
+# Physical key grid used by SuggestionEngine (row, column): the Titan 2 Elite, Z under S.
 GRID = {
     **{c: (0, i) for i, c in enumerate("qwertyuiop")},
     **{c: (1, i) for i, c in enumerate("asdfghjkl")},
-    "z": (2, 0), "x": (2, 1), "c": (2, 2), "v": (2, 3), "b": (2, 6), "n": (2, 7), "m": (2, 8),
+    **{c: (2, i + 1) for i, c in enumerate("zxcvbnm")},
 }
 
 

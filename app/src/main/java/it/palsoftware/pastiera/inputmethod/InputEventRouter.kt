@@ -25,9 +25,7 @@ import android.view.inputmethod.ExtractedTextRequest
 import it.palsoftware.pastiera.commands.CommandExecutor
 import it.palsoftware.pastiera.commands.CommandRegistry
 import it.palsoftware.pastiera.commands.CommandSurface
-import it.palsoftware.pastiera.data.layout.LayoutMapping
 import it.palsoftware.pastiera.data.layout.LayoutMappingRepository
-import it.palsoftware.pastiera.data.layout.isRealMultiTap
 
 /**
  * Routes IME key events to the appropriate handlers so that the service can
@@ -37,7 +35,8 @@ class InputEventRouter(
     private val context: Context,
     private val navModeController: NavModeController
 ) {
-    private val swipeToDeleteKeyCodes = setOf(322, 404)
+    // The Titan 2 sends these when a finger slides sideways across the keys.
+    private val sidewaysSwipeKeyCodes = setOf(322, 404)
     private val restrictedFieldBasicCtrlActions = setOf("select_all", "copy", "cut", "paste")
 
     var suggestionController: it.palsoftware.pastiera.core.suggestions.SuggestionController? = null
@@ -102,7 +101,7 @@ class InputEventRouter(
         val isLauncherPackage: (String?) -> Boolean,
         val handleLauncherShortcut: (Int) -> Boolean,
         val handlePowerShortcut: (Int) -> Boolean,
-        val togglePowerShortcutMode: (String, Boolean) -> Unit, // Callback per toast e stato nav mode
+        val togglePowerShortcutMode: (String, Boolean) -> Unit, // Callback for toast and nav mode state
         val callSuper: () -> Boolean,
         val currentInputConnection: () -> InputConnection?
     )
@@ -126,12 +125,12 @@ class InputEventRouter(
             return callbacks.callSuper()
         }
 
-        // Gestisci SYM per Power Shortcuts (toggle: attiva/disattiva)
+        // Handle SYM for Power Shortcuts (toggle on/off)
         if (keyCode == KeyEvent.KEYCODE_SYM && powerShortcutsEnabled) {
             val message = context.getString(R.string.power_shortcuts_press_key)
             val isNavModeActive = navModeController.isNavModeActive()
             callbacks.togglePowerShortcutMode(message, isNavModeActive)
-            return true // Consumiamo l'evento
+            return true // Consume the event
         }
 
         if (navModeController.isNavModeKey(keyCode)) {
@@ -168,7 +167,7 @@ class InputEventRouter(
             return true
         }
 
-        // Gestisci Power Shortcuts (SYM premuto + tasto alfabetico)
+        // Handle Power Shortcuts (SYM pressed + letter key)
         if (!ctrlLatchActive && powerShortcutsEnabled) {
             if (callbacks.isShortcutKey(keyCode)) {
                 if (callbacks.handlePowerShortcut(keyCode)) {
@@ -177,7 +176,7 @@ class InputEventRouter(
             }
         }
 
-        // Launcher Shortcuts (logica esistente - mantieni per compatibilità)
+        // Launcher Shortcuts (existing logic, kept for compatibility)
         if (!ctrlLatchActive && SettingsManager.getLauncherShortcutsEnabled(context)) {
             val packageName = editorInfo?.packageName ?: currentPackageName
             if (callbacks.isLauncherPackage(packageName) && callbacks.isShortcutKey(keyCode)) {
@@ -292,9 +291,6 @@ class InputEventRouter(
         val callSuper: () -> Boolean,
         val callSuperWithKey: (Int, KeyEvent?) -> Boolean,
         val startSpeechRecognition: () -> Unit,
-        val getMapping: (Int) -> LayoutMapping?,
-        val handleMultiTapCommit: (Int, LayoutMapping, Boolean, InputConnection?, Boolean) -> Boolean,
-        val isLongPressSuppressed: (Int) -> Boolean,
         val toggleMinimalUi: () -> Unit,
         val handleBoundaryText: (String, InputConnection?) -> Boolean = { _, _ -> false },
         val onShiftOneShotToggledOff: () -> Unit = {}
@@ -402,27 +398,8 @@ class InputEventRouter(
             return EditableFieldRoutingResult.Consume
         }
 
-        if (keyCode in swipeToDeleteKeyCodes) {
-            val swipeToDeleteEnabled = SettingsManager.getSwipeToDelete(context)
-            val swipeToDeleteProvider = SettingsManager.getSwipeToDeleteProvider(context)
-            if (
-                swipeToDeleteEnabled &&
-                swipeToDeleteProvider == SettingsManager.SWIPE_TO_DELETE_PROVIDER_TITAN2_KEYCODE
-            ) {
-                if (ic != null && TextSelectionHelper.deleteLastWord(ic)) {
-                    return EditableFieldRoutingResult.Consume
-                }
-            } else {
-                KeyboardEventTracker.notifyKeyEvent(
-                    keyCode = keyCode,
-                    event = event,
-                    action = "KEY_DOWN",
-                    origin = "ime_service",
-                    outputKeyCode = null,
-                    outputKeyCodeName = "swipe_to_delete_ignored_${swipeToDeleteProvider}"
-                )
-                return EditableFieldRoutingResult.Consume
-            }
+        if (keyCode in sidewaysSwipeKeyCodes) {
+            return EditableFieldRoutingResult.Consume
         }
 
         if (controllers.alternateCharacterManager.hasPendingPress(keyCode)) {
@@ -526,19 +503,6 @@ class InputEventRouter(
             }
         }
 
-        val mapping = callbacks.getMapping(keyCode)
-        val resolvedUppercase = mapping?.let {
-            when {
-                shiftOneShotActive -> true
-                params.shiftLayerLatched -> true
-                params.capsLockEnabled && event?.isShiftPressed != true -> true
-                event?.isShiftPressed == true -> true
-                else -> false
-            }
-        } ?: false
-
-        // Compute long-press eligibility up front so multi-tap can still schedule it.
-        val longPressSuppressed = callbacks.isLongPressSuppressed(keyCode)
         val longPressMode = SettingsManager.getLongPressModifier(context)
         val effectiveShiftForLongPress =
             event?.isShiftPressed == true || shiftOneShotActive || params.shiftLayerLatched
@@ -553,13 +517,13 @@ class InputEventRouter(
             callbacks.getCharacterFromLayout(keyCode, event, effectiveShiftForLongPress)
         }
         val hasLongPressSupport = when (longPressMode) {
-            "shift" -> !longPressSuppressed && event != null && event.unicodeChar != 0 && event.unicodeChar.toChar().isLetter()
-            "variations" -> !longPressSuppressed && charForLongPress != null && controllers.variationStateController.hasVariationsFor(charForLongPress)
-            "sym", "sym_symbols", "sym_emoji" -> !longPressSuppressed && controllers.alternateCharacterManager.hasSymLongPressMapping(
+            "shift" -> event != null && event.unicodeChar != 0 && event.unicodeChar.toChar().isLetter()
+            "variations" -> charForLongPress != null && controllers.variationStateController.hasVariationsFor(charForLongPress)
+            "sym", "sym_symbols", "sym_emoji" -> controllers.alternateCharacterManager.hasSymLongPressMapping(
                 keyCode = keyCode,
                 shiftPressed = effectiveShiftForLongPress
             )
-            else -> !longPressSuppressed && controllers.alternateCharacterManager.hasAltMapping(keyCode)
+            else -> controllers.alternateCharacterManager.hasAltMapping(keyCode)
         }
 
         if (
@@ -613,31 +577,6 @@ class InputEventRouter(
                 callbacks.updateStatusBar()
             }, params.cursorUpdateDelayMs)
             return EditableFieldRoutingResult.Consume
-        }
-
-        val shouldUseMultiTap = mapping?.isRealMultiTap == true &&
-            !shouldSuppressUppercaseEszettMultiTap(mapping, resolvedUppercase)
-
-        // Ignore system-generated repeats on multi-tap keys so holding the key
-        // won't churn through tap levels. Legacy keys keep their normal repeat.
-        if (shouldUseMultiTap && (event?.repeatCount ?: 0) > 0) {
-            return EditableFieldRoutingResult.Consume
-        }
-
-        // Multi-tap: commit immediately and replace within the timeout window.
-        // Uppercase multi-tap is intentional for layouts that expose accented
-        // uppercase letters such as E -> È -> É.
-        if (shouldUseMultiTap && ic != null) {
-            if (callbacks.handleMultiTapCommit(keyCode, mapping, resolvedUppercase, ic, hasLongPressSupport)) {
-                if (shiftOneShotActive) {
-                    callbacks.disableShiftOneShot()
-                    shiftOneShotActive = false
-                }
-                Handler(Looper.getMainLooper()).postDelayed({
-                    callbacks.updateStatusBar()
-                }, params.cursorUpdateDelayMs)
-                return EditableFieldRoutingResult.Consume
-            }
         }
 
         if (hasLongPressSupport) {
@@ -818,13 +757,6 @@ class InputEventRouter(
         }
 
         return false
-    }
-
-    private fun shouldSuppressUppercaseEszettMultiTap(
-        mapping: LayoutMapping,
-        resolvedUppercase: Boolean
-    ): Boolean {
-        return resolvedUppercase && mapping.taps.drop(1).any { it.uppercase == "ẞ" }
     }
 
     fun handleTextInputPipeline(
@@ -1035,8 +967,7 @@ class InputEventRouter(
                     isAutoCorrectEnabled,
                     commitBoundary = isMultiline, // commit newline inside autocorrect only for multiline
                     onStatusBarUpdate = updateStatusBar,
-                    boundaryCharOverride = '\n',
-                    isKnownWord = { word -> suggestionController?.isKnownWordInActiveDictionaries(word) == true }
+                    boundaryCharOverride = '\n'
                 )
             } else {
                 false
@@ -1075,18 +1006,8 @@ class InputEventRouter(
                 inputConnection,
                 isAutoCorrectEnabled,
                 commitBoundary = true,
-                onStatusBarUpdate = updateStatusBar,
-                isKnownWord = { word -> suggestionController?.isKnownWordInActiveDictionaries(word) == true }
+                onStatusBarUpdate = updateStatusBar
             )
-        ) {
-            suggestionController?.onContextReset()
-            return true
-        }
-        if (
-            isPunctuation &&
-            SettingsManager.shouldApplyFrenchPunctuationSpacing(context) &&
-            inputConnection != null &&
-            it.palsoftware.pastiera.core.Punctuation.commitFrenchSpacedPunctuation(inputConnection, typedChar)
         ) {
             suggestionController?.onContextReset()
             return true
@@ -1130,22 +1051,10 @@ class InputEventRouter(
                 isAutoCorrectEnabled = isAutoCorrectEnabled,
                 commitBoundary = true,
                 onStatusBarUpdate = updateStatusBar,
-                boundaryCharOverride = boundaryChar,
-                isKnownWord = { word ->
-                    suggestionController?.isKnownWordInActiveDictionaries(word) == true
-                }
+                boundaryCharOverride = boundaryChar
             )
         ) {
             suggestionController?.onContextReset()
-            return true
-        }
-
-        if (
-            SettingsManager.shouldApplyFrenchPunctuationSpacing(context) &&
-            it.palsoftware.pastiera.core.Punctuation.commitFrenchSpacedPunctuation(input, boundaryChar)
-        ) {
-            suggestionController?.onContextReset()
-            updateStatusBar()
             return true
         }
 
@@ -1304,16 +1213,7 @@ class InputEventRouter(
     ): Boolean {
         val isPhysicalCtrlCombo = event?.isCtrlPressed == true || ctrlPhysicallyPressed
         val useNavModeForHeldCtrl = SettingsManager.getNavModeCtrlHoldEnabled(context)
-        val useLayoutAwareCtrlShortcuts = SettingsManager.getLayoutAwareCtrlShortcutsEnabled(context)
-        val shortcutKeyCode = if (useLayoutAwareCtrlShortcuts) {
-            resolveLayoutShortcutKeyCode(keyCode)
-        } else {
-            keyCode
-        }
-        val usesPhysicalNavGrid = ctrlLatchFromNavMode ||
-            (isPhysicalCtrlCombo && useNavModeForHeldCtrl)
-        val mappingKeyCode = if (usesPhysicalNavGrid) keyCode else shortcutKeyCode
-        val ctrlMapping = ctrlKeyMap[mappingKeyCode]
+        val ctrlMapping = ctrlKeyMap[keyCode]
         val shouldForceContextMenuAction =
             forceBasicContextMenuActions &&
             ctrlMapping?.type == "action" &&
@@ -1322,10 +1222,10 @@ class InputEventRouter(
         fun passThroughCtrlCombo(): Boolean {
             val ic = inputConnection ?: return false
             if (event != null) {
-                ic.sendKeyEvent(event.withKeyCodeAndCtrl(shortcutKeyCode))
+                ic.sendKeyEvent(event.withCtrl())
             } else {
                 val meta = KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON or KeyEvent.META_CTRL_RIGHT_ON
-                val down = KeyEvent(0L, 0L, KeyEvent.ACTION_DOWN, shortcutKeyCode, 0, meta)
+                val down = KeyEvent(0L, 0L, KeyEvent.ACTION_DOWN, keyCode, 0, meta)
                 ic.sendKeyEvent(down)
             }
             return true
@@ -1690,42 +1590,14 @@ class InputEventRouter(
             this == KeyEvent.KEYCODE_PAGE_DOWN
     }
 
-    private fun resolveLayoutShortcutKeyCode(keyCode: Int): Int {
-        val mappedChar = LayoutMappingRepository.getCharacter(keyCode, isShift = false)
-            ?.lowercaseChar()
-            ?: return keyCode
-
-        return if (mappedChar in 'a'..'z') {
-            KeyEvent.KEYCODE_A + (mappedChar - 'a')
-        } else {
-            keyCode
-        }
-    }
-
-    private fun KeyEvent.withKeyCode(newKeyCode: Int): KeyEvent {
-        if (keyCode == newKeyCode) return this
-        return KeyEvent(
-            downTime,
-            eventTime,
-            action,
-            newKeyCode,
-            repeatCount,
-            metaState,
-            deviceId,
-            scanCode,
-            flags,
-            source
-        )
-    }
-
-    private fun KeyEvent.withKeyCodeAndCtrl(newKeyCode: Int): KeyEvent {
+    private fun KeyEvent.withCtrl(): KeyEvent {
         val ctrlMetaState = metaState or KeyEvent.META_CTRL_ON or KeyEvent.META_CTRL_LEFT_ON
-        if (keyCode == newKeyCode && metaState == ctrlMetaState) return this
+        if (metaState == ctrlMetaState) return this
         return KeyEvent(
             downTime,
             eventTime,
             action,
-            newKeyCode,
+            keyCode,
             repeatCount,
             ctrlMetaState,
             deviceId,

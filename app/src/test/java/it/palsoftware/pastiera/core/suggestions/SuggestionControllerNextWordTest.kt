@@ -115,36 +115,6 @@ class SuggestionControllerNextWordTest {
     }
 
     @Test
-    fun currentWordSuggestionsIncludeAdditionalLocales() {
-        val deRepository = FakeDictionaryRepository().apply {
-            isReady = true
-            addTestEntry("deutsch", 200)
-        }
-        val enRepository = FakeDictionaryRepository().apply {
-            isReady = true
-            addTestEntry("english", 200)
-        }
-        val context = RuntimeEnvironment.getApplication()
-        val controller = SuggestionController(
-            context = context,
-            assets = context.assets,
-            settingsProvider = { SuggestionSettings(suggestionsEnabled = true, maxSuggestions = 3) },
-            onSuggestionsUpdated = { snapshots.add(it) },
-            currentLocale = Locale.GERMANY,
-            dictionaryRepositoryFactory = { _, _, _, locale, _ ->
-                if (locale.language == "en") enRepository else deRepository
-            },
-            nextWordPredictorOverride = NextWordPredictor(store),
-            activeSuggestionLocalesProvider = { listOf(Locale.ENGLISH) }
-        )
-        controllers.add(controller)
-
-        typeWord(controller, "eng")
-
-        assertEquals(listOf("english"), waitForSuggestionCandidates("english").map { it.candidate })
-    }
-
-    @Test
     fun emptyInitialContextShowsStarterSuggestions() {
         fakeRepository.addTestEntry("Pastiera", 255, SuggestionSource.DEFAULT_USER)
         fakeRepository.addTestEntry("BlackBerry", 255, SuggestionSource.DEFAULT_USER)

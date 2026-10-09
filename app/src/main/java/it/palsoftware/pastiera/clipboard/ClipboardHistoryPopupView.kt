@@ -14,7 +14,6 @@ import android.widget.LinearLayout
 import android.widget.PopupWindow
 import android.widget.ScrollView
 import android.widget.TextView
-import androidx.core.content.ContextCompat
 import it.palsoftware.pastiera.R
 
 /**

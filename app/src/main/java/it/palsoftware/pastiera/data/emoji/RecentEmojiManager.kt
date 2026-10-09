@@ -3,7 +3,6 @@ package it.palsoftware.pastiera.data.emoji
 import android.content.Context
 import android.util.Log
 import it.palsoftware.pastiera.R
-import it.palsoftware.pastiera.SettingsManager
 import org.json.JSONArray
 
 /**

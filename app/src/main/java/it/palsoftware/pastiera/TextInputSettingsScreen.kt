@@ -1,6 +1,5 @@
 package it.palsoftware.pastiera
 
-import androidx.compose.foundation.clickable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
@@ -9,7 +8,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -79,14 +77,6 @@ fun TextInputSettingsScreen(
         mutableStateOf(SettingsManager.getMidWordQuoteToApostrophe(context))
     }
 
-    var frenchPunctuationSpacing by remember {
-        mutableStateOf(SettingsManager.getFrenchPunctuationSpacing(context))
-    }
-
-    var frenchPunctuationOnlyFrenchLayouts by remember {
-        mutableStateOf(SettingsManager.getFrenchPunctuationOnlyFrenchLayouts(context))
-    }
-
     var commaSpace by remember {
         mutableStateOf(SettingsManager.getCommaSpace(context))
     }
@@ -105,11 +95,6 @@ fun TextInputSettingsScreen(
         mutableStateOf(SettingsManager.getSmartQuotes(context))
     }
 
-    var smartQuotesStyle by remember {
-        mutableStateOf(SettingsManager.getSmartQuotesStyle(context))
-    }
-
-    var smartQuotesExpanded by remember { mutableStateOf(false) }
 
     var clearAltOnSpace by remember {
         mutableStateOf(SettingsManager.getClearAltOnSpace(context))
@@ -397,32 +382,6 @@ fun TextInputSettingsScreen(
                     SettingsManager.setCommaSpace(context, enabled)
                 }
             )
-            // French spacing is noise in English-first Numen; still shown if it was turned on.
-            if (BuildConfig.UPSTREAM_BRANDING || frenchPunctuationSpacing) {
-                SettingsSwitchRow(
-                    title = stringResource(R.string.french_punctuation_spacing_title),
-                    description = stringResource(R.string.french_punctuation_spacing_description),
-                    checked = frenchPunctuationSpacing,
-                    linkId = SettingLinkIds.TEXT_INPUT_FRENCH_PUNCTUATION_SPACING,
-                    onCheckedChange = { enabled ->
-                        frenchPunctuationSpacing = enabled
-                        SettingsManager.setFrenchPunctuationSpacing(context, enabled)
-                    }
-                )
-                AnimatedVisibility(visible = frenchPunctuationSpacing) {
-                    SettingsSwitchRow(
-                        title = stringResource(R.string.french_punctuation_only_french_title),
-                        description = stringResource(R.string.french_punctuation_only_french_description),
-                        checked = frenchPunctuationOnlyFrenchLayouts,
-                        inset = 52.dp,
-                        linkId = SettingLinkIds.TEXT_INPUT_FRENCH_PUNCTUATION_ONLY_FRENCH,
-                        onCheckedChange = { enabled ->
-                            frenchPunctuationOnlyFrenchLayouts = enabled
-                            SettingsManager.setFrenchPunctuationOnlyFrenchLayouts(context, enabled)
-                        }
-                    )
-                }
-            }
 
             SettingsSectionHeader(text = stringResource(R.string.text_input_section_typography))
             SettingsDropdownSwitchRow(
@@ -457,26 +416,14 @@ fun TextInputSettingsScreen(
                     SettingsManager.setMidWordQuoteToApostrophe(context, enabled)
                 }
             )
-            SettingsDropdownSwitchRow(
+            SettingsSwitchRow(
                 title = stringResource(R.string.smart_quotes_title),
+                description = stringResource(R.string.smart_quotes_description),
                 checked = smartQuotes,
                 linkId = SettingLinkIds.TEXT_INPUT_SMART_QUOTES,
                 onCheckedChange = { enabled ->
                     smartQuotes = enabled
                     SettingsManager.setSmartQuotes(context, enabled)
-                    if (!enabled) {
-                        smartQuotesExpanded = false
-                    }
-                },
-                expanded = smartQuotesExpanded,
-                onExpandedChange = { smartQuotesExpanded = it },
-                value = smartQuotesStyleLabel(smartQuotesStyle),
-                options = smartQuoteStyleOptions(),
-                optionLabel = ::smartQuotesStyleLabel,
-                onOptionSelected = { style ->
-                    smartQuotesStyle = style
-                    SettingsManager.setSmartQuotesStyle(context, style)
-                    smartQuotesExpanded = false
                 }
             )
 
@@ -491,18 +438,6 @@ fun TextInputSettingsScreen(
                     SettingsManager.setClearAltOnSpace(context, enabled)
                 }
             )
-            if (BuildConfig.UPSTREAM_BRANDING) { // Numen shows it in Keyboard & Devices.
-                SettingsSwitchRow(
-                    title = stringResource(R.string.auto_show_keyboard_title),
-                    description = stringResource(R.string.auto_show_keyboard_description),
-                    checked = autoShowKeyboard,
-                    linkId = SettingLinkIds.TEXT_INPUT_AUTO_SHOW_KEYBOARD,
-                    onCheckedChange = { enabled ->
-                        autoShowKeyboard = enabled
-                        SettingsManager.setAutoShowKeyboard(context, enabled)
-                    }
-                )
-            }
             SettingsSwitchRow(
                 title = stringResource(R.string.alt_ctrl_speech_shortcut_title),
                 description = stringResource(R.string.alt_ctrl_speech_shortcut_description),
@@ -829,29 +764,6 @@ private fun dashStyleLabel(style: String): String {
     return when (style) {
         SettingsManager.DASH_STYLE_EM -> "—"
         else -> "–"
-    }
-}
-
-private fun smartQuoteStyleOptions(): List<String> {
-    return listOf(
-        SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS,
-        SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS,
-        SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED,
-        SettingsManager.SMART_QUOTES_STYLE_GERMAN_LOW_HIGH,
-        SettingsManager.SMART_QUOTES_STYLE_ENGLISH_CURLY
-    )
-}
-
-// These labels intentionally use explicit quote pairs instead of generic placeholders.
-// Change them only with care: quotation marks are interpreted visually and some
-// combinations render ambiguously in Android text fields and dropdowns.
-private fun smartQuotesStyleLabel(style: String): String {
-    return when (style) {
-        SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS -> "«...»"
-        SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED -> "« ... »"
-        SettingsManager.SMART_QUOTES_STYLE_GERMAN_LOW_HIGH -> "„...“"
-        SettingsManager.SMART_QUOTES_STYLE_ENGLISH_CURLY -> "“...”"
-        else -> "»...«"
     }
 }
 

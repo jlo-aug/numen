@@ -80,13 +80,6 @@ sealed class CommandLaunchSpec {
     data class NavAction(val mappingType: String, val value: String) : CommandLaunchSpec()
 }
 
-data class CommandReference(
-    val id: String,
-    val source: String,
-    val kind: String,
-    val launch: CommandLaunchSpec
-)
-
 sealed class CommandExecutionResult {
     data object Success : CommandExecutionResult()
     data class Failed(val reason: String) : CommandExecutionResult()

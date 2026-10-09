@@ -1,5 +1,6 @@
 package it.palsoftware.pastiera
 
+import androidx.activity.ComponentActivity
 import android.os.Bundle
 import android.content.Intent
 import androidx.compose.runtime.CompositionLocalProvider
@@ -15,7 +16,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.ui.Modifier
 import it.palsoftware.pastiera.ui.theme.PastieraTheme
 
-class SymCustomizationActivity : LocalizedComponentActivity() {
+class SymCustomizationActivity : ComponentActivity() {
     companion object {
         const val EXTRA_SETTING_ID = "it.palsoftware.pastiera.extra.SYM_SETTING_ID"
         const val EXTRA_INITIAL_PAGE = "it.palsoftware.pastiera.extra.INITIAL_SYM_PAGE"

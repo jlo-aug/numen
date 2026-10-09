@@ -130,12 +130,12 @@ class ContextCorrectorTest {
     @Test
     fun findsTheWordsAroundTheBoundaryJustTyped() {
         fun find(text: String, truncated: Boolean = false) = ContextCorrector.findTrailing(text, truncated)
-        assertEquals(ContextCorrector.Trailing("get", "dome", "food", " "), find("Let's get dome food "))
+        assertEquals(ContextCorrector.Trailing("get", "dome", "food", " ", "Let's"), find("Let's get dome food "))
         assertEquals(ContextCorrector.Trailing("Let's", "dome", "food", ". "), find("Let’s dome food. "))
         assertEquals(ContextCorrector.Trailing(SENTENCE_START, "Dome", "food", " "), find("Dome food "))
         assertEquals(ContextCorrector.Trailing(SENTENCE_START, "Dome", "food", ", "), find("I ate. Dome food, "))
         assertEquals(ContextCorrector.Trailing(SENTENCE_START, "dome", "food", " "), find("Hi\ndome food "))
-        assertEquals(ContextCorrector.Trailing("wagged", "it's", "tail", " "), find("The dog wagged it's tail "))
+        assertEquals(ContextCorrector.Trailing("wagged", "it's", "tail", " ", "dog"), find("The dog wagged it's tail "))
     }
 
     @Test
@@ -152,5 +152,47 @@ class ContextCorrectorTest {
         // Text cut off by the editor: the first word may be a fragment.
         assertNull(find("ey end ", truncated = true))
         assertNull(find("hey end up ", truncated = true))
+    }
+
+    @Test
+    fun aRealWordTypedForAnotherIsFixedOnlyWhenTheNeighboursClearlyAgree() {
+        val confusions = ConfusionTable.parse(sequenceOf("he\tthe\t-1.7\t1000\t5000"))
+        val pairs = mapOf("is the" to 900, "the best" to 800, "is he" to 40, "he best" to 0, "said he" to 500, "he was" to 900)
+        val corrector = ContextCorrector(
+            frequencyOf = { 100 },
+            isNeighborKey = { _, _ -> false },
+            pairCount = { a, b -> pairs["$a $b"] ?: 0 },
+            confusions = confusions
+        )
+        assertEquals("the", corrector.review("is", "he", "best"))
+        assertNull(corrector.review("said", "he", "was"))
+        // Capitals and the end of a sentence say too little.
+        assertNull(corrector.review("is", "He", "best"))
+        assertNull(corrector.review("is", "he", PairCounts.SENTENCE_END))
+    }
+
+    @Test
+    fun trailingWordsIncludeTheWordTwoBack() {
+        val trailing = requireNotNull(ContextCorrector.findTrailing("I think he best ", truncated = false))
+        assertEquals("he", trailing.word)
+        assertEquals("think", trailing.before)
+        assertEquals("i", trailing.beforePrevious?.lowercase())
+    }
+
+    @Test
+    fun aLoneLetterBecomesTheShortWordItsNeighboursClearlyWant() {
+        val pairs = mapOf("going to" to 900, "to the" to 800, "going on" to 5, "on the" to 600, "so tired" to 300, "am so" to 200)
+        val corrector = ContextCorrector(
+            frequencyOf = { 0 },
+            isNeighborKey = { _, _ -> false },
+            pairCount = { a, b -> pairs["$a $b"] ?: 0 },
+            shortWords = mapOf("to" to 5000, "on" to 3000, "so" to 2000, "of" to 6000)
+        )
+        assertEquals("to", corrector.review("going", "o", "the"))
+        assertEquals("so", corrector.review("am", "o", "tired"))
+        // Texting shorthand stays.
+        assertNull(corrector.review("love", "u", "too"))
+        // No clear winner: left alone.
+        assertNull(corrector.review("the", "o", "cat"))
     }
 }

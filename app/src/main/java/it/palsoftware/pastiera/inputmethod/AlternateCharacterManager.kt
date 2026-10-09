@@ -25,8 +25,7 @@ import java.util.concurrent.ConcurrentHashMap
 class AlternateCharacterManager(
     private val assets: AssetManager,
     private val prefs: SharedPreferences,
-    private val context: Context? = null,
-    private val activeLayoutNameProvider: (() -> String?)? = null
+    private val context: Context? = null
 ) {
     // Callback invoked when an Alt character is inserted after a long press
     var onAltCharInserted: ((Char) -> Unit)? = null
@@ -112,7 +111,7 @@ class AlternateCharacterManager(
     fun getSymMappings2Uppercase(): Map<Int, String> = symKeyMap2Uppercase
     
     /**
-     * Ricarica le mappature SYM, controllando prima le personalizzazioni.
+     * Reloads SYM mappings, checking for custom mappings first.
      */
     fun reloadSymMappings() {
         if (context != null) {
@@ -265,7 +264,7 @@ class AlternateCharacterManager(
 
         // For unmapped keys, apply case conversion if needed (fallback only)
         if (normalChar.isNotEmpty() && !LayoutMappingRepository.isMapped(keyCode)) {
-            // Gestisci shiftOneShot: se è attivo e il carattere è una lettera, rendilo maiuscolo
+            // Handle shiftOneShot: if active and the character is a letter, uppercase it
             if (shiftOneShot && normalChar.isNotEmpty() && normalChar[0].isLetter()) {
                 normalChar = normalChar.uppercase()
             } else if (capsLockEnabled && event?.isShiftPressed != true) {
@@ -300,11 +299,7 @@ class AlternateCharacterManager(
                     false
                 } else {
                     val variations = context?.let { ctx ->
-                        VariationRepository.loadVariations(
-                            assets = ctx.assets,
-                            context = ctx,
-                            activeLayoutName = activeLayoutNameProvider?.invoke()
-                        )
+                        VariationRepository.loadVariations(assets = ctx.assets, context = ctx)
                     } ?: emptyMap()
                     variations[normalChar.firstOrNull()]?.isNotEmpty() == true
                 }
@@ -339,13 +334,6 @@ class AlternateCharacterManager(
             }
             context?.let {
                 DeferredPunctuationSpaceTracker.prepareForTextCommit(it, inputConnection, altChar)
-            }
-            val frenchSpacedPunctuation = altChar.length == 1 &&
-                context?.let { SettingsManager.shouldApplyFrenchPunctuationSpacing(it) } == true &&
-                it.palsoftware.pastiera.core.Punctuation.commitFrenchSpacedPunctuation(inputConnection, altChar[0])
-            if (frenchSpacedPunctuation) {
-                onAltCharInserted?.invoke(altChar[0])
-                return true
             }
             val punctuationSet = autoSpacePunctuation()
             if (altChar.isNotEmpty() && altChar[0] in punctuationSet) {
@@ -388,27 +376,6 @@ class AlternateCharacterManager(
         longPressRunnables.remove(keyCode)?.let { handler.removeCallbacks(it) }
     }
 
-    /**
-     * Schedules a long-press without committing a new character, reusing the
-     * same runnable logic used by handleKeyWithAltMapping. This is used so
-     * multi-tap commits can still trigger Alt/Shift long-press behaviour.
-     */
-    fun scheduleLongPressOnly(
-        keyCode: Int,
-        inputConnection: InputConnection,
-        insertedChar: String
-    ) {
-        pressedKeys[keyCode] = System.currentTimeMillis()
-        longPressActivated[keyCode] = false
-        insertedNormalChars[keyCode] = insertedChar
-        insertedTextAnchors.remove(keyCode)
-        captureInsertedTextAnchor(inputConnection, insertedChar)?.let { anchor ->
-            insertedTextAnchors[keyCode] = anchor
-        }
-        keyPressWasShifted[keyCode] = insertedChar.firstOrNull()?.isUpperCase() == true
-        scheduleLongPress(keyCode, inputConnection)
-    }
-
     private fun scheduleLongPress(
         keyCode: Int,
         inputConnection: InputConnection
@@ -445,11 +412,7 @@ class AlternateCharacterManager(
                             }
 
                             val variations = context?.let { ctx ->
-                                VariationRepository.loadVariations(
-                                    assets = ctx.assets,
-                                    context = ctx,
-                                    activeLayoutName = activeLayoutNameProvider?.invoke()
-                                )[lookupChar]
+                                VariationRepository.loadVariations(assets = ctx.assets, context = ctx)[lookupChar]
                             }
                             if (!variations.isNullOrEmpty()) {
                                 val firstVariation = variations.first()
@@ -506,17 +469,6 @@ class AlternateCharacterManager(
                                 return@Runnable
                             }
 
-                            val frenchSpacedPunctuation = symChar.length == 1 &&
-                                context?.let { SettingsManager.shouldApplyFrenchPunctuationSpacing(it) } == true &&
-                                it.palsoftware.pastiera.core.Punctuation.commitFrenchSpacedPunctuation(inputConnection, symChar[0])
-                            if (frenchSpacedPunctuation) {
-                                Log.d(TAG, "Long press Sym mapping applied with French spacing for '$symChar'")
-                                onAltCharInserted?.invoke(symChar[0])
-                                insertedNormalChars.remove(keyCode)
-                                keyPressWasShifted.remove(keyCode)
-                                longPressRunnables.remove(keyCode)
-                                return@Runnable
-                            }
 
                             val punctuationSet = autoSpacePunctuation()
                             if (symChar[0] in punctuationSet) {
@@ -597,17 +549,6 @@ class AlternateCharacterManager(
                                 return@Runnable
                             }
 
-                            val frenchSpacedPunctuation = altChar.length == 1 &&
-                                context?.let { SettingsManager.shouldApplyFrenchPunctuationSpacing(it) } == true &&
-                                it.palsoftware.pastiera.core.Punctuation.commitFrenchSpacedPunctuation(inputConnection, altChar[0])
-                            if (frenchSpacedPunctuation) {
-                                Log.d(TAG, "Long press Alt mapping applied with French spacing for '$altChar'")
-                                onAltCharInserted?.invoke(altChar[0])
-                                insertedNormalChars.remove(keyCode)
-                                keyPressWasShifted.remove(keyCode)
-                                longPressRunnables.remove(keyCode)
-                                return@Runnable
-                            }
 
                             val punctuationSet = autoSpacePunctuation()
                             if (altChar.isNotEmpty() && altChar[0] in punctuationSet) {

@@ -14,7 +14,6 @@ import android.widget.FrameLayout
 import it.palsoftware.pastiera.SettingsManager
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
-import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -89,29 +88,8 @@ class AospKeyboardViewTest {
     }
 
     @Test
-    fun accessibilityIdsFollowLogicalLettersAcrossQwertyQwertzAndAzerty() {
-        val view = measuredKeyboard()
-        val qwertyY = accessibilitySnapshot(view, "pastiera_key_y")
-        val qwertyYId = qwertyY.virtualId
-
-        view.layoutName = "qwertz"
-        val qwertzY = accessibilitySnapshot(view, "pastiera_key_y")
-
-        assertEquals(qwertyYId, accessibilityVirtualId(view, "pastiera_key_y"))
-        assertNotEquals(qwertyY.bounds.top, qwertzY.bounds.top)
-
-        val qwertzABounds = accessibilitySnapshot(view, "pastiera_key_a").bounds
-        view.layoutName = "azerty"
-        val azertyABounds = accessibilitySnapshot(view, "pastiera_key_a").bounds
-
-        assertNotEquals(qwertzABounds.top, azertyABounds.top)
-        assertEquals("pastiera_key_a", accessibilitySnapshot(view, "pastiera_key_a").resourceName)
-    }
-
-    @Test
     fun everyVisibleKeyHasUniqueAccessibleIdentityLabelAndBounds() {
         val view = measuredKeyboard().apply {
-            layoutName = "german_multitap_qwertz"
             layoutStyle = AospKeyboardView.SoftwareLayoutStyle.FULL_ISO
             includeNumberRow = true
         }
@@ -198,30 +176,26 @@ class AospKeyboardViewTest {
     }
 
     @Test
-    fun germanMultitapQwertzCompact_normalizesToQwertzSoftwareGeometry() {
-        val view = measuredKeyboard().apply {
-            layoutName = "german_multitap_qwertz"
-        }
+    fun compact_rendersOnlyQwertyLetterRows() {
+        val view = measuredKeyboard()
 
         val labels = labels(view)
 
-        assertTrue(!labels.contains("ä"))
-        assertTrue(!labels.contains("ö"))
-        assertTrue(!labels.contains("ü"))
-        assertTrue(labels.containsAll(listOf("q", "w", "e", "r", "t", "z", "u", "i", "o", "p")))
+        assertTrue(!labels.contains("["))
+        assertTrue(!labels.contains(";"))
+        assertTrue(labels.containsAll(listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p")))
     }
 
     @Test
-    fun germanMultitapQwertzExtendedIso_rendersVisibleUmlautKeys() {
+    fun extendedIso_rendersVisiblePunctuationKeys() {
         val view = measuredKeyboard().apply {
-            layoutName = "german_multitap_qwertz"
             layoutStyle = AospKeyboardView.SoftwareLayoutStyle.EXTENDED_ISO
         }
 
         val labels = labels(view)
 
-        assertTrue(labels.containsAll(listOf("ä", "ö", "ü")))
-        assertTrue(labels.containsAll(listOf("q", "w", "e", "r", "t", "z", "u", "i", "o", "p")))
+        assertTrue(labels.containsAll(listOf("[", ";", "'")))
+        assertTrue(labels.containsAll(listOf("q", "w", "e", "r", "t", "y", "u", "i", "o", "p")))
     }
 
     @Test
@@ -235,23 +209,21 @@ class AospKeyboardViewTest {
     @Test
     fun numberRowExtendedIso_alignsWithElevenKeyTopRow() {
         val view = measuredKeyboard().apply {
-            layoutName = "german_multitap_qwertz"
             layoutStyle = AospKeyboardView.SoftwareLayoutStyle.EXTENDED_ISO
             includeNumberRow = true
         }
 
         val labels = labels(view)
 
-        assertTrue(labels.containsAll(listOf("1", "0", "+", "ü")))
+        assertTrue(labels.containsAll(listOf("1", "0", "+", "[")))
         assertEquals(leftOfLabel(view, "q"), leftOfLabel(view, "1"), 0.1f)
-        assertEquals(leftOfLabel(view, "ü"), leftOfLabel(view, "+"), 0.1f)
+        assertEquals(leftOfLabel(view, "["), leftOfLabel(view, "+"), 0.1f)
     }
 
     @Test
     fun longPressDefaultSelection_survivesMoveOutsidePopup_andCommitsFirstAlternateOnRelease() {
         val listener = RecordingListener()
         val view = measuredKeyboard().apply {
-            layoutName = "german_multitap_qwertz"
             longPressTimeoutMs = 50L
             longPressAlternatesProvider = { output -> if (output == "u") listOf("ü") else emptyList() }
             this.listener = listener
@@ -333,13 +305,12 @@ class AospKeyboardViewTest {
     fun symPageTextLabels_commitExactVirtualSymbolText() {
         val listener = RecordingListener()
         val view = measuredKeyboard().apply {
-            layoutName = "german_multitap_qwertz"
             layoutStyle = AospKeyboardView.SoftwareLayoutStyle.EXTENDED_ISO
             symPageActive = true
-            symPageTextLabels = mapOf("ü" to "🙃")
+            symPageTextLabels = mapOf("[" to "🙃")
             this.listener = listener
         }
-        val (x, y) = centerOfLabel(view, "ü")
+        val (x, y) = centerOfLabel(view, "[")
 
         view.dispatchTouchEvent(motion(MotionEvent.ACTION_DOWN, x, y, 0L))
         view.dispatchTouchEvent(motion(MotionEvent.ACTION_UP, x, y, 20L))
@@ -406,21 +377,20 @@ class AospKeyboardViewTest {
     @Test
     fun ctrlPreviewActive_hidesSymPageTextLabels() {
         val view = measuredKeyboard().apply {
-            layoutName = "german_multitap_qwertz"
             layoutStyle = AospKeyboardView.SoftwareLayoutStyle.EXTENDED_ISO
             symPageActive = true
             symPageLabels = mapOf(KeyEvent.KEYCODE_U to "❤️")
-            symPageTextLabels = mapOf("ü" to "🙃")
+            symPageTextLabels = mapOf("[" to "🙃")
             ctrlPreviewActive = true
             ctrlPreviewLabels = mapOf(KeyEvent.KEYCODE_U to "OK")
         }
         val uKey = keyForLabel(view, "u")
-        val umlautKey = keyForLabel(view, "ü")
+        val bracketKey = keyForLabel(view, "[")
 
         assertEquals(null, symPageLabel(view, uKey))
         assertEquals("OK", previewLabel(view, uKey))
-        assertEquals(null, symPageLabel(view, umlautKey))
-        assertEquals(null, previewLabel(view, umlautKey))
+        assertEquals(null, symPageLabel(view, bracketKey))
+        assertEquals(null, previewLabel(view, bracketKey))
     }
 
     @Test

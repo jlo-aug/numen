@@ -8,7 +8,6 @@ import android.net.Uri
 import android.util.Log
 import it.palsoftware.pastiera.BuildConfig
 import it.palsoftware.pastiera.SettingsManager
-import it.palsoftware.pastiera.data.layout.LayoutFileStore
 import it.palsoftware.pastiera.inputmethod.DeviceSpecific
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -280,11 +279,7 @@ object FileBackupHelper {
     private val allowedFiles = setOf(
         "ctrl_key_mappings.json",
         "variations.json",
-        "user_defaults.json",
-        "locale_layout_mapping.json"
-    )
-    private val allowedDirectories = setOf(
-        "keyboard_layouts"
+        "user_defaults.json"
     )
 
     fun snapshotInternalFiles(
@@ -443,12 +438,7 @@ object FileBackupHelper {
         if (allowedFiles.contains(normalized)) {
             return true
         }
-        if (includeTypingSoundPack && isTypingSoundPackPath(normalized)) {
-            return true
-        }
-        return allowedDirectories.any { dir ->
-            normalized == dir || normalized.startsWith("$dir/")
-        }
+        return includeTypingSoundPack && isTypingSoundPackPath(normalized)
     }
 
     internal fun hasValidTypingSoundPack(root: File): Boolean =
@@ -522,7 +512,6 @@ object FileBackupHelper {
 
     private fun ensureDefaults(context: Context) {
         try {
-            LayoutFileStore.getLayoutsDirectory(context)
             SettingsManager.initializeNavModeMappingsFile(context)
         } catch (e: Exception) {
             Log.w(TAG, "Failed to ensure default config files", e)

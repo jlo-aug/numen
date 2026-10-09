@@ -178,8 +178,6 @@ class SuggestionControllerContextTest {
 
     @Test
     fun pairCountsStayForEnglishReplacementsAndAreFreedWhenNothingNeedsThem() {
-        // Numen only: Pastiera's build keeps its original text replacements.
-        org.junit.Assume.assumeFalse(it.palsoftware.pastiera.BuildConfig.UPSTREAM_BRANDING)
         var sentenceAware = true
         var textReplacements = true
         val controller = controller(textReplacements = { textReplacements }) { sentenceAware }

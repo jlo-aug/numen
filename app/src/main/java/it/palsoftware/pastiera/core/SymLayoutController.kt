@@ -178,10 +178,6 @@ class SymLayoutController(
         return mappingsForPage(nextTextPage, shiftPressed)
     }
 
-    fun nextSoftwareTextSymPage(): Int {
-        return nextSoftwareTextPageType()?.toPrefValue() ?: 0
-    }
-
     private fun nextSoftwareTextPageType(): SymPage? {
         val config = SettingsManager.getSymPagesConfig(context)
         alignSymPageToConfig(config)
@@ -295,14 +291,7 @@ class SymLayoutController(
         }
 
         if (symChar != null && inputConnection != null) {
-            if (
-                !handleBoundaryText(symChar, inputConnection) &&
-                (
-                    symChar.length != 1 ||
-                        !SettingsManager.shouldApplyFrenchPunctuationSpacing(context) ||
-                        !it.palsoftware.pastiera.core.Punctuation.commitFrenchSpacedPunctuation(inputConnection, symChar[0])
-                )
-            ) {
+            if (!handleBoundaryText(symChar, inputConnection)) {
                 inputConnection.commitText(symChar, 1)
             }
             if (autoCloseEnabled) {

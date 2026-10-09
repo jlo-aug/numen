@@ -354,14 +354,6 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         )
     ),
     SettingEntry(
-        id = "variations.layout_override",
-        titleRes = R.string.variation_global_layout_override_title,
-        route = SettingRoute(
-            destination = SettingsDestination.Customization,
-            customizationDestination = "variations"
-        )
-    ),
-    SettingEntry(
         id = "variations.mappings",
         titleRes = R.string.setting_link_variation_mappings,
         route = SettingRoute(
@@ -651,15 +643,6 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         unavailableFallbackId = "keyboard_theme.hardware.assignment"
     ),
     SettingEntry(
-        id = "keyboard_theme.hardware.layout_overrides",
-        titleRes = R.string.setting_link_theme_hardware_layout_overrides,
-        route = SettingRoute(
-            destination = SettingsDestination.Customization,
-            customizationDestination = "keyboard_theme_assignment",
-            keyboardThemeTarget = SettingsManager.KeyboardThemeTarget.HARDWARE
-        )
-    ),
-    SettingEntry(
         id = "keyboard_theme.software.led_colors",
         titleRes = R.string.setting_link_theme_software_led_colors,
         route = SettingRoute(
@@ -699,15 +682,6 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         ),
         availabilityCheck = { SettingsManager.getKeyboardThemeAssignmentMode(it, SettingsManager.KeyboardThemeTarget.SOFTWARE) == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM },
         unavailableFallbackId = "keyboard_theme.software.assignment"
-    ),
-    SettingEntry(
-        id = "keyboard_theme.software.layout_overrides",
-        titleRes = R.string.setting_link_theme_software_layout_overrides,
-        route = SettingRoute(
-            destination = SettingsDestination.Customization,
-            customizationDestination = "keyboard_theme_assignment",
-            keyboardThemeTarget = SettingsManager.KeyboardThemeTarget.SOFTWARE
-        )
     ),
 )
 

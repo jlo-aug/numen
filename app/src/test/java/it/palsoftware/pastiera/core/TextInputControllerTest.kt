@@ -340,10 +340,9 @@ class TextInputControllerTest {
     }
 
     @Test
-    fun smartQuotes_enabled_commitsConfiguredOpeningAndClosingQuotes() {
+    fun smartQuotes_enabled_commitsCurlyQuotes() {
         SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS)
-        val inputConnection = FakeInputConnection(context, "\"Hallo\"")
+        val inputConnection = FakeInputConnection(context, "\"Hello\"")
 
         val handled = controller.handleSmartQuoteReplacement(
             typedText = " ",
@@ -352,40 +351,13 @@ class TextInputControllerTest {
         )
 
         assertTrue(handled)
-        assertEquals("»Hallo« ", inputConnection.text)
-    }
-
-    @Test
-    fun smartQuotes_enabled_supportsAllConfiguredStyles() {
-        val styles = listOf(
-            SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS to "»Hallo« ",
-            SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS to "«Hallo» ",
-            SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED to "« Hallo » ",
-            SettingsManager.SMART_QUOTES_STYLE_GERMAN_LOW_HIGH to "„Hallo“ ",
-            SettingsManager.SMART_QUOTES_STYLE_ENGLISH_CURLY to "“Hallo” "
-        )
-
-        SettingsManager.setSmartQuotes(context, true)
-        styles.forEach { (style, expected) ->
-            SettingsManager.setSmartQuotesStyle(context, style)
-            val inputConnection = FakeInputConnection(context, "\"Hallo\"")
-
-            val handled = controller.handleSmartQuoteReplacement(
-                typedText = " ",
-                inputConnection = inputConnection,
-                shouldDisableSmartPunctuation = false
-            )
-
-            assertTrue("Expected style $style to be handled", handled)
-            assertEquals(expected, inputConnection.text)
-        }
+        assertEquals("“Hello” ", inputConnection.text)
     }
 
     @Test
     fun smartQuotes_enabled_replacesBeforeHyphenAfterClosingQuote() {
         SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS)
-        val inputConnection = FakeInputConnection(context, "Sogenannter \"Hooligang\"")
+        val inputConnection = FakeInputConnection(context, "A so-called \"expert\"")
 
         val handled = controller.handleSmartQuoteReplacement(
             typedText = "-",
@@ -394,14 +366,13 @@ class TextInputControllerTest {
         )
 
         assertTrue(handled)
-        assertEquals("Sogenannter »Hooligang«-", inputConnection.text)
+        assertEquals("A so-called “expert”-", inputConnection.text)
     }
 
     @Test
     fun smartQuotes_enabled_supportsMultiWordQuotes() {
         SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS)
-        val inputConnection = FakeInputConnection(context, "Er sagte \"Man kann das testen\"")
+        val inputConnection = FakeInputConnection(context, "She said \"we can test that\"")
 
         val handled = controller.handleSmartQuoteReplacement(
             typedText = " ",
@@ -410,13 +381,12 @@ class TextInputControllerTest {
         )
 
         assertTrue(handled)
-        assertEquals("Er sagte »Man kann das testen« ", inputConnection.text)
+        assertEquals("She said “we can test that” ", inputConnection.text)
     }
 
     @Test
     fun smartQuotes_enabled_ignoresEmbeddedQuotesInsideWords() {
         SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS)
         val inputConnection = FakeInputConnection(context, "foo\"bar\"")
 
         val handled = controller.handleSmartQuoteReplacement(
@@ -433,8 +403,7 @@ class TextInputControllerTest {
     @Test
     fun smartQuotes_enabled_waitsForDelimiterAfterClosingQuote() {
         SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS)
-        val inputConnection = FakeInputConnection(context, "\"Hallo\"")
+        val inputConnection = FakeInputConnection(context, "\"Hello\"")
 
         val handled = controller.handleSmartQuoteReplacement(
             typedText = "a",
@@ -444,30 +413,13 @@ class TextInputControllerTest {
         if (!handled) inputConnection.commitText("a", 1)
 
         assertFalse(handled)
-        assertEquals("\"Hallo\"a", inputConnection.text)
-    }
-
-    @Test
-    fun smartQuotes_enabled_supportsNarrowSpacedGuillemets() {
-        SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED)
-        val inputConnection = FakeInputConnection(context, "\"Bonjour\"")
-
-        val handled = controller.handleSmartQuoteReplacement(
-            typedText = " ",
-            inputConnection = inputConnection,
-            shouldDisableSmartPunctuation = false
-        )
-
-        assertTrue(handled)
-        assertEquals("« Bonjour » ", inputConnection.text)
+        assertEquals("\"Hello\"a", inputConnection.text)
     }
 
     @Test
     fun smartQuotes_enabled_waitsForFollowingCharacterAfterClosingQuote() {
         SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS)
-        val inputConnection = FakeInputConnection(context, "\"Hallo")
+        val inputConnection = FakeInputConnection(context, "\"Hello")
 
         val handled = controller.handleSmartQuoteReplacement(
             typedText = "\"",
@@ -477,13 +429,13 @@ class TextInputControllerTest {
         if (!handled) inputConnection.commitText("\"", 1)
 
         assertFalse(handled)
-        assertEquals("\"Hallo\"", inputConnection.text)
+        assertEquals("\"Hello\"", inputConnection.text)
     }
 
     @Test
     fun smartQuotes_settingDisabled_keepsPlainQuote() {
         SettingsManager.setSmartQuotes(context, false)
-        val inputConnection = FakeInputConnection(context, "\"Hallo\"")
+        val inputConnection = FakeInputConnection(context, "\"Hello\"")
 
         val handled = controller.handleSmartQuoteReplacement(
             typedText = " ",
@@ -493,14 +445,13 @@ class TextInputControllerTest {
         if (!handled) inputConnection.commitText(" ", 1)
 
         assertFalse(handled)
-        assertEquals("\"Hallo\" ", inputConnection.text)
+        assertEquals("\"Hello\" ", inputConnection.text)
     }
 
     @Test
     fun smartQuotes_fieldDisabled_keepsPlainQuoteEvenWhenSettingEnabled() {
         SettingsManager.setSmartQuotes(context, true)
-        SettingsManager.setSmartQuotesStyle(context, SettingsManager.SMART_QUOTES_STYLE_GERMAN_GUILLEMETS)
-        val inputConnection = FakeInputConnection(context, "\"Hallo\"")
+        val inputConnection = FakeInputConnection(context, "\"Hello\"")
 
         val handled = controller.handleSmartQuoteReplacement(
             typedText = " ",
@@ -510,7 +461,7 @@ class TextInputControllerTest {
         if (!handled) inputConnection.commitText(" ", 1)
 
         assertFalse(handled)
-        assertEquals("\"Hallo\" ", inputConnection.text)
+        assertEquals("\"Hello\" ", inputConnection.text)
     }
 
     private class FakeInputConnection(

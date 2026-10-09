@@ -66,8 +66,6 @@ fun commandMaterialIcon(command: CommandTarget): ImageVector {
         command.id == "device.volume.up" -> Icons.AutoMirrored.Filled.VolumeUp
         command.id == "device.volume.down" -> Icons.AutoMirrored.Filled.VolumeDown
         command.id == "device.volume.mute" -> Icons.AutoMirrored.Filled.VolumeOff
-        command.id == "device.brightness.up" -> Icons.Default.WbSunny
-        command.id == "device.brightness.down" -> Icons.Default.WbSunny
         command.id.contains("default_apps") || command.id == "settings.android.apps" -> Icons.Default.Apps
         command.id.contains("input_method") -> Icons.Default.Keyboard
         command.id.contains("accessibility") -> Icons.Default.AccessibilityNew

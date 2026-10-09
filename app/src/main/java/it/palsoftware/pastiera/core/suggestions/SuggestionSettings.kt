@@ -11,7 +11,6 @@ data class SuggestionSettings(
     val useEditTypeRanking: Boolean = false,
     val aggressiveAutoReplace: Boolean = false,
     val contextAwareCorrection: Boolean = false,
-    val frenchPunctuationSpacing: Boolean = false,
     val commaSpace: Boolean = false,
     val autoSpacePunctuation: String = it.palsoftware.pastiera.core.Punctuation.DEFAULT_AUTO_SPACE
 )

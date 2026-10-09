@@ -45,7 +45,6 @@ import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.commands.CommandRegistry
 import it.palsoftware.pastiera.commands.CommandSurface
 import it.palsoftware.pastiera.commands.CommandTarget
-import it.palsoftware.pastiera.data.layout.JsonLayoutLoader
 import it.palsoftware.pastiera.data.mappings.KeyMappingLoader
 import kotlin.math.min
 
@@ -67,11 +66,7 @@ fun NavModeSettingsScreen(
     var navModeCtrlHoldEnabled by remember {
         mutableStateOf(SettingsManager.getNavModeCtrlHoldEnabled(context))
     }
-    var layoutAwareCtrlShortcutsEnabled by remember {
-        mutableStateOf(SettingsManager.getLayoutAwareCtrlShortcutsEnabled(context))
-    }
     var showNavModeGuide by remember { mutableStateOf(false) }
-    var showLayoutAwareCtrlInfo by remember { mutableStateOf(false) }
 
     // Load current mappings (all alphabetic keys)
     var keyMappings by remember {
@@ -84,9 +79,6 @@ fun NavModeSettingsScreen(
     // Load default mappings for comparison
     val defaultMappings = remember {
         loadAllKeyMappings(context, useDefaults = true)
-    }
-    val layoutHints = remember(keyMappings) {
-        loadLayoutHints(context)
     }
 
     // Handle system back button
@@ -195,8 +187,6 @@ fun NavModeSettingsScreen(
         }
 
         if (navModeEnabled) {
-            val layoutAwareCtrlShortcutsAvailable = !navModeCtrlHoldEnabled
-
             Surface(
                 modifier = Modifier.fillMaxWidth().settingRow("nav_mode.ctrl_hold")
             ) {
@@ -228,80 +218,6 @@ fun NavModeSettingsScreen(
                     )
                 }
             }
-
-            Surface(
-                modifier = Modifier.fillMaxWidth().settingRow("nav_mode.layout_aware_ctrl_shortcuts")
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Column(modifier = Modifier.weight(1f)) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = stringResource(R.string.layout_aware_ctrl_shortcuts_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium,
-                                color = if (layoutAwareCtrlShortcutsAvailable) {
-                                    MaterialTheme.colorScheme.onSurface
-                                } else {
-                                    MaterialTheme.colorScheme.onSurfaceVariant
-                                },
-                                modifier = Modifier.weight(1f, fill = false)
-                            )
-                            IconButton(
-                                onClick = { showLayoutAwareCtrlInfo = true },
-                                modifier = Modifier.size(40.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Info,
-                                    contentDescription = stringResource(R.string.layout_aware_ctrl_shortcuts_info_title),
-                                    tint = MaterialTheme.colorScheme.primary
-                                )
-                            }
-                        }
-                        Text(
-                            text = stringResource(
-                                if (layoutAwareCtrlShortcutsAvailable) {
-                                    R.string.layout_aware_ctrl_shortcuts_description
-                                } else {
-                                    R.string.layout_aware_ctrl_shortcuts_disabled_description
-                                }
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                    }
-                    Switch(
-                        checked = layoutAwareCtrlShortcutsEnabled,
-                        enabled = layoutAwareCtrlShortcutsAvailable,
-                        onCheckedChange = { enabled ->
-                            layoutAwareCtrlShortcutsEnabled = enabled
-                            SettingsManager.setLayoutAwareCtrlShortcutsEnabled(context, enabled)
-                        }
-                    )
-                }
-            }
-        }
-
-        if (showLayoutAwareCtrlInfo) {
-            AlertDialog(
-                onDismissRequest = { showLayoutAwareCtrlInfo = false },
-                confirmButton = {
-                    TextButton(onClick = { showLayoutAwareCtrlInfo = false }) {
-                        Text(stringResource(R.string.close))
-                    }
-                },
-                title = {
-                    Text(stringResource(R.string.layout_aware_ctrl_shortcuts_info_title))
-                },
-                text = {
-                    Text(stringResource(R.string.layout_aware_ctrl_shortcuts_info_text))
-                }
-            )
         }
 
         if (showNavModeGuide) {
@@ -382,7 +298,6 @@ fun NavModeSettingsScreen(
                             spacing = spacing,
                             mappings = keyMappings,
                             defaultMappings = defaultMappings,
-                            layoutHints = layoutHints,
                             onKeyClick = { keyCode ->
                                 selectedKeyCode = keyCode
                             }
@@ -442,7 +357,6 @@ private fun KeyboardRow(
     spacing: Dp,
     mappings: Map<Int, KeyMappingLoader.CtrlMapping>,
     defaultMappings: Map<Int, KeyMappingLoader.CtrlMapping>,
-    layoutHints: Map<Int, String>,
     onKeyClick: (Int) -> Unit
 ) {
     Row(
@@ -458,7 +372,6 @@ private fun KeyboardRow(
                 keyCode = keyCode,
                 mapping = mappings[keyCode],
                 hasDefault = defaultMappings.containsKey(keyCode),
-                layoutHint = layoutHints[keyCode],
                 onClick = { onKeyClick(keyCode) },
                 modifier = Modifier
                     .width(keySize)
@@ -473,7 +386,6 @@ private fun KeyButton(
     keyCode: Int,
     mapping: KeyMappingLoader.CtrlMapping?,
     hasDefault: Boolean,
-    layoutHint: String?,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -563,17 +475,6 @@ private fun KeyButton(
                 overflow = TextOverflow.Ellipsis,
                 textAlign = TextAlign.Center
             )
-            if (layoutHint != null) {
-                Text(
-                    text = layoutHint,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 8.sp,
-                    color = MaterialTheme.colorScheme.tertiary,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
-            }
             if (mappingIcon != null) {
                 Icon(
                     imageVector = mappingIcon,
@@ -981,64 +882,5 @@ private fun loadAllKeyMappings(context: Context, useDefaults: Boolean = false): 
     // Return all keys with their mappings (or null if no mapping)
     return allAlphabeticKeys.associateWith { keyCode ->
         loadedMappings[keyCode] ?: KeyMappingLoader.CtrlMapping("none", "")
-    }
-}
-
-private fun loadLayoutHints(context: Context): Map<Int, String> {
-    val layoutName = SettingsManager.getKeyboardLayout(context)
-    val layout = JsonLayoutLoader.loadLayout(context.assets, layoutName, context)
-        ?: return emptyMap()
-    val allAlphabeticKeys = listOf(
-        KeyEvent.KEYCODE_Q, KeyEvent.KEYCODE_W, KeyEvent.KEYCODE_E, KeyEvent.KEYCODE_R,
-        KeyEvent.KEYCODE_T, KeyEvent.KEYCODE_Y, KeyEvent.KEYCODE_U, KeyEvent.KEYCODE_I,
-        KeyEvent.KEYCODE_O, KeyEvent.KEYCODE_P, KeyEvent.KEYCODE_A, KeyEvent.KEYCODE_S,
-        KeyEvent.KEYCODE_D, KeyEvent.KEYCODE_F, KeyEvent.KEYCODE_G, KeyEvent.KEYCODE_H,
-        KeyEvent.KEYCODE_J, KeyEvent.KEYCODE_K, KeyEvent.KEYCODE_L, KeyEvent.KEYCODE_Z,
-        KeyEvent.KEYCODE_X, KeyEvent.KEYCODE_C, KeyEvent.KEYCODE_V, KeyEvent.KEYCODE_B,
-        KeyEvent.KEYCODE_N, KeyEvent.KEYCODE_M
-    )
-
-    return allAlphabeticKeys.mapNotNull { keyCode ->
-        val physicalLabel = keyCodeToLetter(keyCode) ?: return@mapNotNull null
-        val layoutChar = layout[keyCode]?.lowercase?.firstOrNull()
-            ?.uppercaseChar()
-            ?: return@mapNotNull null
-        if (layoutChar.toString() != physicalLabel) {
-            keyCode to "→ $layoutChar"
-        } else {
-            null
-        }
-    }.toMap()
-}
-
-private fun keyCodeToLetter(keyCode: Int): String? {
-    return when (keyCode) {
-        KeyEvent.KEYCODE_Q -> "Q"
-        KeyEvent.KEYCODE_W -> "W"
-        KeyEvent.KEYCODE_E -> "E"
-        KeyEvent.KEYCODE_R -> "R"
-        KeyEvent.KEYCODE_T -> "T"
-        KeyEvent.KEYCODE_Y -> "Y"
-        KeyEvent.KEYCODE_U -> "U"
-        KeyEvent.KEYCODE_I -> "I"
-        KeyEvent.KEYCODE_O -> "O"
-        KeyEvent.KEYCODE_P -> "P"
-        KeyEvent.KEYCODE_A -> "A"
-        KeyEvent.KEYCODE_S -> "S"
-        KeyEvent.KEYCODE_D -> "D"
-        KeyEvent.KEYCODE_F -> "F"
-        KeyEvent.KEYCODE_G -> "G"
-        KeyEvent.KEYCODE_H -> "H"
-        KeyEvent.KEYCODE_J -> "J"
-        KeyEvent.KEYCODE_K -> "K"
-        KeyEvent.KEYCODE_L -> "L"
-        KeyEvent.KEYCODE_Z -> "Z"
-        KeyEvent.KEYCODE_X -> "X"
-        KeyEvent.KEYCODE_C -> "C"
-        KeyEvent.KEYCODE_V -> "V"
-        KeyEvent.KEYCODE_B -> "B"
-        KeyEvent.KEYCODE_N -> "N"
-        KeyEvent.KEYCODE_M -> "M"
-        else -> null
     }
 }

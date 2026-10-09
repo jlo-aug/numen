@@ -49,9 +49,6 @@ class StatusBarButtonHost(
     ): HostedButton? {
         val existing = hostedButtons[id]
         if (existing != null) {
-            if (id == StatusBarButtonId.Language) {
-                registry.getLanguageFactory().refreshLanguageText(context, existing.button)
-            }
             prepareForAttach(existing, width, height)
             return existing
         }
@@ -131,11 +128,6 @@ class StatusBarButtonHost(
     fun updateMicrophoneAudioLevel(rmsdB: Float) {
         val hosted = hostedButtons[StatusBarButtonId.Microphone] ?: return
         registry.getMicrophoneFactory().updateAudioLevel(hosted.button, rmsdB)
-    }
-
-    fun refreshLanguageText() {
-        val hosted = hostedButtons[StatusBarButtonId.Language] ?: return
-        registry.getLanguageFactory().refreshLanguageText(context, hosted.button)
     }
 
     fun setMinimalUiActive(isActive: Boolean) {

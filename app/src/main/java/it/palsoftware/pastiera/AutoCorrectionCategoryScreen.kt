@@ -1,6 +1,5 @@
 package it.palsoftware.pastiera
 
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -13,7 +12,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
@@ -21,7 +19,6 @@ import androidx.compose.material.icons.filled.Search
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -78,12 +75,13 @@ fun AutoCorrectionCategoryScreen(
         mutableStateOf(SettingsManager.getContextAwareCorrection(context))
     }
     val currentDestination = when (val page = settingsChild(context, "autocorrection")) {
-        "Settings" -> AutoCorrectionDestination.Settings
         "UserDictionary" -> AutoCorrectionDestination.UserDictionary
-        else -> if (page?.startsWith("Edit:") == true) AutoCorrectionDestination.Edit(page.removePrefix("Edit:")) else AutoCorrectionDestination.Main
+        // "Settings" and "Edit:<lang>" are older spellings of the editor page.
+        "Edit", "Settings" -> AutoCorrectionDestination.Edit
+        else -> if (page?.startsWith("Edit:") == true) AutoCorrectionDestination.Edit else AutoCorrectionDestination.Main
     }
     fun navigateTo(destination: AutoCorrectionDestination) {
-        openSettingsChild(context, "autocorrection", when (destination) { AutoCorrectionDestination.Main -> "Main"; AutoCorrectionDestination.Settings -> "Settings"; AutoCorrectionDestination.UserDictionary -> "UserDictionary"; is AutoCorrectionDestination.Edit -> "Edit:${destination.languageCode}" })
+        openSettingsChild(context, "autocorrection", when (destination) { AutoCorrectionDestination.Main -> "Main"; AutoCorrectionDestination.UserDictionary -> "UserDictionary"; AutoCorrectionDestination.Edit -> "Edit" })
     }
     fun navigateBack() { context.settingsActivity().finish() }
 
@@ -128,7 +126,7 @@ fun AutoCorrectionCategoryScreen(
                             .verticalScroll(rememberScrollState())
                     ) {
                         // Advanced suggestions master toggle
-                        if (BuildConfig.UPSTREAM_BRANDING || !experimentalSuggestionsEnabled) { // Numen keeps the engine on; the switch only appears if it was turned off.
+                        if (!experimentalSuggestionsEnabled) { // Numen keeps the engine on; the switch only appears if it was turned off.
                             Surface(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -162,7 +160,6 @@ fun AutoCorrectionCategoryScreen(
                                                 maxLines = 2
                                             )
                                         }
-                                        if (BuildConfig.UPSTREAM_BRANDING) FeatureStatusIcon(FeatureStatus.Experimental) // no beta badge in Numen
                                         Switch(
                                             checked = experimentalSuggestionsEnabled,
                                             onCheckedChange = { enabled ->
@@ -443,96 +440,6 @@ fun AutoCorrectionCategoryScreen(
                             }
                         }
 
-                        if (BuildConfig.UPSTREAM_BRANDING) { // suggestion-ranking knobs; Numen keeps the defaults
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 64.dp)
-                                    .settingRow(SettingLinkIds.AUTO_CORRECTION_KEYBOARD_PROXIMITY)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.TextFields,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = stringResource(R.string.auto_correct_keyboard_proximity_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.auto_correct_keyboard_proximity_description),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 2
-                                        )
-                                    }
-                                    Switch(
-                                        checked = useKeyboardProximity,
-                                        onCheckedChange = { enabled ->
-                                            useKeyboardProximity = enabled
-                                            SettingsManager.setUseKeyboardProximity(context, enabled)
-                                        },
-                                        enabled = experimentalSuggestionsEnabled
-                                    )
-                                }
-                            }
-                        }
-                        if (BuildConfig.UPSTREAM_BRANDING) { // suggestion-ranking knobs; Numen keeps the defaults
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 64.dp)
-                                    .settingRow(SettingLinkIds.AUTO_CORRECTION_EDIT_TYPE_RANKING)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.TextFields,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = stringResource(R.string.auto_correct_edit_type_ranking_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.auto_correct_edit_type_ranking_description),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 2
-                                        )
-                                    }
-                                    Switch(
-                                        checked = useEditTypeRanking,
-                                        onCheckedChange = { enabled ->
-                                            useEditTypeRanking = enabled
-                                            SettingsManager.setUseEditTypeRanking(context, enabled)
-                                        },
-                                        enabled = experimentalSuggestionsEnabled
-                                    )
-                                }
-                            }
-                        }
                         Surface(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -620,14 +527,14 @@ fun AutoCorrectionCategoryScreen(
                             }
                         }
 
-                        // Text replacement language/rule sets (only if text replacements are enabled)
+                        // Text replacement list editor (only if text replacements are enabled)
                         if (autoCorrectEnabled) {
                             Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .heightIn(min = 72.dp)
                                     .settingRow(SettingLinkIds.AUTO_CORRECTION_LANGUAGES) {
-                                        navigateTo(AutoCorrectionDestination.Settings)
+                                        navigateTo(AutoCorrectionDestination.Edit)
                                     }
                             ) {
                                 Row(
@@ -638,7 +545,7 @@ fun AutoCorrectionCategoryScreen(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Filled.Language,
+                                        imageVector = Icons.Filled.Edit,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(24.dp)
@@ -670,19 +577,8 @@ fun AutoCorrectionCategoryScreen(
                 }
             }
 
-            AutoCorrectionDestination.Settings -> {
-                AutoCorrectSettingsScreen(
-                    modifier = modifier,
-                    onBack = { navigateBack() },
-                    onEditLanguage = { languageCode ->
-                        navigateTo(AutoCorrectionDestination.Edit(languageCode))
-                    }
-                )
-            }
-
-            is AutoCorrectionDestination.Edit -> {
+            AutoCorrectionDestination.Edit -> {
                 AutoCorrectEditScreen(
-                    languageCode = destination.languageCode,
                     modifier = modifier,
                     onBack = { navigateBack() }
                 )
@@ -700,8 +596,7 @@ fun AutoCorrectionCategoryScreen(
 
 private sealed class AutoCorrectionDestination {
     object Main : AutoCorrectionDestination()
-    object Settings : AutoCorrectionDestination()
-    data class Edit(val languageCode: String) : AutoCorrectionDestination()
+    object Edit : AutoCorrectionDestination()
     object UserDictionary : AutoCorrectionDestination()
 }
 

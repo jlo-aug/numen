@@ -208,7 +208,6 @@ private fun createVirtualKeyboardThemePreviewView(
     showVirtualPreviewVariations(variationBar)
 
     val keyboardView = AospKeyboardView(context).apply {
-        layoutName = SettingsManager.getKeyboardLayout(context)
         layoutStyle = softwareKeyboardPreviewLayoutStyle(context)
         includeNumberRow = SettingsManager.getSoftwareKeyboardNumberRowEnabled(context)
         shifted = false
@@ -301,7 +300,6 @@ private fun updateVirtualKeyboardThemePreviewView(view: android.view.View, theme
         showVirtualPreviewVariations(this)
     }
     (root.getTag(R.id.keyboard_theme_preview_aosp_keyboard) as? AospKeyboardView)?.apply {
-        layoutName = SettingsManager.getKeyboardLayout(context)
         layoutStyle = softwareKeyboardPreviewLayoutStyle(context)
         includeNumberRow = SettingsManager.getSoftwareKeyboardNumberRowEnabled(context)
         longPressTimeoutMs = SettingsManager.getLongPressThreshold(context)
@@ -671,13 +669,9 @@ private fun AospKeyboardView.applyVirtualKeyboardSymPreviewState(context: Contex
         return
     }
     val mappings = previewSymMappings(context, page, shiftActive)
-    val layout = SettingsManager.getKeyboardLayout(context)
-    val style = softwareKeyboardPreviewLayoutStyle(context)
     val projection = SoftwareKeyboardSymLabels.project(
-        page = page,
-        rows = SoftwareKeyboardLayoutTemplates.rowTemplateFor(layout, style),
-        symMappings = mappings,
-        layoutName = layout
+        rows = SoftwareKeyboardLayoutTemplates.rowTemplateFor(softwareKeyboardPreviewLayoutStyle(context)),
+        symMappings = mappings
     )
     symPageLabels = projection.contentByKeyCode
     symPageTextLabels = projection.contentByBaseText
@@ -711,10 +705,7 @@ private fun previewSymMappings(context: Context, page: Int, shiftActive: Boolean
 private fun resolveVirtualPreviewLongPressAlternates(context: Context, output: String): List<String> {
     if (output.isEmpty()) return emptyList()
     val baseChar = output.first()
-    val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(
-        baseChar,
-        SettingsManager.getKeyboardLayout(context)
-    ) ?: return emptyList()
+    val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(baseChar) ?: return emptyList()
     return when (SettingsManager.getLongPressModifier(context)) {
         "alt" -> AltModifierMappingResolver.resolve(context.assets, context)[keyCode]?.let(::listOf).orEmpty()
         "shift" -> listOf(output.uppercase()).filter { it != output }
@@ -725,8 +716,7 @@ private fun resolveVirtualPreviewLongPressAlternates(context: Context, output: S
         "variations" -> {
             val variations = VariationRepository.loadVariations(
                 assets = context.assets,
-                context = context,
-                activeLayoutName = SettingsManager.getKeyboardLayout(context)
+                context = context
             )
             variations[baseChar] ?: variations[baseChar.lowercaseChar()] ?: emptyList()
         }
@@ -736,10 +726,7 @@ private fun resolveVirtualPreviewLongPressAlternates(context: Context, output: S
 
 private fun resolveVirtualPreviewAltHint(context: Context, output: String): String? {
     if (output.isEmpty()) return null
-    val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(
-        output.first(),
-        SettingsManager.getKeyboardLayout(context)
-    ) ?: return null
+    val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(output.first()) ?: return null
     return AltModifierMappingResolver.resolve(context.assets, context)[keyCode]
 }
 
@@ -750,10 +737,7 @@ private fun resolveVirtualPreviewLongPressLayerAlternates(
     if (!SettingsManager.getSoftwareKeyboardLongPressLayerPopupEnabled(context) || output.isEmpty()) {
         return emptyList()
     }
-    val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(
-        output.first(),
-        SettingsManager.getKeyboardLayout(context)
-    ) ?: return emptyList()
+    val keyCode = SoftwareKeyboardSymLabels.keyCodeForChar(output.first()) ?: return emptyList()
     val alternatives = mutableListOf<AospKeyboardView.LongPressLayerAlternative>()
     AltModifierMappingResolver.resolve(context.assets, context)[keyCode]?.takeIf { it.isNotBlank() }?.let { alt ->
         alternatives += AospKeyboardView.LongPressLayerAlternative(label = alt, output = alt)
@@ -932,7 +916,6 @@ private fun virtualKeyboardSurfaceHeightPx(
     theme: KeyboardThemePreset
 ): Int {
     val keyboardHeight = AospKeyboardView(context).apply {
-        layoutName = SettingsManager.getKeyboardLayout(context)
         layoutStyle = softwareKeyboardPreviewLayoutStyle(context)
         includeNumberRow = SettingsManager.getSoftwareKeyboardNumberRowEnabled(context)
         themeOverride = theme.toAospThemeOverride()

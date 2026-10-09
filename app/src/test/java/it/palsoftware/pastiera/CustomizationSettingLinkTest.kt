@@ -26,9 +26,8 @@ class CustomizationSettingLinkTest {
             "quick_launcher.width" to "launcher_shortcut_cosmetic",
             "quick_launcher.assignments" to "launcher_shortcut_assignments",
             "sounds.typing_mode" to "sounds",
-            "variations.layout_override" to "variations",
             "keyboard_theme.hardware.assignment" to "keyboard_theme_assignment",
-            "keyboard_theme.software.layout_overrides" to "keyboard_theme_assignment"
+            "keyboard_theme.software.assignment" to "keyboard_theme_assignment"
         )
         expected.forEach { (id, route) ->
             assertEquals(id, route, entries.getValue(id).route.customizationDestination)

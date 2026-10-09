@@ -9,68 +9,41 @@ internal object SoftwareKeyboardSymLabels {
     )
 
     fun project(
-        page: Int,
         rows: List<String>,
-        symMappings: Map<Int, String>,
-        layoutName: String
+        symMappings: Map<Int, String>
     ): Projection = Projection(
         contentByKeyCode = symMappings.filterValues { it.isNotBlank() },
-        contentByBaseText = buildContentByChar(page, rows, symMappings, layoutName)
+        contentByBaseText = buildContentByChar(rows, symMappings)
             .mapKeys { (char, _) -> char.toString() }
     )
 
+    /** Labels each software key with its hardware key's SYM content, or the key's own symbol. */
     fun buildContentByChar(
-        page: Int,
         rows: List<String>,
-        symMappings: Map<Int, String>,
-        layoutName: String
+        symMappings: Map<Int, String>
     ): Map<Char, String> {
         val contentByChar = linkedMapOf<Char, String>()
-        val usedContent = symMappings.values.toMutableSet()
-        val supplementalContent = supplementalContentPool(page)
-            .filterNot { it in usedContent }
-            .iterator()
-
         rows.flatMap { it.toList() }.distinct().forEach { char ->
-            val keyCode = keyCodeForChar(char, layoutName)
-            val isSupplementalLetter = char.isLetter() && char.lowercaseChar() !in 'a'..'z'
-            val content = if (isSupplementalLetter) {
-                supplementalContent.nextOrNull()
-            } else {
-                keyCode?.let { symMappings[it] }
-            } ?: symbolFallback(char)
-
+            val content = keyCodeForChar(char)?.let { symMappings[it] } ?: symbolFallback(char)
             if (content.isNotEmpty()) {
                 contentByChar[char] = content
-                usedContent += content
             }
         }
         return contentByChar
     }
 
-    fun keyCodeForChar(char: Char, layoutName: String): Int? {
-        val normalizedChar = char.lowercaseChar()
-        if (SoftwareKeyboardLayoutTemplates.familyFor(layoutName) == SoftwareKeyboardLayoutTemplates.Family.QWERTZ) {
-            when (normalizedChar) {
-                'z' -> return KeyEvent.KEYCODE_Y
-                'y' -> return KeyEvent.KEYCODE_Z
-            }
-        }
-        return keyCodeForQwertyPosition(normalizedChar)
-    }
-
-    private fun keyCodeForQwertyPosition(char: Char): Int? = when (char) {
+    fun keyCodeForChar(char: Char): Int? = when (char.lowercaseChar()) {
         'q' -> KeyEvent.KEYCODE_Q
         'w' -> KeyEvent.KEYCODE_W
         'e' -> KeyEvent.KEYCODE_E
         'r' -> KeyEvent.KEYCODE_R
         't' -> KeyEvent.KEYCODE_T
         'y' -> KeyEvent.KEYCODE_Y
-        'u', 'ü', 'ù' -> KeyEvent.KEYCODE_U
+        'u' -> KeyEvent.KEYCODE_U
         'i' -> KeyEvent.KEYCODE_I
-        'o', 'ö' -> KeyEvent.KEYCODE_O
+        'o' -> KeyEvent.KEYCODE_O
         'p' -> KeyEvent.KEYCODE_P
-        'a', 'ä' -> KeyEvent.KEYCODE_A
+        'a' -> KeyEvent.KEYCODE_A
         's' -> KeyEvent.KEYCODE_S
         'd' -> KeyEvent.KEYCODE_D
         'f' -> KeyEvent.KEYCODE_F
@@ -91,19 +64,9 @@ internal object SoftwareKeyboardSymLabels {
         else -> null
     }
 
-    private fun supplementalContentPool(page: Int): List<String> =
-        when (page) {
-            1 -> listOf("🙃", "🧐", "🍎", "☔", "✨", "⭐", "✅", "🔥", "💡", "🎯")
-            2 -> listOf("€", "@", "#", "£", "¥", "§", "±", "×", "÷", "≈", "…")
-            else -> emptyList()
-        }
-
     private fun symbolFallback(char: Char): String =
         when {
             char.isLetterOrDigit() -> ""
             else -> char.toString()
         }
-
-    private fun <T> Iterator<T>.nextOrNull(): T? =
-        if (hasNext()) next() else null
 }

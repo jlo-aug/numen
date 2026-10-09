@@ -35,7 +35,6 @@ class HamburgerMenuView(
         StatusBarButtonId.Clipboard,
         StatusBarButtonId.Undo,
         StatusBarButtonId.Redo,
-        StatusBarButtonId.Language,
         StatusBarButtonId.MinimalUi,
         StatusBarButtonId.SoftwareKeyboardMode,
         StatusBarButtonId.Settings
@@ -111,10 +110,6 @@ class HamburgerMenuView(
     fun setMinimalUiActive(isActive: Boolean) {
         lastMinimalUiActive = isActive
         buttonHost.setMinimalUiActive(isActive)
-    }
-
-    fun refreshLanguageText() {
-        buttonHost.refreshLanguageText()
     }
 
     private fun ensureView(): FrameLayout {
@@ -277,7 +272,6 @@ class HamburgerMenuView(
         lastMicrophoneActive?.let { buttonHost.setMicrophoneActive(it) }
         lastMicrophoneRms?.let { buttonHost.updateMicrophoneAudioLevel(it) }
         lastMinimalUiActive?.let { buttonHost.setMinimalUiActive(it) }
-        buttonHost.refreshLanguageText()
     }
 
     private fun createCloseButton(

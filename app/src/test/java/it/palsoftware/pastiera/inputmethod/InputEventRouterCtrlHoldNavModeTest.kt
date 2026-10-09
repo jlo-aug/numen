@@ -45,7 +45,7 @@ class InputEventRouterCtrlHoldNavModeTest {
 
     @Test
     fun heldCtrl_defaultsToAppShortcutPassthrough() {
-        LayoutMappingRepository.loadLayout(context.assets, "qwerty", context)
+        LayoutMappingRepository.loadLayout(context.assets, "qwerty")
         val inputConnection = mockInputConnection()
         val event = ctrlKeyDown(KeyEvent.KEYCODE_D)
 
@@ -69,33 +69,7 @@ class InputEventRouterCtrlHoldNavModeTest {
     }
 
     @Test
-    fun heldCtrl_whenLayoutAwareEnabled_usesActiveLayoutForPassthroughShortcutKey() {
-        SettingsManager.setLayoutAwareCtrlShortcutsEnabled(context, true)
-        LayoutMappingRepository.loadLayout(context.assets, "qwertz", context)
-        val inputConnection = mockInputConnection()
-
-        val handled = router.handleCtrlModifiedKey(
-            keyCode = KeyEvent.KEYCODE_Y,
-            event = ctrlKeyDown(KeyEvent.KEYCODE_Y),
-            inputConnection = inputConnection,
-            ctrlKeyMap = navMapping,
-            ctrlLatchFromNavMode = false,
-            ctrlOneShot = false,
-            ctrlPhysicallyPressed = true,
-            clearCtrlOneShot = {},
-            updateStatusBar = {},
-            callSuper = { false },
-            toggleMinimalUi = {}
-        )
-
-        assertTrue(handled)
-        val sentEvent = captureSentKeyEvents(inputConnection, expectedCount = 1).single()
-        assertEquals(KeyEvent.KEYCODE_Z, sentEvent.keyCode)
-    }
-
-    @Test
-    fun heldCtrl_whenLayoutAwareDisabled_passesOriginalKeycodeThrough() {
-        LayoutMappingRepository.loadLayout(context.assets, "qwertz", context)
+    fun heldCtrl_passesOriginalKeycodeThrough() {
         val inputConnection = mockInputConnection()
 
         val handled = router.handleCtrlModifiedKey(
@@ -115,58 +89,6 @@ class InputEventRouterCtrlHoldNavModeTest {
         assertTrue(handled)
         val sentEvent = captureSentKeyEvents(inputConnection, expectedCount = 1).single()
         assertEquals(KeyEvent.KEYCODE_Z, sentEvent.keyCode)
-    }
-
-    @Test
-    fun heldCtrl_whenLayoutAwareEnabled_usesActiveLayoutForQwertzYKeyPassthrough() {
-        SettingsManager.setLayoutAwareCtrlShortcutsEnabled(context, true)
-        LayoutMappingRepository.loadLayout(context.assets, "qwertz", context)
-        val inputConnection = mockInputConnection()
-
-        val handled = router.handleCtrlModifiedKey(
-            keyCode = KeyEvent.KEYCODE_Z,
-            event = ctrlKeyDown(KeyEvent.KEYCODE_Z),
-            inputConnection = inputConnection,
-            ctrlKeyMap = navMapping,
-            ctrlLatchFromNavMode = false,
-            ctrlOneShot = false,
-            ctrlPhysicallyPressed = true,
-            clearCtrlOneShot = {},
-            updateStatusBar = {},
-            callSuper = { false },
-            toggleMinimalUi = {}
-        )
-
-        assertTrue(handled)
-        val sentEvent = captureSentKeyEvents(inputConnection, expectedCount = 1).single()
-        assertEquals(KeyEvent.KEYCODE_Y, sentEvent.keyCode)
-    }
-
-    @Test
-    fun ctrlOneShot_whenLayoutAwareEnabled_usesActiveLayoutForConfiguredMappingLookup() {
-        SettingsManager.setLayoutAwareCtrlShortcutsEnabled(context, true)
-        LayoutMappingRepository.loadLayout(context.assets, "qwertz", context)
-        val inputConnection = mockInputConnection()
-        val mapping = mapOf(
-            KeyEvent.KEYCODE_Z to KeyMappingLoader.CtrlMapping("action", "undo")
-        )
-
-        val handled = router.handleCtrlModifiedKey(
-            keyCode = KeyEvent.KEYCODE_Y,
-            event = keyDown(KeyEvent.KEYCODE_Y),
-            inputConnection = inputConnection,
-            ctrlKeyMap = mapping,
-            ctrlLatchFromNavMode = false,
-            ctrlOneShot = true,
-            ctrlPhysicallyPressed = false,
-            clearCtrlOneShot = {},
-            updateStatusBar = {},
-            callSuper = { false },
-            toggleMinimalUi = {}
-        )
-
-        assertTrue(handled)
-        verify(inputConnection, times(1)).performContextMenuAction(android.R.id.undo)
     }
 
     @Test
@@ -195,10 +117,8 @@ class InputEventRouterCtrlHoldNavModeTest {
     }
 
     @Test
-    fun heldCtrlNavGrid_staysPhysicalWhenLayoutAwareShortcutsAreEnabled() {
+    fun heldCtrlNavGrid_staysPhysical() {
         SettingsManager.setNavModeCtrlHoldEnabled(context, true)
-        SettingsManager.setLayoutAwareCtrlShortcutsEnabled(context, true)
-        LayoutMappingRepository.loadLayout(context.assets, "qwertz", context)
         val inputConnection = mockInputConnection()
         val mapping = mapOf(
             KeyEvent.KEYCODE_Y to KeyMappingLoader.CtrlMapping("keycode", "PAGE_UP"),
@@ -225,9 +145,7 @@ class InputEventRouterCtrlHoldNavModeTest {
     }
 
     @Test
-    fun latchedNavGrid_staysPhysicalWhenLayoutAwareShortcutsAreEnabled() {
-        SettingsManager.setLayoutAwareCtrlShortcutsEnabled(context, true)
-        LayoutMappingRepository.loadLayout(context.assets, "qwertz", context)
+    fun latchedNavGrid_staysPhysical() {
         val inputConnection = mockInputConnection()
         val mapping = mapOf(
             KeyEvent.KEYCODE_Y to KeyMappingLoader.CtrlMapping("keycode", "PAGE_UP"),

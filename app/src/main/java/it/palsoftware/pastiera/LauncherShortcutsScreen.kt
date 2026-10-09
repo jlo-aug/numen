@@ -7,7 +7,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -30,7 +29,6 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.ui.viewinterop.AndroidView
 import android.widget.ImageView
 import android.view.ViewGroup
-import android.content.pm.PackageManager
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.BoxWithConstraints
 import it.palsoftware.pastiera.inputmethod.LauncherShortcutAssignmentActivity
@@ -49,7 +47,7 @@ import it.palsoftware.pastiera.commands.CommandSourceId
 import it.palsoftware.pastiera.commands.PastieraCommandSource
 
 /**
- * Schermata per gestire le scorciatoie del launcher.
+ * Screen for managing launcher shortcuts.
  */
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -60,7 +58,7 @@ fun LauncherShortcutsScreen(
     val context = LocalContext.current
     val pm = context.packageManager
 
-    // Funzione helper per verificare se un package esiste ancora installato
+    // Checks whether a package is still installed
     fun isPackageInstalled(packageName: String?): Boolean {
         if (packageName == null) return false
         return try {
@@ -70,7 +68,7 @@ fun LauncherShortcutsScreen(
         }
     }
 
-    // Carica le scorciatoie salvate e pulisce quelle per app disinstallate
+    // Load saved shortcuts and clean up those for uninstalled apps
     var shortcuts by remember {
         mutableStateOf(SettingsManager.getLauncherShortcuts(context))
     }
@@ -95,7 +93,7 @@ fun LauncherShortcutsScreen(
         }
     }
 
-    // Activity launcher per avviare LauncherShortcutAssignmentActivity
+    // Activity launcher for LauncherShortcutAssignmentActivity
     val launcherShortcutAssignmentLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.StartActivityForResult()
     ) { result ->
@@ -103,16 +101,16 @@ fun LauncherShortcutsScreen(
             result.resultCode == LauncherShortcutAssignmentActivity.RESULT_ASSIGNED ||
             result.resultCode == LauncherShortcutAssignmentActivity.RESULT_REMOVED
         ) {
-            // Aggiorna le scorciatoie dopo l'assegnazione
+            // Refresh shortcuts after assignment
             shortcuts = SettingsManager.getLauncherShortcuts(context)
         }
     }
 
-    // Funzione helper per avviare l'activity di assegnazione
+    // Launches the assignment activity
     fun launchShortcutAssignment(keyCode: Int) {
         val intent = Intent(context, LauncherShortcutAssignmentActivity::class.java).apply {
             putExtra(LauncherShortcutAssignmentActivity.EXTRA_KEY_CODE, keyCode)
-            putExtra(LauncherShortcutAssignmentActivity.EXTRA_SKIP_LAUNCH, true) // Non avviare l'app dalla schermata settings
+            putExtra(LauncherShortcutAssignmentActivity.EXTRA_SKIP_LAUNCH, true) // Don't launch the app from the settings screen
         }
         launcherShortcutAssignmentLauncher.launch(intent)
     }
@@ -127,7 +125,7 @@ fun LauncherShortcutsScreen(
             var containerPosition by remember { mutableStateOf<androidx.compose.ui.geometry.Offset?>(null) }
 
 
-    // Funzione helper per scambiare gli shortcut tra due tasti
+    // Swaps shortcuts between two keys
     fun swapShortcuts(fromKeyCode: Int, toKeyCode: Int) {
         // Use atomic swap function from SettingsManager
         SettingsManager.swapLauncherShortcuts(context, fromKeyCode, toKeyCode)
@@ -172,14 +170,14 @@ fun LauncherShortcutsScreen(
 
         Spacer(modifier = Modifier.height(16.dp))
 
-        // Griglia QWERTY con larghezza fissa (come SYM layers)
+        // Fixed-width QWERTY grid (like the SYM layers)
         val qwertyRows = listOf(
             listOf("Q", "W", "E", "R", "T", "Y", "U", "I", "O", "P"),
             listOf("A", "S", "D", "F", "G", "H", "J", "K", "L", "⌫"),
             listOf("Z", "X", "C", "V","␣", "B", "N", "M", "⏎")
         )
 
-        // Funzione helper per ottenere l'icona dell'app
+        // Returns the app icon
         fun getAppIcon(packageName: String?): android.graphics.drawable.Drawable? {
             return try {
                 if (packageName != null && isPackageInstalled(packageName)) {
@@ -202,7 +200,7 @@ fun LauncherShortcutsScreen(
                 }
         ) {
             val density = LocalDensity.current
-            // Calcola la larghezza fissa per ogni tasto (come nella visuale SYM)
+            // Compute a fixed width per key (as in the SYM view)
             val maxKeysInRow = qwertyRows.maxOf { it.size }
             val keySpacing = 4.dp
             val totalSpacing = keySpacing * (maxKeysInRow - 1)
@@ -215,7 +213,7 @@ fun LauncherShortcutsScreen(
                 verticalArrangement = Arrangement.spacedBy(keySpacing)
             ) {
                 qwertyRows.forEachIndexed { rowIndex, row ->
-                    // Calcola lo spazio necessario per centrare la riga
+                    // Compute the spacing needed to center the row
                     val rowKeysCount = row.size
                     val totalRowWidth = keySize * rowKeysCount + keySpacing * (rowKeysCount - 1)
                     val maxRowWidth = keySize * maxKeysInRow + keySpacing * (maxKeysInRow - 1)
@@ -225,7 +223,7 @@ fun LauncherShortcutsScreen(
                         modifier = Modifier.fillMaxWidth(),
                         horizontalArrangement = Arrangement.Center
                     ) {
-                        // Spacer a sinistra per centrare la riga (solo per seconda e terza riga)
+                        // Left spacer to center the row (second and third rows only)
                         if (rowIndex > 0) {
                             Spacer(modifier = Modifier.width(leftSpacing))
                         }
@@ -454,7 +452,7 @@ fun LauncherShortcutsScreen(
                                                     )
                                                 }
                                             } else if (hasApp && appIcon != null) {
-                                                // Mostra solo l'icona dell'app (riempie tutto il tasto)
+                                                // Show only the app icon (fills the whole key)
                                                 AndroidView(
                                                     factory = { ctx ->
                                                         ImageView(ctx).apply {
@@ -493,7 +491,7 @@ fun LauncherShortcutsScreen(
                                                     )
                                                 }
                                             } else {
-                                                // Mostra la lettera del tasto
+                                                // Show the key letter
                                                 Text(
                                                     text = keyName,
                                                     style = MaterialTheme.typography.bodyLarge,
@@ -511,7 +509,7 @@ fun LauncherShortcutsScreen(
                             }
                         }
 
-                        // Spacer a destra per centrare la riga
+                        // Right spacer to center the row
                         if (rowIndex > 0) {
                             Spacer(modifier = Modifier.width(leftSpacing))
                         }

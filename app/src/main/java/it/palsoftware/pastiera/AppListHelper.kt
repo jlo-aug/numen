@@ -2,7 +2,6 @@ package it.palsoftware.pastiera
 
 import android.content.Context
 import android.content.pm.ApplicationInfo
-import android.content.pm.PackageManager
 import android.content.Intent
 import android.graphics.drawable.Drawable
 import android.os.Build
@@ -11,7 +10,7 @@ import android.util.Log
 import it.palsoftware.pastiera.commands.CommandLaunchSpec
 
 /**
- * Data class per rappresentare un'app installata.
+ * An installed app.
  */
 data class InstalledApp(
     val packageName: String,
@@ -21,7 +20,7 @@ data class InstalledApp(
 )
 
 /**
- * Helper per ottenere la lista di tutte le app installate che possono essere avviate.
+ * Helper for listing all installed launchable apps.
  */
 object AppListHelper {
     private const val TAG = "AppListHelper"
@@ -101,7 +100,7 @@ object AppListHelper {
     }
     
     /**
-     * Ottiene tutte le app installate che possono essere avviate.
+     * Returns all installed launchable apps.
      */
     fun getInstalledApps(context: Context, forceRefresh: Boolean = false): List<InstalledApp> {
         if (!forceRefresh) {
@@ -112,20 +111,20 @@ object AppListHelper {
         val apps = mutableListOf<InstalledApp>()
         
         try {
-            // Ottieni tutte le app che hanno un launcher activity
+            // Get all apps that have a launcher activity
             val intent = Intent(Intent.ACTION_MAIN, null).apply {
                 addCategory(Intent.CATEGORY_LAUNCHER)
             }
             
             val resolveInfos = pm.queryIntentActivities(intent, 0)
             
-            // Raggruppa per package per evitare duplicati
+            // Group by package to avoid duplicates
             val packageNames = mutableSetOf<String>()
             
             for (resolveInfo in resolveInfos) {
                 val packageName = resolveInfo.activityInfo.packageName
                 
-                // Evita duplicati
+                // Skip duplicates
                 if (packageNames.contains(packageName)) {
                     continue
                 }
@@ -144,17 +143,17 @@ object AppListHelper {
                         isSystemApp = isSystemApp
                     ))
                 } catch (e: Exception) {
-                    Log.w(TAG, "Errore nel caricamento info per $packageName", e)
+                    Log.w(TAG, "Error loading info for $packageName", e)
                 }
             }
             
-            // Ordina alfabeticamente per nome
+            // Sort alphabetically by name
             apps.sortBy { it.appName.lowercase() }
             cachedInstalledApps = apps.toList()
             
-            Log.d(TAG, "Caricate ${apps.size} app installate")
+            Log.d(TAG, "Loaded ${apps.size} installed apps")
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel recupero delle app installate", e)
+            Log.e(TAG, "Error fetching installed apps", e)
         }
         
         return apps

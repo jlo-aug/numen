@@ -1,5 +1,6 @@
 package it.palsoftware.pastiera.inputmethod
 
+import androidx.activity.ComponentActivity
 import android.os.Bundle
 import android.view.WindowManager
 import androidx.activity.compose.setContent
@@ -49,11 +50,11 @@ import it.palsoftware.pastiera.commands.CommandSurface
 import it.palsoftware.pastiera.commands.CommandTarget
 
 /**
- * Activity per assegnare una scorciatoia del launcher a un tasto.
- * Viene mostrata quando si preme un tasto non assegnato nel launcher.
- * Usa un BottomSheet che appare sopra il launcher.
+ * Activity for assigning a launcher shortcut to a key.
+ * Shown when an unassigned key is pressed in the launcher.
+ * Uses a BottomSheet that appears over the launcher.
  */
-class LauncherShortcutAssignmentActivity : LocalizedComponentActivity() {
+class LauncherShortcutAssignmentActivity : ComponentActivity() {
     companion object {
         const val EXTRA_KEY_CODE = "key_code"
         const val EXTRA_SKIP_LAUNCH = "skip_launch"
@@ -67,7 +68,7 @@ class LauncherShortcutAssignmentActivity : LocalizedComponentActivity() {
         // Disable activity transition animations for instant appearance
         disableActivityAnimations()
         
-        // Rimuovi il titolo dalla finestra (deve essere chiamato prima di setContent)
+        // Remove the window title (must be called before setContent)
         window.requestFeature(android.view.Window.FEATURE_NO_TITLE)
         
         // Configure window to be fully transparent and overlay
@@ -86,13 +87,13 @@ class LauncherShortcutAssignmentActivity : LocalizedComponentActivity() {
         val skipLaunch = intent.getBooleanExtra(EXTRA_SKIP_LAUNCH, false)
         val hasExistingShortcut = SettingsManager.getLauncherShortcut(this, keyCode) != null
         
-        // Usa un tema trasparente per mostrare il bottom sheet sopra il launcher
+        // Use a transparent theme to show the bottom sheet over the launcher
         setContent {
             MaterialTheme {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .clickable { finish() }, // Tocca fuori per chiudere
+                        .clickable { finish() }, // Tap outside to close
                     contentAlignment = Alignment.BottomCenter
                 ) {
                     LauncherShortcutAssignmentBottomSheet(
@@ -151,8 +152,8 @@ class LauncherShortcutAssignmentActivity : LocalizedComponentActivity() {
 }
 
 /**
- * Bottom Sheet per assegnare un'app a un tasto.
- * Appare dal basso e non occupa tutto lo schermo.
+ * Bottom sheet for assigning an app to a key.
+ * Slides up from the bottom and doesn't fill the whole screen.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -165,7 +166,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
     val context = LocalContext.current
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     
-    // Focus requester per il campo di ricerca
+    // Focus requester for the search field
     val searchFocusRequester = remember { FocusRequester() }
     
     val commands by remember {
@@ -174,17 +175,17 @@ private fun LauncherShortcutAssignmentBottomSheet(
     
     var searchQuery by remember { mutableStateOf("") }
     // Numen opens with search ready: start typing an app's name right away.
-    var searchActive by remember { mutableStateOf(!BuildConfig.UPSTREAM_BRANDING) }
+    var searchActive by remember { mutableStateOf(true) }
     
-    // Dai il focus al campo di ricerca quando il bottom sheet è completamente aperto
+    // Focus the search field once the bottom sheet is fully open
     LaunchedEffect(sheetState.targetValue, searchActive) {
-        if ((sheetState.targetValue == SheetValue.Expanded || !BuildConfig.UPSTREAM_BRANDING) && searchActive) {
+        if ((sheetState.targetValue == SheetValue.Expanded || true) && searchActive) {
             kotlinx.coroutines.delay(100)
             searchFocusRequester.requestFocus()
         }
     }
     
-    // Funzione helper per ottenere la lettera del tasto
+    // Returns the key's letter
     fun getKeyLetter(keyCode: Int): Char? {
         return when (keyCode) {
             KeyEvent.KEYCODE_Q -> 'Q'
@@ -231,7 +232,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
             }
         }
         
-        // Ordina: prima le app che iniziano con la lettera del tasto, poi le altre
+        // Sort: apps starting with the key's letter first, then the rest
         val keyLetter = getKeyLetter(keyCode)?.lowercaseChar()
         if (keyLetter != null && searchQuery.isBlank()) {
             val commandsStartingWithLetter = matches.filter {
@@ -245,7 +246,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
             
             commandsStartingWithLetter + otherCommands
         } else {
-            // Se c'è una ricerca attiva, ordina normalmente
+            // With an active search, sort normally
             matches.sortedWith(compareBy<CommandTarget> { it.source.ordinal }.thenBy { it.label.lowercase() })
         }
     }
@@ -262,7 +263,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
         }
     }
     
-    // Funzione helper per ottenere il nome del tasto
+    // Returns the key's name
     @Composable
     fun getKeyName(keyCode: Int): String {
         val keyName = when (keyCode) {
@@ -300,7 +301,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
         return keyName ?: stringResource(R.string.launcher_shortcut_assignment_key_name, keyCode)
     }
     
-    // Calcola l'altezza massima (75% dello schermo)
+    // Compute the max height (75% of the screen)
     val configuration = LocalConfiguration.current
     val screenHeightDp = configuration.screenHeightDp.dp
     val maxSheetHeight = screenHeightDp * 0.75f
@@ -316,7 +317,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
             )
         }
     ) {
-        // Box con altezza massima per limitare l'altezza del bottom sheet
+        // Box with a max height to cap the bottom sheet's height
         Box(
             modifier = Modifier
                 .fillMaxWidth()
@@ -451,7 +452,7 @@ private fun LauncherShortcutAssignmentBottomSheet(
             
             Spacer(modifier = Modifier.height(12.dp))
             
-            // Griglia delle app - usa weight per espandersi e riempire lo spazio disponibile
+            // App grid: uses weight to expand and fill the available space
             if (filteredCommands.isEmpty()) {
                 Box(
                     modifier = Modifier
@@ -530,7 +531,7 @@ private fun CommandSectionHeader(label: String) {
 }
 
 /**
- * Item della griglia per un'app (versione compatta per griglia).
+ * Grid item for an app (compact grid version).
  */
 @Composable
 private fun CommandGridItem(
@@ -552,7 +553,7 @@ private fun CommandGridItem(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            // Icona app usando AndroidView (ottimizzata con remember)
+            // App icon via AndroidView (optimized with remember)
             val iconDrawable = remember(command.id) { (command.icon as? CommandIcon.DrawableIcon)?.drawable }
             Box(
                 modifier = Modifier.size(56.dp),

@@ -42,43 +42,6 @@ class SettingsManagerLayoutSwitchTest {
     }
 
     @Test
-    fun altShiftLayoutSwitch_defaultsDisabled_andPersistsEnabledState() {
-        val context = RuntimeEnvironment.getApplication()
-
-        assertFalse(SettingsManager.isAltShiftLayoutSwitchEnabled(context))
-
-        SettingsManager.setAltShiftLayoutSwitchEnabled(context, true)
-
-        assertTrue(SettingsManager.isAltShiftLayoutSwitchEnabled(context))
-    }
-
-    @Test
-    fun altEnterLayoutSwitch_defaultsDisabled_andPersistsState() {
-        val context = RuntimeEnvironment.getApplication()
-
-        assertFalse(SettingsManager.isAltEnterLayoutSwitchEnabled(context))
-
-        SettingsManager.setAltEnterLayoutSwitchEnabled(context, true)
-
-        assertTrue(SettingsManager.isAltEnterLayoutSwitchEnabled(context))
-
-        SettingsManager.setAltEnterLayoutSwitchEnabled(context, false)
-
-        assertFalse(SettingsManager.isAltEnterLayoutSwitchEnabled(context))
-    }
-
-    @Test
-    fun ctrlSpaceLayoutSwitch_defaultsEnabled_andPersistsDisabledState() {
-        val context = RuntimeEnvironment.getApplication()
-
-        assertTrue(SettingsManager.isCtrlSpaceLayoutSwitchEnabled(context))
-
-        SettingsManager.setCtrlSpaceLayoutSwitchEnabled(context, false)
-
-        assertFalse(SettingsManager.isCtrlSpaceLayoutSwitchEnabled(context))
-    }
-
-    @Test
     fun symAutoCloseOnTouch_defaultsEnabled_andPersistsDisabledState() {
         val context = RuntimeEnvironment.getApplication()
 
@@ -208,123 +171,6 @@ class SettingsManagerLayoutSwitchTest {
             ),
             SettingsManager.getModifierIndicators(context)
         )
-    }
-
-    @Test
-    fun trackpadSwipeThresholds_fallBackToLegacyValue() {
-        val context = RuntimeEnvironment.getApplication()
-
-        SettingsManager.getPreferences(context).edit()
-            .putFloat("trackpad_swipe_threshold", 420f)
-            .commit()
-
-        assertEquals(420f, SettingsManager.getTrackpadSuggestionSwipeThreshold(context), 0.01f)
-        assertEquals(420f, SettingsManager.getTrackpadDeleteSwipeThreshold(context), 0.01f)
-    }
-
-    @Test
-    fun trackpadSwipeThresholds_persistSeparatelyAndClamp() {
-        val context = RuntimeEnvironment.getApplication()
-
-        SettingsManager.setTrackpadSuggestionSwipeThreshold(context, 240f)
-        SettingsManager.setTrackpadDeleteSwipeThreshold(context, 720f)
-
-        assertEquals(240f, SettingsManager.getTrackpadSuggestionSwipeThreshold(context), 0.01f)
-        assertEquals(720f, SettingsManager.getTrackpadDeleteSwipeThreshold(context), 0.01f)
-
-        SettingsManager.setTrackpadSuggestionSwipeThreshold(context, 40f)
-        SettingsManager.setTrackpadDeleteSwipeThreshold(context, 2000f)
-
-        assertEquals(120f, SettingsManager.getTrackpadSuggestionSwipeThreshold(context), 0.01f)
-        assertEquals(750f, SettingsManager.getTrackpadDeleteSwipeThreshold(context), 0.01f)
-    }
-
-    @Test
-    fun trackpadShizukuDevice_defaultsToAutoAndPersistsEventNode() {
-        val context = RuntimeEnvironment.getApplication()
-
-        assertEquals(
-            SettingsManager.TRACKPAD_SHIZUKU_DEVICE_AUTO,
-            SettingsManager.getTrackpadShizukuDevice(context)
-        )
-
-        SettingsManager.setTrackpadShizukuDevice(context, "/dev/input/event6")
-
-        assertEquals(
-            "/dev/input/event6",
-            SettingsManager.getTrackpadShizukuDevice(context)
-        )
-
-        SettingsManager.setTrackpadShizukuDevice(context, "not-an-event-node")
-
-        assertEquals(
-            SettingsManager.TRACKPAD_SHIZUKU_DEVICE_AUTO,
-            SettingsManager.getTrackpadShizukuDevice(context)
-        )
-    }
-
-    @Test
-    fun inputStyleSuggestionLocales_persistPerLocaleAndLayout() {
-        val context = RuntimeEnvironment.getApplication()
-
-        SettingsManager.setAdditionalSuggestionLocalesForInputStyle(
-            context,
-            locale = "de_DE",
-            layout = "qwertz",
-            locales = listOf("en", "fr-FR", "en")
-        )
-
-        assertEquals(
-            listOf("en", "fr-FR"),
-            SettingsManager.getAdditionalSuggestionLocalesForInputStyle(context, "de-DE", "qwertz")
-        )
-        assertTrue(
-            SettingsManager.getAdditionalSuggestionLocalesForInputStyle(context, "de-DE", "qwerty").isEmpty()
-        )
-    }
-
-    @Test
-    fun inputStyleSuggestionLocales_fallBackAcrossLanguageAndLayout() {
-        val context = RuntimeEnvironment.getApplication()
-
-        SettingsManager.setAdditionalSuggestionLocalesForInputStyle(
-            context,
-            locale = "de",
-            layout = "german_multitap_qwertz",
-            locales = listOf("en")
-        )
-
-        assertEquals(
-            listOf("en"),
-            SettingsManager.getAdditionalSuggestionLocalesForInputStyle(context, "de-DE", "qwertz")
-        )
-    }
-
-    @Test
-    fun hiddenSystemInputStyles_persistPerLocaleAndLayout() {
-        val context = RuntimeEnvironment.getApplication()
-
-        assertFalse(SettingsManager.isSystemInputStyleHidden(context, "de_DE", "qwertz"))
-
-        SettingsManager.hideSystemInputStyle(context, "de_DE", "qwertz")
-
-        assertTrue(SettingsManager.isSystemInputStyleHidden(context, "de-DE", "qwertz"))
-        assertFalse(SettingsManager.isSystemInputStyleHidden(context, "de-DE", "qwerty"))
-
-        SettingsManager.showSystemInputStyle(context, "de-DE", "qwertz")
-
-        assertFalse(SettingsManager.isSystemInputStyleHidden(context, "de_DE", "qwertz"))
-    }
-
-    @Test
-    fun layoutSwitchToast_defaultsEnabled_andPersistsDisabledState() {
-        val context = RuntimeEnvironment.getApplication()
-
-        assertTrue(SettingsManager.isToastOnLayoutSwitchEnabled(context))
-
-        SettingsManager.setToastOnLayoutSwitchEnabled(context, false)
-
-        assertFalse(SettingsManager.isToastOnLayoutSwitchEnabled(context))
     }
 
     @Test
@@ -608,17 +454,6 @@ class SettingsManagerLayoutSwitchTest {
             .commit()
 
         assertEquals(".,!?\\/\"", SettingsManager.getAutoSpacePunctuation(context))
-    }
-
-    @Test
-    fun layoutAwareCtrlShortcuts_defaultsDisabled_andPersistsEnabledState() {
-        val context = RuntimeEnvironment.getApplication()
-
-        assertFalse(SettingsManager.getLayoutAwareCtrlShortcutsEnabled(context))
-
-        SettingsManager.setLayoutAwareCtrlShortcutsEnabled(context, true)
-
-        assertTrue(SettingsManager.getLayoutAwareCtrlShortcutsEnabled(context))
     }
 
     @Test

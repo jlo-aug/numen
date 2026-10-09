@@ -3,20 +3,22 @@ package it.palsoftware.pastiera.inputmethod
 import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils.localeString
 import org.json.JSONObject
-import java.text.Normalizer
 
 /**
- * Handles auto-correction of accents, apostrophes, and contractions.
- * Automatically corrects common patterns when space or punctuation is pressed.
+ * Applies text replacements ("dont" → "don't", user entries like "brb" → "be right back")
+ * when space or punctuation is pressed.
  * Supports undo with backspace (only as first action after correction).
- * Preserves original capitalization (Cos e → Cos'è, not cos'è).
+ * Preserves original capitalization (Dont → Don't, DONT → DON'T).
  */
 object AutoCorrector {
     private const val TAG = "AutoCorrector"
 
-    private val corrections = mutableMapOf<String, Map<String, String>>()
+    private const val ASSET_PATH = "common/autocorrect/auto_corrections_en.json"
+
+    /** Lowercase trigger → replacement: the bundled English list overlaid with the user's entries. */
+    @Volatile
+    private var corrections: Map<String, String> = emptyMap()
 
     /**
      * Information about the last applied correction.
@@ -35,9 +37,6 @@ object AutoCorrector {
     // These words won't be corrected until the user modifies the text
     private val rejectedWords = mutableSetOf<String>()
 
-    // Track custom languages loaded from external files
-    private val customLanguages = mutableSetOf<String>()
-
     private fun hasSymbolChar(text: String): Boolean {
         return text.any { !it.isLetterOrDigit() }
     }
@@ -54,28 +53,21 @@ object AutoCorrector {
      * Matches custom/exact triggers that may contain symbols (e.g. ":e1", "@@@")
      * at the end of the text segment before trailing boundaries.
      */
-    private fun findExactSymbolTrigger(
-        text: String,
-        endIndex: Int,
-        languagesToSearch: Set<String>
-    ): Pair<String, String>? {
+    private fun findExactSymbolTrigger(text: String, endIndex: Int): Pair<String, String>? {
         if (endIndex <= 0) return null
         val textUpToCursor = text.substring(0, endIndex)
         var bestMatch: Pair<String, String>? = null
 
-        for (lang in languagesToSearch) {
-            val langCorrections = corrections[lang] ?: continue
-            for ((trigger, replacement) in langCorrections) {
-                if (trigger.isBlank() || !hasSymbolChar(trigger)) continue
-                if (!textUpToCursor.endsWith(trigger, ignoreCase = true)) continue
+        for ((trigger, replacement) in corrections) {
+            if (trigger.isBlank() || !hasSymbolChar(trigger)) continue
+            if (!textUpToCursor.endsWith(trigger, ignoreCase = true)) continue
 
-                val start = textUpToCursor.length - trigger.length
-                if (!isBoundaryBeforeIndex(textUpToCursor, start)) continue
+            val start = textUpToCursor.length - trigger.length
+            if (!isBoundaryBeforeIndex(textUpToCursor, start)) continue
 
-                val currentBestLength = bestMatch?.first?.length ?: -1
-                if (trigger.length > currentBestLength) {
-                    bestMatch = Pair(trigger, replacement)
-                }
+            val currentBestLength = bestMatch?.first?.length ?: -1
+            if (trigger.length > currentBestLength) {
+                bestMatch = Pair(trigger, replacement)
             }
         }
 
@@ -83,179 +75,27 @@ object AutoCorrector {
     }
 
     /**
-     * Loads auto-correction rules from JSON files per language.
-     * Files must be in common/autocorrect folder with name: auto_corrections_{locale}.json
-     * Example: common/autocorrect/auto_corrections_it.json, common/autocorrect/auto_corrections_en.json
-     * Also supports loading custom JSON files.
+     * Loads the bundled English text replacements and, when [context] is given,
+     * overlays the user's own entries on top (custom entries win).
      */
     fun loadCorrections(assets: AssetManager, context: Context? = null) {
+        val loaded = mutableMapOf<String, String>()
         try {
-            corrections.clear()
-            customLanguages.clear()
-
-            // List of supported languages by default
-            val standardLocales = listOf("it", "en", "es", "fr", "de", "pl", "x-pastiera")
-
-            for (locale in standardLocales) {
-                try {
-                    // Load bundled defaults first, then overlay custom corrections.
-                    val fileName = "common/autocorrect/auto_corrections_$locale.json"
-                    val jsonString = assets.open(fileName).bufferedReader().use { it.readText() }
-                    loadCorrectionsFromJson(locale, jsonString)
-
-                    if (context != null) {
-                        val customCorrections = it.palsoftware.pastiera.SettingsManager.getCustomAutoCorrections(context, locale)
-                        if (customCorrections.isNotEmpty()) {
-                            val customJson = correctionsToJson(customCorrections)
-                            loadCorrectionsFromJson(locale, customJson)
-                            Log.d(TAG, "Loaded ${customCorrections.size} custom corrections for locale: $locale")
-                        }
-                    }
-                } catch (e: Exception) {
-                    // File not found or parsing error - ignore this language
-                    Log.d(TAG, "No correction file found for locale: $locale")
-                }
+            val jsonString = assets.open(ASSET_PATH).bufferedReader().use { it.readText() }
+            val json = JSONObject(jsonString)
+            for (key in json.keys()) {
+                loaded[key] = json.getString(key)
             }
-
-            // Remove any standard languages from customLanguages (shouldn't be there, but for safety)
-            customLanguages.removeAll(standardLocales)
-            
-            // Also load additional custom languages (non-standard)
-            if (context != null) {
-                try {
-                    val prefs = it.palsoftware.pastiera.SettingsManager.getPreferences(context)
-                    val allPrefs = prefs.all
-                    
-                    // Search for all keys starting with "auto_correct_custom_"
-                    for ((key, value) in allPrefs) {
-                        if (key.startsWith("auto_correct_custom_") && value is String) {
-                            val languageCode = key.removePrefix("auto_correct_custom_")
-                            
-                            // Skip standard languages (already loaded above)
-                            if (languageCode !in standardLocales) {
-                                try {
-                                    val customCorrections = it.palsoftware.pastiera.SettingsManager.getCustomAutoCorrections(context, languageCode)
-                                    if (customCorrections.isNotEmpty()) {
-                                        val customJson = correctionsToJson(customCorrections)
-                                        loadCorrectionsFromJson(languageCode, customJson)
-                                        customLanguages.add(languageCode)
-                                        Log.d(TAG, "Loaded ${customCorrections.size} corrections for custom language: $languageCode")
-                                    }
-                                } catch (e: Exception) {
-                                    Log.e(TAG, "Error loading custom language $languageCode", e)
-                                }
-                            }
-                        }
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error loading custom languages", e)
-                }
-            }
-            
-            Log.d(TAG, "Total languages loaded: ${corrections.size}")
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading corrections", e)
+            Log.e(TAG, "Error loading $ASSET_PATH", e)
         }
-    }
-    
-    /**
-     * Converts a map of corrections to JSON string.
-     */
-    private fun correctionsToJson(corrections: Map<String, String>): String {
-        val jsonObject = JSONObject()
-        corrections.forEach { (key, value) ->
-            jsonObject.put(key, value)
+        if (context != null) {
+            val custom = it.palsoftware.pastiera.SettingsManager.getCustomAutoCorrections(context)
+            loaded.putAll(custom)
+            Log.d(TAG, "Loaded ${custom.size} custom text replacements")
         }
-        return jsonObject.toString()
-    }
-
-    /**
-     * Loads corrections from a custom JSON file.
-     * @param locale The language code (e.g. "it", "en", "custom1")
-     * @param jsonString The JSON file content
-     */
-    fun loadCustomCorrections(locale: String, jsonString: String) {
-        try {
-            loadCorrectionsFromJson(locale, jsonString)
-            // Add to customLanguages only if not a standard language
-            val standardLocales = listOf("it", "en", "es", "fr", "de", "pl", "x-pastiera")
-            if (locale !in standardLocales) {
-                customLanguages.add(locale)
-            }
-            Log.d(TAG, "Loaded custom corrections for locale: $locale")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error loading custom corrections for $locale", e)
-        }
-    }
-
-    /**
-     * Loads corrections from a JSON string.
-     * Ignores the special "__name" field that contains the language name.
-     * Always adds the locale to corrections map, even if empty, so it appears in available languages.
-     */
-    private fun loadCorrectionsFromJson(locale: String, jsonString: String) {
-        val jsonObject = JSONObject(jsonString)
-        val correctionMap = corrections[locale]?.toMutableMap() ?: mutableMapOf()
-
-        // JSON file contains an object with keys that are words to correct
-        val keys = jsonObject.keys()
-        while (keys.hasNext()) {
-            val key = keys.next()
-            // Skip special name field
-            if (key != "__name") {
-                val value = jsonObject.getString(key)
-                correctionMap[key] = value
-            }
-        }
-
-        // Always add locale to corrections map, even if empty, so it appears in available languages
-        corrections[locale] = correctionMap
-        Log.d(TAG, "Loaded ${correctionMap.size} corrections for locale: $locale")
-    }
-
-    /**
-     * Gets all available languages (including custom ones).
-     */
-    fun getAllAvailableLanguages(): Set<String> {
-        return corrections.keys.toSet()
-    }
-
-    /**
-     * Gets only custom languages.
-     */
-    fun getCustomLanguages(): Set<String> {
-        return customLanguages.toSet()
-    }
-
-    /**
-     * Gets current locale based on device language.
-     */
-    private fun getCurrentLocale(context: Context): String {
-        val locale = context.resources.configuration.locales[0]
-        return locale.language.lowercase()
-    }
-
-    /**
-     * Gets the current IME subtype language code (e.g., "it" from "it_IT").
-     * Returns null if the IME or subtype is not available.
-     */
-    private fun getCurrentImeLanguageCode(context: Context): String? {
-        return try {
-            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? android.view.inputmethod.InputMethodManager
-            val localeString = imm?.currentInputMethodSubtype?.localeString() ?: return null
-            val locale = java.util.Locale.forLanguageTag(localeString.replace("_", "-"))
-            locale.language.lowercase()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error getting IME language code", e)
-            null
-        }
-    }
-
-    /**
-     * Gets all supported locales.
-     */
-    fun getSupportedLocales(): Set<String> {
-        return corrections.keys.toSet()
+        corrections = loaded
+        Log.d(TAG, "Loaded ${loaded.size} text replacements")
     }
 
     /**
@@ -270,9 +110,6 @@ object AutoCorrector {
         if (originalWord.isEmpty() || correctedWord.isEmpty()) {
             return correctedWord
         }
-
-        val originalLower = originalWord.lowercase()
-        val correctedLower = correctedWord.lowercase()
 
         // If original word was all uppercase, apply uppercase to entire correction
         if (originalWord == originalWord.uppercase() && originalWord.any { it.isLetter() }) {
@@ -304,80 +141,20 @@ object AutoCorrector {
         return correctedWord
     }
 
-    /**
-     * Checks if a word should be corrected.
-     * @param word The word to check (without trailing spaces)
-     * @param locale The locale to use (e.g. "it", "en"). If null, uses device locale.
-     * @param context The context to verify enabled languages
-     * @return The corrected word with preserved capitalization, or null if no correction.
-     */
-    fun getCorrection(word: String, locale: String? = null, context: Context? = null): String? {
-        val targetLocale = locale
-            ?: context?.let { getCurrentImeLanguageCode(it) }
-            ?: return null
-
-        // Verify if language is enabled
-        if (context != null) {
-            val enabledLanguages = it.palsoftware.pastiera.SettingsManager.getAutoCorrectEnabledLanguages(context)
-            if (enabledLanguages.isNotEmpty() && !enabledLanguages.contains(targetLocale)) {
-                return null
-            }
-        }
-
-        // Search for correction using lowercase word (JSON keys are lowercase)
-        val wordLower = word.lowercase()
-
-        // Try specific locale first
-        corrections[targetLocale]?.let { localeCorrections ->
-            localeCorrections[wordLower]?.let { correction ->
-                // Applica la capitalizzazione originale alla correzione
-                return applyCapitalization(word, correction)
-            }
-        }
-
-        return null
-    }
-
-    private fun getCustomCorrection(word: String, locale: String, context: Context?): String? {
-        if (context == null) return null
-        val customCorrections = it.palsoftware.pastiera.SettingsManager.getCustomAutoCorrections(context, locale)
-        val correction = customCorrections[word.lowercase()] ?: return null
+    /** Returns the replacement for [word] with its capitalization applied, or null. */
+    private fun getCorrection(word: String): String? {
+        val correction = corrections[word.lowercase()] ?: return null
         return applyCapitalization(word, correction)
-    }
-
-    private fun isOrthographicReplacement(original: String, replacement: String): Boolean {
-        fun normalize(text: String): String {
-            return Normalizer.normalize(text.lowercase(), Normalizer.Form.NFD)
-                .replace("\\p{Mn}".toRegex(), "")
-                .filter { it.isLetterOrDigit() }
-        }
-        return normalize(original) == normalize(replacement)
-    }
-
-    private fun shouldApplyExactReplacement(
-        original: String,
-        replacement: String,
-        isKnownWord: ((String) -> Boolean)?,
-        explicitSubstitutionLanguagesEnabled: Boolean
-    ): Boolean {
-        val known = isKnownWord?.invoke(original) == true
-        return !known || isOrthographicReplacement(original, replacement) || explicitSubstitutionLanguagesEnabled
     }
 
     /**
      * Processes text before cursor and applies corrections if needed.
-     * Supports both single words and patterns with spaces (e.g. "cos e" → "cos'è").
+     * Supports both single words and two-word patterns (e.g. "cos e" → "cos'è").
+     * Replacements apply even when the typed word is a dictionary word ("ill" → "I'll").
      * @param textBeforeCursor The text before cursor
-     * @param locale The locale to use
-     * @param context The context to get locale if not specified
      * @return Pair<wordToReplace, correctedWord> if there's a correction, null otherwise
      */
-    fun processText(
-        textBeforeCursor: CharSequence?,
-        locale: String? = null,
-        context: Context? = null,
-        isKnownWord: ((String) -> Boolean)? = null
-    ): Pair<String, String>? {
+    fun processText(textBeforeCursor: CharSequence?): Pair<String, String>? {
         if (textBeforeCursor == null || textBeforeCursor.isEmpty()) {
             return null
         }
@@ -392,42 +169,6 @@ object AutoCorrector {
             return it.palsoftware.pastiera.core.Punctuation.isWordBoundary(ch, prev, next)
         }
 
-        // Get enabled languages if we have context
-        val enabledLanguages = if (context != null) {
-            it.palsoftware.pastiera.SettingsManager.getAutoCorrectEnabledLanguages(context)
-        } else {
-            emptySet<String>()
-        }
-
-        // Determine current IME language when no explicit substitution languages are configured.
-        val imeLanguage = locale ?: if (context != null) getCurrentImeLanguageCode(context) else null
-
-        // Build candidate languages. When the user explicitly enables multiple
-        // substitution languages, search those languages instead of only the
-        // active IME language.
-        val candidates = if (enabledLanguages.isNotEmpty()) {
-            enabledLanguages.filter { corrections.containsKey(it) }.toSet()
-        } else {
-            if (imeLanguage == null) {
-                return null
-            }
-            buildSet {
-                if (corrections.containsKey(imeLanguage)) add(imeLanguage)
-                if (corrections.containsKey("x-pastiera")) add("x-pastiera")
-            }
-        }
-
-        // Apply toggle filter (if not empty). x-pastiera remains only if enabled.
-        val languagesToSearch = candidates.filter { lang ->
-            enabledLanguages.isEmpty() || enabledLanguages.contains(lang)
-        }.toSet()
-
-        // If no languages available after filtering, exit
-        if (languagesToSearch.isEmpty()) {
-            return null
-        }
-        val explicitSubstitutionLanguagesEnabled = context != null && enabledLanguages.isNotEmpty()
-
         // Highest priority: exact trigger matches that include symbols.
         // Use a cursor endpoint trimmed only for trailing whitespace so pure-symbol
         // triggers like "@@@" are still visible (full boundary trim would remove them).
@@ -435,7 +176,7 @@ object AutoCorrector {
         while (exactSymbolEndIndex > 0 && text[exactSymbolEndIndex - 1].isWhitespace()) {
             exactSymbolEndIndex--
         }
-        val exactSymbolMatch = findExactSymbolTrigger(text, exactSymbolEndIndex, languagesToSearch)
+        val exactSymbolMatch = findExactSymbolTrigger(text, exactSymbolEndIndex)
         if (exactSymbolMatch != null) {
             val (trigger, replacement) = exactSymbolMatch
             val triggerLower = trigger.lowercase()
@@ -465,10 +206,9 @@ object AutoCorrector {
         }
 
         // First, try to search for patterns that include spaces (e.g. "cos e")
-        // Search up to 3 "words" (separated by spaces) before cursor
-        // This allows finding patterns like "cos e", "qual e", etc.
+        // Search up to 2 "words" (separated by spaces) before cursor
         for (maxWords in 2 downTo 1) {
-            var currentEnd = endIndex
+            val currentEnd = endIndex
             var wordsFound = 0
             var startIndex = currentEnd
 
@@ -501,54 +241,18 @@ object AutoCorrector {
                 val sequence = text.substring(startIndex, currentEnd).trim()
                 if (sequence.isNotEmpty()) {
                     // Check if this sequence has been rejected
-                    val sequenceLower = sequence.lowercase()
-                    if (rejectedWords.contains(sequenceLower)) {
+                    if (rejectedWords.contains(sequence.lowercase())) {
                         Log.d(TAG, "Sequence '$sequence' has been rejected, don't correct")
                         continue // Try with fewer words
                     }
-		                    for (lang in languagesToSearch) {
-		                        val customCorrection = getCustomCorrection(sequence, lang, context)
-		                        if (customCorrection != null) {
-		                            if (
-		                                maxWords > 1 ||
-		                                shouldApplyExactReplacement(
-		                                    sequence,
-		                                    customCorrection,
-		                                    isKnownWord,
-		                                    explicitSubstitutionLanguagesEnabled
-		                                )
-		                            ) {
-		                                Log.d(TAG, "Found custom correction for sequence: '$sequence' → '$customCorrection' (language: $lang)")
-		                                return Pair(sequence, customCorrection)
-		                            }
-		                        }
-		                    }
-
-	                    // Check if there's a correction for this sequence in one of the enabled languages
-		                    for (lang in languagesToSearch) {
-		                        val correction = getCorrection(sequence, lang, context)
-		                        if (correction != null) {
-		                            if (
-		                                maxWords > 1 ||
-		                                shouldApplyExactReplacement(
-		                                    sequence,
-		                                    correction,
-		                                    isKnownWord,
-		                                    explicitSubstitutionLanguagesEnabled
-		                                )
-		                            ) {
-		                                Log.d(TAG, "Found correction for multi-word sequence: '$sequence' → '$correction' (language: $lang)")
-		                                return Pair(sequence, correction)
-		                            }
-		                        }
-		                    }
-	                    if (maxWords == 1 && isKnownWord?.invoke(sequence) == true) {
-	                        Log.d(TAG, "Word '$sequence' is known in an active dictionary, don't auto-substitute")
-	                        continue
-	                    }
-	                }
-	            }
-	        }
+                    val correction = getCorrection(sequence)
+                    if (correction != null) {
+                        Log.d(TAG, "Found correction for sequence: '$sequence' → '$correction'")
+                        return Pair(sequence, correction)
+                    }
+                }
+            }
+        }
 
         // If we didn't find patterns with spaces, search for a single word
         var startIndex = endIndex
@@ -566,40 +270,15 @@ object AutoCorrector {
         }
 
         // Check if this word has been rejected (undone with backspace)
-        val wordLower = word.lowercase()
-        if (rejectedWords.contains(wordLower)) {
+        if (rejectedWords.contains(word.lowercase())) {
             Log.d(TAG, "Word '$word' has been rejected, don't correct")
             return null
         }
 
-	        for (lang in languagesToSearch) {
-	            val customCorrection = getCustomCorrection(word, lang, context)
-	            if (customCorrection != null) {
-	                if (shouldApplyExactReplacement(word, customCorrection, isKnownWord, explicitSubstitutionLanguagesEnabled)) {
-	                    Log.d(TAG, "Found custom correction for word: '$word' → '$customCorrection' (language: $lang)")
-	                    return Pair(word, customCorrection)
-	                }
-	            }
-	        }
-
-	        // Check if there's a correction for the single word in one of the enabled languages
-	        for (lang in languagesToSearch) {
-	            val correction = getCorrection(word, lang, context)
-	            if (correction != null) {
-	                if (shouldApplyExactReplacement(word, correction, isKnownWord, explicitSubstitutionLanguagesEnabled)) {
-	                    Log.d(TAG, "Found correction for word: '$word' → '$correction' (language: $lang)")
-	                    return Pair(word, correction)
-	                }
-	            }
-	        }
-
-	        if (isKnownWord?.invoke(word) == true) {
-	            Log.d(TAG, "Word '$word' is known in an active dictionary, don't auto-substitute")
-	            return null
-	        }
-
-	        return null
-	    }
+        val correction = getCorrection(word) ?: return null
+        Log.d(TAG, "Found correction for word: '$word' → '$correction'")
+        return Pair(word, correction)
+    }
 
     /**
      * Records an applied correction.

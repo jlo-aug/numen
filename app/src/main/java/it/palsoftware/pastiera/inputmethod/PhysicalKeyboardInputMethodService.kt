@@ -7,13 +7,11 @@ import android.content.IntentFilter
 import android.content.SharedPreferences
 import android.content.res.Configuration
 import it.palsoftware.pastiera.AppBroadcastActions
-import it.palsoftware.pastiera.ClicksPowerKeyboardController
 import it.palsoftware.pastiera.SettingsManager
 import it.palsoftware.pastiera.SoftwareKeyboardModeActions
 import android.inputmethodservice.InputMethodService
 import android.hardware.input.InputManager
 import android.os.Build
-import android.os.Bundle
 import android.os.SystemClock
 import android.util.Log
 import androidx.core.content.ContextCompat
@@ -50,23 +48,14 @@ import it.palsoftware.pastiera.core.suggestions.SuggestionKind
 import it.palsoftware.pastiera.core.suggestions.SuggestionResult
 import it.palsoftware.pastiera.core.suggestions.SuggestionSettings
 import it.palsoftware.pastiera.data.layout.LayoutMappingRepository
-import it.palsoftware.pastiera.data.layout.LayoutFileStore
-import it.palsoftware.pastiera.data.layout.LayoutMapping
 import it.palsoftware.pastiera.data.mappings.KeyMappingLoader
 import it.palsoftware.pastiera.data.mappings.AltModifierMappingResolver
 import it.palsoftware.pastiera.data.variation.VariationRepository
 import it.palsoftware.pastiera.inputmethod.SpeechRecognitionActivity
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils
 import it.palsoftware.pastiera.inputmethod.aospkeyboard.AospKeyboardView
 import it.palsoftware.pastiera.inputmethod.aospkeyboard.SoftwareKeyboardLayoutTemplates
 import it.palsoftware.pastiera.inputmethod.aospkeyboard.SoftwareKeyboardSymLabels
 import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils.localeString
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils.setAdditionalInputMethodSubtypesCompat
-import it.palsoftware.pastiera.inputmethod.telex.VietnameseTelexProcessor
-import it.palsoftware.pastiera.inputmethod.trackpad.TrackpadEventDeviceResolver
-import it.palsoftware.pastiera.inputmethod.trackpad.TrackpadGestureDetector
-import it.palsoftware.pastiera.inputmethod.trackpad.TrackpadAxisRange
-import it.palsoftware.pastiera.inputmethod.trackpad.TrackpadCoordinateMapper
 import it.palsoftware.pastiera.inputmethod.expansion.ExpansionRuntimeConfig
 import it.palsoftware.pastiera.inputmethod.expansion.ExpansionTriggerKind
 import it.palsoftware.pastiera.inputmethod.expansion.SnippetExpansionSource
@@ -75,16 +64,14 @@ import it.palsoftware.pastiera.inputmethod.expansion.SymbolShortcodeSource
 import it.palsoftware.pastiera.inputmethod.expansion.TextExpansionController
 import java.util.Locale
 import android.view.inputmethod.InputMethodManager
-import android.view.inputmethod.InputMethodSubtype
 import it.palsoftware.pastiera.clipboard.ClipboardHistoryManager
 import android.content.pm.PackageManager
-import rikka.shizuku.Shizuku
 
 /**
  * Input method service specialized for physical keyboards.
  * Handles advanced features such as long press that simulates Alt+key.
  */
-class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibilityKeyBridge.Target {
+class PhysicalKeyboardInputMethodService : InputMethodService() {
 
     companion object {
         private const val TAG = "PastieraInputMethod"
@@ -127,7 +114,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     // SharedPreferences for settings
     private lateinit var prefs: SharedPreferences
     private var prefsListener: SharedPreferences.OnSharedPreferenceChangeListener? = null
-    private var lastSystemLocalesSignature: String = ""
 
     private lateinit var alternateCharacterManager: AlternateCharacterManager
     
@@ -143,7 +129,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     // Broadcast receiver for user dictionary updates
     private var userDictionaryReceiver: BroadcastReceiver? = null
     // Broadcast receiver for additional IME subtypes updates
-    private var additionalSubtypesReceiver: BroadcastReceiver? = null
     private lateinit var candidatesBarController: CandidatesBarController
     private lateinit var textExpansionController: TextExpansionController
     private lateinit var emojiShortcodeSource: EmojiShortcodeSource
@@ -154,18 +139,14 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     private val KEYCODE_SYM = 63
 
     // Minimal Phone (MP01) custom hardware keycodes
-    private val KEYCODE_EM = 666  // Emoji key
-    private val KEYCODE_MIC = 667 // Mic / speech-to-text key
 
     // Single instance to show toasts without overlapping
     private var lastLayoutToastText: String? = null
     private var lastLayoutToastTime: Long = 0
-    private var suppressNextLayoutReload: Boolean = false
     private var activeKeyboardLayoutName: String = "qwerty"
-    private var consumeAltEnterUntilKeyUp: Boolean = false
     private var dispatchingSoftwareKeyboardKey: Boolean = false
     
-    // Aggiungi per Power Shortcuts
+    // For Power Shortcuts
     private var powerShortcutToast: android.widget.Toast? = null
     
     // Mapping Ctrl+key -> action or keycode (loaded from JSON)
@@ -253,7 +234,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     // Constants
     private val DOUBLE_TAP_THRESHOLD = 500L
     private val CURSOR_UPDATE_DELAY = 50L
-    private val MULTI_TAP_TIMEOUT_MS = 400L
 
     // Modifier/nav/SYM controllers
     private lateinit var modifierStateController: ModifierStateController
@@ -282,13 +262,9 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     private var suppressedAutoCapContextKey: String? = null
     private var clearAltOnSpaceEnabled: Boolean = false
     private var physicalKeyboardProfileOverride: String = "auto"
-    private var isLanguageSwitchInProgress: Boolean = false
-    // Stato per ricordare se il nav mode era attivo prima di entrare in un campo di testo
+    // Remembers whether nav mode was active before entering a text field
     private var navModeWasActiveBeforeEditableField: Boolean = false
 
-    // Trackpad gesture detection
-    private val trackpadScope = CoroutineScope(Dispatchers.IO)
-    private lateinit var trackpadGestureDetector: TrackpadGestureDetector
     private var modifierStateBeforeHold: it.palsoftware.pastiera.core.ModifierStateController.LogicalState? = null
     private var variationInteractedDuringHold: Boolean = false
     private var modifierDownTimes = mutableMapOf<Int, Long>()
@@ -302,78 +278,31 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     /** True when this SYM press only reveals the hidden bar; the SYM page opens on the next press. */
     private var symPressRevealsSurfaceOnly: Boolean = false
     private var symPhysicallyPressed: Boolean = false
-    private var nativeTrackpadGestureStart: NativeTrackpadGestureStart? = null
-    private var nativeTrackpadLastX: Float = 0f
-    private var nativeTrackpadLastY: Float = 0f
-    private var nativeTrackpadLastEventTimeUptimeMs: Long = 0L
-    private var nativeTrackpadGestureHandled: Boolean = false
-    private var nativeTrackpadGestureAtMs: Long = 0L
     private var trackpadDecorMotionView: View? = null
 
-    private val multiTapHandler = Handler(Looper.getMainLooper())
-    private val multiTapController = MultiTapController(
-        handler = multiTapHandler,
-        timeoutMs = MULTI_TAP_TIMEOUT_MS
-    )
     private val bounceKeyFilter = BounceKeyFilter()
-    private val clicksPowerShiftTapFilter = ClicksPowerShiftTapFilter()
-    private val accidentalKeyPressFilter = AccidentalKeyPressFilter()
-    private val physicalKeyResolver = PhysicalKeyResolver()
-    private val clicksPowerButtonEventMapper = ClicksPowerButtonEventMapper()
-    private var dispatchingClicksAccessibilityKeyEvent = false
-    private var replayingProtectedNumberKey = false
+    private val overlappingKeyFilter = OverlappingKeyFilter()
     private val uiHandler = Handler(Looper.getMainLooper())
     private var inputManager: InputManager? = null
     private var lastObservedAutoSoftwareKeyboardMode: SettingsManager.SoftwareKeyboardMode? = null
     private var pendingInputDeviceModeRefresh: Runnable? = null
     private var pendingKeyboardSurfaceTransition: Runnable? = null
-    private var clicksConnectionChangePending: Boolean = false
-    private var clicksDisconnectPending: Boolean = false
-    private val connectedClicksInputDeviceIds = mutableSetOf<Int>()
     private val inputDeviceListener = object : InputManager.InputDeviceListener {
         override fun onInputDeviceAdded(deviceId: Int) {
             SoftwareKeyboardAutoDetector.onInputDevicesChanged()
-            val clicksConnected = InputDevice.getDevice(deviceId)
-                ?.takeIf(DeviceSpecific::isClicksPowerKeyboard)
-                ?.let { connectedClicksInputDeviceIds.add(deviceId) } == true
-            scheduleInputDeviceModeRefresh(clicksConnectionChanged = clicksConnected)
+            scheduleInputDeviceModeRefresh()
         }
 
         override fun onInputDeviceRemoved(deviceId: Int) {
-            clicksPowerShiftTapFilter.resetDevice(deviceId)
-            accidentalKeyPressFilter.resetDevice(deviceId)
-            clicksPowerButtonEventMapper.resetDevice(deviceId)
-            val clicksDisconnected = connectedClicksInputDeviceIds.remove(deviceId)
-            if (
-                clicksDisconnected &&
-                SettingsManager.getClicksCloseInputOnDisconnect(this@PhysicalKeyboardInputMethodService)
-            ) {
-                SoftwareKeyboardAutoDetector.beginClosingInputForClicksDisconnect()
-                requestHideSelf(0)
-            }
+            overlappingKeyFilter.resetDevice(deviceId)
             SoftwareKeyboardAutoDetector.onInputDevicesChanged()
-            scheduleInputDeviceModeRefresh(
-                clicksConnectionChanged = clicksDisconnected,
-                clicksDisconnected = clicksDisconnected
-            )
+            scheduleInputDeviceModeRefresh()
         }
 
         override fun onInputDeviceChanged(deviceId: Int) {
-            clicksPowerShiftTapFilter.resetDevice(deviceId)
-            accidentalKeyPressFilter.resetDevice(deviceId)
-            clicksPowerButtonEventMapper.resetDevice(deviceId)
+            overlappingKeyFilter.resetDevice(deviceId)
             SoftwareKeyboardAutoDetector.onInputDevicesChanged()
-            val wasClicksKeyboard = deviceId in connectedClicksInputDeviceIds
-            val device = InputDevice.getDevice(deviceId)
-            val isClicksKeyboard = device != null && DeviceSpecific.isClicksPowerKeyboard(device)
-            if (isClicksKeyboard) {
-                connectedClicksInputDeviceIds += deviceId
-            } else {
-                connectedClicksInputDeviceIds -= deviceId
-            }
-            scheduleInputDeviceModeRefresh(
-                clicksConnectionChanged = wasClicksKeyboard != isClicksKeyboard
-            )
+            scheduleInputDeviceModeRefresh()
         }
     }
     private var pendingStatusBarUpdate: Runnable? = null
@@ -525,32 +454,17 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         updateStatusBarText()
     }
 
-    private fun scheduleInputDeviceModeRefresh(
-        clicksConnectionChanged: Boolean = false,
-        clicksDisconnected: Boolean = false
-    ) {
-        clicksConnectionChangePending = clicksConnectionChangePending || clicksConnectionChanged
-        clicksDisconnectPending = clicksDisconnectPending || clicksDisconnected
+    private fun scheduleInputDeviceModeRefresh() {
         pendingInputDeviceModeRefresh?.let { uiHandler.removeCallbacks(it) }
         val refresh = Runnable {
             pendingInputDeviceModeRefresh = null
-            val didClicksConnectionChange = clicksConnectionChangePending
-            val didClicksDisconnect = clicksDisconnectPending
-            clicksConnectionChangePending = false
-            clicksDisconnectPending = false
-            refreshSoftwareKeyboardModeForConnectedDevices(
-                clicksConnectionChanged = didClicksConnectionChange,
-                clicksDisconnected = didClicksDisconnect
-            )
+            refreshSoftwareKeyboardModeForConnectedDevices()
         }
         pendingInputDeviceModeRefresh = refresh
         uiHandler.postDelayed(refresh, 120L)
     }
 
-    private fun refreshSoftwareKeyboardModeForConnectedDevices(
-        clicksConnectionChanged: Boolean,
-        clicksDisconnected: Boolean
-    ) {
+    private fun refreshSoftwareKeyboardModeForConnectedDevices() {
         alternateCharacterManager.reloadModifierAndDeviceSymMappings()
         updateStatusBarText()
         val autoMode = SoftwareKeyboardAutoDetector.resolve(this)
@@ -560,26 +474,17 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         val transition = SoftwareKeyboardDeviceTransitionPolicy.plan(
             configuredMode = configuredMode,
             previousAutoMode = previousAutoMode,
-            autoMode = autoMode,
-            clicksConnectionChanged = clicksConnectionChanged,
-            clicksDisconnected = clicksDisconnected,
-            closeInputOnClicksDisconnect = SettingsManager.getClicksCloseInputOnDisconnect(this)
+            autoMode = autoMode
         ) ?: return
-        if (transition.clearTemporaryOverride) {
-            SoftwareKeyboardModeActions.clearTemporaryMode(this)
-        }
+        SoftwareKeyboardModeActions.clearTemporaryMode(this)
         scheduleKeyboardSurfaceTransition(
-            mode = transition.mode,
-            closeInput = transition.closeInput,
-            requireActiveTextField = SettingsManager.getClicksShowKeyboardOnlyWithTextFocus(this),
+            mode = transition,
             delayMs = KEYBOARD_DEVICE_SURFACE_TRANSITION_DELAY_MS
         )
     }
 
     private fun scheduleKeyboardSurfaceTransition(
         mode: SettingsManager.SoftwareKeyboardMode,
-        closeInput: Boolean = false,
-        requireActiveTextField: Boolean = false,
         delayMs: Long = KEYBOARD_SURFACE_TRANSITION_DELAY_MS
     ) {
         pendingKeyboardSurfaceTransition?.let(uiHandler::removeCallbacks)
@@ -587,15 +492,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             pendingKeyboardSurfaceTransition = null
             if (::textExpansionController.isInitialized) textExpansionController.clear()
             invalidateRenderedStatusSnapshot()
-            if (closeInput) {
-                requestHideSelf(0)
-                return@Runnable
-            }
             keyboardVisibilityController.onKeyboardSurfaceChanged(
                 // A hidden bar stays hidden in silent hardware mode when a keyboard connects or disconnects.
                 ensureInputViewShown = mode == SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL ||
-                    SettingsManager.getAutoShowKeyboard(this),
-                requireActiveTextField = requireActiveTextField
+                    SettingsManager.getAutoShowKeyboard(this)
             )
         }
         pendingKeyboardSurfaceTransition = transition
@@ -703,11 +603,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             keyCode == KEYCODE_SYM
     }
 
-    private fun isMinimalPhoneHardwareActive(): Boolean {
-        return DeviceSpecific.isMinimalPhoneDevice(physicalKeyboardProfileOverride)
-    }
-
-    private fun openQuickLauncher(): Boolean = QuickLauncherOpener.open(this)
     
     /**
      * Starts voice input using SpeechRecognizer via SpeechRecognitionManager.
@@ -799,7 +694,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             // Sentence fixes also rely on automatic correction's Backspace undo.
             contextAwareCorrection = SettingsManager.getContextAwareCorrection(this) &&
                 SettingsManager.getAutoReplaceOnSpaceEnter(this),
-            frenchPunctuationSpacing = SettingsManager.shouldApplyFrenchPunctuationSpacing(this),
             commaSpace = SettingsManager.getCommaSpace(this),
             autoSpacePunctuation = SettingsManager.getAutoSpacePunctuation(this)
         )
@@ -1277,7 +1171,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         } else {
             false
         }
-        val locale = getLocaleFromSubtype()
+        val locale = Locale.US
 
         return latestSuggestionResults.map { suggestion ->
             when (suggestion.kind) {
@@ -1411,7 +1305,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         
         symLayoutController.restoreSymPageIfNeeded {
             // A restored SYM page changes what keys type, so the bar must be fully visible.
-            if (!BuildConfig.UPSTREAM_BRANDING) ensureImeSurfaceVisible()
+            ensureImeSurfaceVisible()
             updateStatusBarText()
         }
         
@@ -1425,21 +1319,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         deactivateVariations()
     }
     
-    /**
-     * Loads keyboard layout using the central resolver (auto-by-locale or manual override).
-     */
+    /** Loads the bundled layout. Numen is English only, so this is always qwerty. */
     private fun loadKeyboardLayout() {
-        val layoutName = try {
-            val imm = getSystemService(InputMethodManager::class.java)
-            val currentSubtype = imm.currentInputMethodSubtype
-            AdditionalSubtypeUtils.resolveInputStyleLayout(assets, this, currentSubtype)
-        } catch (e: Exception) {
-            Log.w(TAG, "Error getting layout from subtype, using preferences", e)
-            SettingsManager.getKeyboardLayout(this)
-        }
-        activeKeyboardLayoutName = layoutName
-        val layout = LayoutMappingRepository.loadLayout(assets, layoutName, this)
-        Log.d(TAG, "Keyboard layout loaded: $layoutName")
+        activeKeyboardLayoutName = SettingsManager.getKeyboardLayout(this)
+        LayoutMappingRepository.loadLayout(assets, activeKeyboardLayoutName)
     }
     
     /**
@@ -1461,102 +1344,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         return null
     }
     
-    /**
-     * Gets the character string from the selected keyboard layout.
-     * Returns the original event character if not mapped in layout.
-     */
-    private fun getCharacterStringFromLayout(keyCode: Int, event: KeyEvent?, isShift: Boolean): String {
-        val char = getCharacterFromLayout(keyCode, event, isShift)
-        return char?.toString() ?: ""
-    }
 
-    private fun switchToLayout(layoutName: String, showToast: Boolean) {
-        activeKeyboardLayoutName = layoutName
-        LayoutMappingRepository.loadLayout(assets, layoutName, this)
-        variationStateController = VariationStateController(
-            VariationRepository.loadVariations(assets, this, activeKeyboardLayoutName)
-        )
-        updateStatusBarText()
-
-        // Update suggestion engine's keyboard layout for proximity-based ranking
-        suggestionController?.updateKeyboardLayout(layoutName)
-    }
-
-    private fun cycleLayoutFromShortcut() {
-        suppressNextLayoutReload = true
-        val nextLayout = SettingsManager.cycleKeyboardLayout(this)
-        if (nextLayout != null) {
-            switchToLayout(nextLayout, showToast = false)
-        }
-    }
-
-    private fun isVietnameseTelexActive(): Boolean {
-        return VietnameseTelexProcessor.isActiveForLayout(activeKeyboardLayoutName)
-    }
-
-    private fun handleVietnameseTelexKey(keyCode: Int, event: KeyEvent?, inputConnection: InputConnection?): Boolean {
-        if (!isVietnameseTelexActive()) return false
-        val ic = inputConnection ?: return false
-        if (event == null || event.repeatCount > 0) return false
-        if (!LayoutMappingRepository.isMapped(keyCode)) return false
-
-        val char = LayoutMappingRepository.getCharacterStringWithModifiers(
-            keyCode = keyCode,
-            isShiftPressed = event.isShiftPressed,
-            capsLockEnabled = capsLockEnabled,
-            shiftOneShot = shiftOneShot
-        )
-        if (char.length != 1) return false
-
-        val rewrite = VietnameseTelexProcessor.rewrite(
-            textBeforeCursor = ic.getTextBeforeCursor(64, 0)?.toString().orEmpty(),
-            keyChar = char[0]
-        ) ?: return false
-
-        ic.finishComposingText()
-        ic.beginBatchEdit()
-        ic.deleteSurroundingText(rewrite.replaceCount, 0)
-        ic.commitText(rewrite.replacement, 1)
-        ic.endBatchEdit()
-
-        if (shiftOneShot) {
-            modifierStateController.consumeShiftOneShot()
-        }
-
-        Handler(Looper.getMainLooper()).postDelayed({
-            updateStatusBarText()
-        }, CURSOR_UPDATE_DELAY)
-        return true
-    }
-
-    /**
-     * Cycles to the next enabled input method subtype (language).
-     * Prevents multiple simultaneous switches to avoid dictionary loading conflicts.
-     */
-    private fun cycleToNextLanguage() {
-        if (isLanguageSwitchInProgress) {
-            Log.d(TAG, "Language switch already in progress, ignoring request")
-            return
-        }
-
-        isLanguageSwitchInProgress = true
-        try {
-            val switched = SubtypeCycler.cycleToNextSubtype(
-                context = this,
-                imeServiceClass = PhysicalKeyboardInputMethodService::class.java,
-                assets = assets,
-                showToast = SettingsManager.isToastOnLayoutSwitchEnabled(this)
-            )
-
-            // Reset flag; keep a short delay when a switch happened to avoid rapid repeats
-            val delayMs = if (switched) 300L else 0L
-            uiHandler.postDelayed({ isLanguageSwitchInProgress = false }, delayMs)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error cycling language", e)
-            isLanguageSwitchInProgress = false
-        }
-    }
-    
     private fun showPowerShortcutToast(message: String) {
         uiHandler.post {
             val now = System.currentTimeMillis()
@@ -1578,39 +1366,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
 
-    private fun handleMultiTapCommit(
-        keyCode: Int,
-        mapping: LayoutMapping,
-        useUppercase: Boolean,
-        inputConnection: InputConnection?,
-        allowLongPress: Boolean
-    ): Boolean {
-        val ic = inputConnection ?: return false
-        val tapResult = multiTapController.handleTap(keyCode, mapping, useUppercase, ic)
-        if (tapResult.handled && allowLongPress) {
-            tapResult.committedText?.let { committedText ->
-                alternateCharacterManager.scheduleLongPressOnly(keyCode, ic, committedText)
-            }
-        }
-        if (tapResult.handled) {
-            if (SettingsManager.isSuggestionDebugLoggingEnabled(this)) {
-                Log.d(TAG, "multiTap commit text='${tapResult.committedText}' replaced=${tapResult.replacedInWindow}")
-            }
-            // Prevent onUpdateSelection from re-triggering suggestion recalculation for the same commit.
-            markSelectionUpdateSkipAfterCommit()
-            tapResult.committedText?.let { committedText ->
-                if (tapResult.replacedInWindow) {
-                    // Replace the last character in the tracker to stay in sync with the text field.
-                    suggestionController.currentSuggestions() // touch to keep listener consistent (noop)
-                    suggestionController.onCharacterCommitted("\b$committedText", inputConnection)
-                } else {
-                    suggestionController.onCharacterCommitted(committedText, inputConnection)
-                }
-            }
-        }
-        return tapResult.handled
-    }
-    
     private fun reloadNavModeMappings() {
         try {
             ctrlKeyMap.clear()
@@ -1675,8 +1430,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
 
     override fun onCreate() {
         super.onCreate()
-        ClicksAccessibilityKeyBridge.register(this)
-        lastSystemLocalesSignature = resources.configuration.locales.toLanguageTags()
         prefs = getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
         clearAltOnSpaceEnabled = SettingsManager.getClearAltOnSpace(this)
         physicalKeyboardProfileOverride = SettingsManager.getPhysicalKeyboardProfileOverride(this)
@@ -1702,9 +1455,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         autoCorrectionManager = AutoCorrectionManager(this)
         val suggestionDebugLogging = SettingsManager.isSuggestionDebugLoggingEnabled(this)
         
-        // Get locale from current IME subtype
-        val initialLocale = getLocaleFromSubtype()
-        
         suggestionController = SuggestionController(
             context = this,
             assets = assets,
@@ -1712,9 +1462,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             isEnabled = { SettingsManager.isExperimentalSuggestionsEnabled(this) },
             debugLogging = suggestionDebugLogging,
             onSuggestionsUpdated = { suggestions -> handleSuggestionsUpdated(suggestions) },
-            currentLocale = initialLocale,
-            keyboardLayoutProvider = { SettingsManager.getKeyboardLayout(this) },
-            activeSuggestionLocalesProvider = { getAdditionalSuggestionLocalesForActiveInputStyle() },
+            currentLocale = Locale.US,
             typingStats = it.palsoftware.pastiera.core.suggestions.TypingStats(
                 getSharedPreferences(it.palsoftware.pastiera.core.suggestions.TypingStats.PREFS_NAME, MODE_PRIVATE)
             ),
@@ -1828,17 +1576,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 entry.word.equals(suggestion, ignoreCase = true)
             }
         }
-        candidatesBarController.onLanguageSwitchRequested = {
-            if (shiftLayerLatched || altModifierLayerLatched) {
-                shiftLayerLatched = false
-                altModifierLayerLatched = false
-                modifierStateBeforeHold?.let { modifierStateController.restoreLogicalState(it) }
-                modifierStateBeforeHold = null
-            }
-            variationInteractedDuringHold = true
-            cycleToNextLanguage()
-        }
-
         // Register listener for variation selection (both controllers)
         val variationListener = object : VariationButtonHandler.OnVariationSelectedListener {
             override fun onBoundaryTextRequested(
@@ -2031,8 +1768,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         alternateCharacterManager = AlternateCharacterManager(
             assets = assets,
             prefs = prefs,
-            context = this,
-            activeLayoutNameProvider = { activeKeyboardLayoutName }
+            context = this
         )
         alternateCharacterManager.reloadSymMappings() // Load custom mappings for page 1 if present
         alternateCharacterManager.reloadSymMappings2() // Load custom mappings for page 2 if present
@@ -2078,7 +1814,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             candidatesBarController = candidatesBarController,
             symLayoutController = symLayoutController,
             isInputViewActive = { isInputViewActive },
-            hasActiveTextField = { inputContextState.isEditable },
             isNavModeLatched = { ctrlLatchFromNavMode },
             currentInputConnection = { currentInputConnection },
             isInputViewShown = { isInputViewShown },
@@ -2111,15 +1846,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             setSurfaceCollapsed = candidatesBarController::setInputSurfaceCollapsed
         )
         inputManager = getSystemService(InputManager::class.java)
-        InputDevice.getDeviceIds().forEach { deviceId ->
-            InputDevice.getDevice(deviceId)
-                ?.takeIf(DeviceSpecific::isClicksPowerKeyboard)
-                ?.let { connectedClicksInputDeviceIds += deviceId }
-        }
         lastObservedAutoSoftwareKeyboardMode = SoftwareKeyboardAutoDetector.resolve(this)
         inputManager?.registerInputDeviceListener(inputDeviceListener, uiHandler)
         launcherShortcutController = LauncherShortcutController(this)
-        // Configura callbacks per gestire nav mode durante power shortcuts
+        // Set up callbacks for handling nav mode during power shortcuts
         launcherShortcutController.setNavModeCallbacks(
             exitNavMode = { navModeController.exitNavMode() },
             enterNavMode = { navModeController.enterNavMode() }
@@ -2132,7 +1862,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         it.palsoftware.pastiera.SettingsManager.initializeNavModeMappingsFile(this)
         ctrlKeyMap.putAll(KeyMappingLoader.loadCtrlKeyMappings(assets, this))
         variationStateController = VariationStateController(
-            VariationRepository.loadVariations(assets, this, activeKeyboardLayoutName)
+            VariationRepository.loadVariations(assets, this)
         )
         keyboardVisibilityController.syncStatusBarPresentationModeFromSettings()
         
@@ -2140,13 +1870,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         AutoCorrector.loadCorrections(assets, this)
         
         // Register additional subtypes (custom input styles)
-        registerAdditionalSubtypes()
         
-        // Trackpad gestures detector (instantiated early to avoid late-init issues in listener)
-        Log.d(TRACKPAD_DEBUG_TAG, "onCreate: Building initial trackpad gesture detector...")
-        trackpadGestureDetector = buildTrackpadGestureDetector()
-        Log.d(TRACKPAD_DEBUG_TAG, "onCreate: Initial detector built")
-
         // Register listener for SharedPreferences changes
         prefsListener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPrefs, key ->
             Log.d(TRACKPAD_DEBUG_TAG, "SharedPrefs changed: key=$key")
@@ -2201,7 +1925,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             } else if (key == "physical_keyboard_currency_symbol") {
                 Log.d(TAG, "Physical keyboard currency symbol changed, reloading Device SYM and Alt modifier mappings...")
                 alternateCharacterManager.reloadModifierAndDeviceSymMappings()
-            } else if (key != null && (key.startsWith("auto_correct_custom_") || key == "auto_correct_enabled_languages")) {
+            } else if (key != null && key.startsWith("auto_correct_custom_")) {
                 Log.d(TAG, "Auto-correction rules changed, reloading...")
                 // Reload auto-corrections (including new custom languages)
                 AutoCorrector.loadCorrections(assets, this)
@@ -2209,7 +1933,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 Log.d(TAG, "Variations file changed, reloading...")
                 // Reload variations from file
                 variationStateController = VariationStateController(
-                    VariationRepository.loadVariations(assets, this, activeKeyboardLayoutName)
+                    VariationRepository.loadVariations(assets, this)
                 )
                 candidatesBarController.invalidateStaticVariations()
                 // Update status bar to reflect new variations
@@ -2220,84 +1944,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 Log.d(TAG, "Nav mode mappings changed, reloading...")
                 // Reload nav mode key mappings
                 reloadNavModeMappings()
-            } else if (key == "keyboard_layout") {
-                if (suppressNextLayoutReload) {
-                    Log.d(TAG, "Keyboard layout change observed, reload suppressed")
-                    suppressNextLayoutReload = false
-                } else {
-                    Log.d(TAG, "Keyboard layout changed, reloading...")
-                    val layoutName = SettingsManager.getKeyboardLayout(this)
-                    switchToLayout(layoutName, showToast = false)
-                }
-            } else if (key == "keyboard_layout_auto_by_locale" || key == SettingsManager.KEY_KEYBOARD_LAYOUT_AUTO_MAPPING_UPDATED) {
-                Log.d(TAG, "Keyboard layout auto mode/mapping changed, resolving active layout...")
-                loadKeyboardLayout()
-                switchToLayout(activeKeyboardLayoutName, showToast = false)
-            } else if (key == AdditionalSubtypeUtils.PREF_CUSTOM_INPUT_STYLES) {
-                Log.d(TAG, "Custom input styles changed, re-registering subtypes...")
-                registerAdditionalSubtypes()
-            } else if (key == "trackpad_gestures_enabled") {
-                val newValue = SettingsManager.getTrackpadGesturesEnabled(this)
-                Log.d(TRACKPAD_DEBUG_TAG, "SharedPrefs listener: trackpad_gestures_enabled changed to $newValue")
-                Log.d(TAG, "Trackpad gestures setting changed, restarting detection...")
-                if (::trackpadGestureDetector.isInitialized) {
-                    Log.d(TRACKPAD_DEBUG_TAG, "Detector initialized, stopping old detector...")
-                    trackpadGestureDetector.stop()
-                    Log.d(TRACKPAD_DEBUG_TAG, "Building new detector...")
-                    trackpadGestureDetector = buildTrackpadGestureDetector()
-                    if (shouldStartShizukuTrackpadDetector()) {
-                        Log.d(TRACKPAD_DEBUG_TAG, "Starting new Shizuku detector...")
-                        trackpadGestureDetector.start()
-                    } else {
-                        Log.d(TRACKPAD_DEBUG_TAG, "Detector start skipped after gestures change")
-                    }
-                    Log.d(TRACKPAD_DEBUG_TAG, "Detector restart complete for gestures_enabled change")
-                } else {
-                    Log.d(TRACKPAD_DEBUG_TAG, "Detector NOT initialized yet, skipping restart")
-                }
-            } else if (
-                key == "trackpad_swipe_threshold" ||
-                key == "trackpad_suggestion_swipe_threshold" ||
-                key == "trackpad_delete_swipe_threshold"
-            ) {
-                val suggestionValue = SettingsManager.getTrackpadSuggestionSwipeThreshold(this)
-                val deleteValue = SettingsManager.getTrackpadDeleteSwipeThreshold(this)
-                Log.d(
-                    TRACKPAD_DEBUG_TAG,
-                    "SharedPrefs listener: trackpad thresholds changed: suggestion=$suggestionValue, delete=$deleteValue"
-                )
-                Log.d(TAG, "Trackpad swipe threshold changed, restarting detection...")
-                if (::trackpadGestureDetector.isInitialized) {
-                    Log.d(TRACKPAD_DEBUG_TAG, "Detector initialized, stopping old detector...")
-                    trackpadGestureDetector.stop()
-                    Log.d(TRACKPAD_DEBUG_TAG, "Building new detector...")
-                    trackpadGestureDetector = buildTrackpadGestureDetector()
-                    if (shouldStartShizukuTrackpadDetector()) {
-                        Log.d(TRACKPAD_DEBUG_TAG, "Starting new Shizuku detector...")
-                        trackpadGestureDetector.start()
-                    } else {
-                        Log.d(TRACKPAD_DEBUG_TAG, "Detector start skipped after swipe threshold change")
-                    }
-                    Log.d(TRACKPAD_DEBUG_TAG, "Detector restart complete for swipe_threshold change")
-                } else {
-                    Log.d(TRACKPAD_DEBUG_TAG, "Detector NOT initialized yet, skipping restart")
-                }
-            } else if (key == "trackpad_provider" || key == "trackpad_shizuku_device") {
-                val newValue = SettingsManager.getTrackpadProvider(this)
-                val shizukuDevice = SettingsManager.getTrackpadShizukuDevice(this)
-                Log.d(
-                    TRACKPAD_DEBUG_TAG,
-                    "SharedPrefs listener: trackpad input changed: provider=$newValue, shizukuDevice=$shizukuDevice"
-                )
-                if (::trackpadGestureDetector.isInitialized) {
-                    trackpadGestureDetector.stop()
-                    trackpadGestureDetector = buildTrackpadGestureDetector()
-                    if (shouldStartShizukuTrackpadDetector()) {
-                        Log.d(TRACKPAD_DEBUG_TAG, "Starting Shizuku detector for provider change")
-                        trackpadGestureDetector.start()
-                    }
-                }
-                attachTrackpadDecorViewMotionHook("provider_changed")
             } else if (key == "pastierina_mode_override") {
                 keyboardVisibilityController.syncStatusBarPresentationModeFromSettings()
             } else if (key == SettingsManager.KEY_TITAN2_ELITE_ROUNDED_CORNER_INSETS ||
@@ -2455,34 +2101,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         }
         
         Log.d(TAG, "Broadcast receiver registered for user dictionary updates")
-        
-        // Register broadcast receiver for additional IME subtypes updates
-        additionalSubtypesReceiver = object : BroadcastReceiver() {
-            override fun onReceive(context: Context?, intent: Intent?) {
-                if (intent?.action == "it.palsoftware.pastiera.ACTION_ADDITIONAL_SUBTYPES_UPDATED") {
-                    Log.d(TAG, "Additional subtypes updated, refreshing...")
-                    updateAdditionalSubtypes()
-                }
-            }
-        }
-        
-        val subtypesFilter = IntentFilter("it.palsoftware.pastiera.ACTION_ADDITIONAL_SUBTYPES_UPDATED")
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            registerReceiver(additionalSubtypesReceiver, subtypesFilter, ContextCompat.RECEIVER_NOT_EXPORTED)
-        } else {
-            registerReceiver(additionalSubtypesReceiver, subtypesFilter)
-        }
-        
-        Log.d(TAG, "Broadcast receiver registered for additional subtypes updates")
-
-        // Start trackpad gesture detection
-        if (shouldStartShizukuTrackpadDetector()) {
-            Log.d(TRACKPAD_DEBUG_TAG, "onCreate: Calling initial Shizuku trackpadGestureDetector.start()...")
-            trackpadGestureDetector.start()
-            Log.d(TRACKPAD_DEBUG_TAG, "onCreate: Initial Shizuku start() call completed")
-        } else {
-            Log.d(TRACKPAD_DEBUG_TAG, "onCreate: Initial Shizuku detector start skipped")
-        }
     }
 
     private fun handleSoftwareKeyboardTextInput(
@@ -2741,46 +2359,15 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         return metaState
     }
 
-    private fun buildTrackpadGestureDetector(): TrackpadGestureDetector {
-        val gesturesEnabled = SettingsManager.getTrackpadGesturesEnabled(this)
-        val swipeThreshold = SettingsManager.getTrackpadSuggestionSwipeThreshold(this).toInt()
-        val eventDeviceSelection = SettingsManager.getTrackpadShizukuDevice(this)
-        val fallbackEventDevice = resolveTrackpadEventDevice()
-        Log.d(
-            TRACKPAD_DEBUG_TAG,
-            "buildTrackpadGestureDetector() - gesturesEnabled=$gesturesEnabled, swipeThreshold=$swipeThreshold, eventDeviceSelection=$eventDeviceSelection, fallbackEventDevice=$fallbackEventDevice"
-        )
-        return TrackpadGestureDetector(
-            isEnabled = { shouldStartShizukuTrackpadDetector() },
-            onSwipeUp = { third -> acceptSuggestionAtIndex(third) },
-            scope = trackpadScope,
-            swipeUpThreshold = swipeThreshold,
-            eventDeviceSelection = eventDeviceSelection,
-            fallbackEventDevice = fallbackEventDevice
-        )
-    }
-
-    private fun resolveTrackpadEventDevice(): String {
-        return TrackpadEventDeviceResolver.resolve(
-            physicalKeyboardName = DeviceSpecific.physicalKeyboardName(),
-            firmwareIncremental = Build.VERSION.INCREMENTAL.orEmpty()
-        )
-    }
     
     override fun onDestroy() {
-        ClicksAccessibilityKeyBridge.unregister(this)
-        clicksPowerShiftTapFilter.reset()
-        accidentalKeyPressFilter.reset()
-        clicksPowerButtonEventMapper.reset()
+        overlappingKeyFilter.reset()
         expansionAssetScope.cancel()
         super.onDestroy()
         pendingInputDeviceModeRefresh?.let { uiHandler.removeCallbacks(it) }
         pendingInputDeviceModeRefresh = null
         pendingKeyboardSurfaceTransition?.let { uiHandler.removeCallbacks(it) }
         pendingKeyboardSurfaceTransition = null
-        clicksConnectionChangePending = false
-        clicksDisconnectPending = false
-        connectedClicksInputDeviceIds.clear()
         inputManager?.unregisterInputDeviceListener(inputDeviceListener)
         inputManager = null
         stopClipboardCleanupTimer()
@@ -2827,22 +2414,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             }
         }
         
-        additionalSubtypesReceiver?.let {
-            try {
-                unregisterReceiver(it)
-            } catch (e: Exception) {
-                Log.e(TAG, "Error while unregistering additional subtypes receiver", e)
-            }
-        }
         speechResultReceiver = null
-        multiTapController.cancelAll()
         updateNavModeStatusIcon(false)
         trackpadDecorMotionView?.setOnGenericMotionListener(null)
         trackpadDecorMotionView = null
-
-        // Stop trackpad gesture detection
-        trackpadGestureDetector.stop()
-        trackpadScope.cancel()
     }
 
     private fun prepareEnabledExpansionAssets() {
@@ -3053,7 +2628,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         keyboardVisibilityController.ensureImeSurfaceVisible()
     }
     /**
-     * Aggiorna la status bar delegando al controller dedicato.
+     * Updates the status bar by delegating to the dedicated controller.
      */
     private fun updateStatusBarText() {
         val totalStart = ImePerfLogger.mark()
@@ -3111,7 +2686,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             isEmailField = state.isEmailField,
             shiftLayerLatched = shiftLayerLatched,
             altModifierLayerLatched = altModifierLayerLatched,
-            activeKeyboardLayoutName = activeKeyboardLayoutName,
             softwareSymPreviewLabels = softwareSymPreviewProjection.contentByKeyCode,
             softwareSymPreviewTextLabels = softwareSymPreviewProjection.contentByBaseText,
             softwareCtrlPreviewLabels = buildSoftwareCtrlPreviewLabels(modifierSnapshot),
@@ -3124,11 +2698,11 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         )
         updateSystemStatusModifierIcon(snapshot, effectiveSoftwareKeyboardMode)
         val modifierIndicators = SettingsManager.getModifierIndicators(this)
-        // Passa anche la mappa emoji quando SYM è attivo (solo pagina 1)
+        // Also pass the emoji map when SYM is active (page 1 only)
         val emojiMapText = symLayoutController.emojiMapText()
-        // Passa le mappature SYM per la griglia emoji/caratteri
+        // Pass the SYM mappings for the emoji/character grid
         val symMappings = symLayoutController.currentSymMappings()?.toMap()
-        // Passa l'inputConnection per rendere i pulsanti clickabili
+        // Pass the inputConnection so the buttons are clickable
         val inputConnection = currentInputConnection
         val unchangedRenderedState =
             snapshot == lastRenderedStatusSnapshot &&
@@ -3169,13 +2743,8 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             return SoftwareKeyboardSymLabels.Projection(emptyMap(), emptyMap())
         }
         return SoftwareKeyboardSymLabels.project(
-            page = symLayoutController.nextSoftwareTextSymPage(),
-            rows = SoftwareKeyboardLayoutTemplates.rowTemplateFor(
-                activeKeyboardLayoutName,
-                softwareKeyboardLayoutStyle()
-            ),
-            symMappings = mappings,
-            layoutName = activeKeyboardLayoutName
+            rows = SoftwareKeyboardLayoutTemplates.rowTemplateFor(softwareKeyboardLayoutStyle()),
+            symMappings = mappings
         )
     }
 
@@ -3205,8 +2774,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             return emptyMap()
         }
         return SOFTWARE_PREVIEW_KEY_CODES.mapNotNull { keyCode ->
-            val shortcutKeyCode = resolveSoftwareCtrlPreviewShortcutKeyCode(keyCode, modifierSnapshot)
-            val mapping = ctrlKeyMap[shortcutKeyCode] ?: return@mapNotNull null
+            val mapping = ctrlKeyMap[keyCode] ?: return@mapNotNull null
             val label = softwareCtrlPreviewLabel(mapping) ?: return@mapNotNull null
             keyCode to label
         }.toMap()
@@ -3219,8 +2787,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             return emptyMap()
         }
         return SOFTWARE_PREVIEW_KEY_CODES.mapNotNull { keyCode ->
-            val shortcutKeyCode = resolveSoftwareCtrlPreviewShortcutKeyCode(keyCode, modifierSnapshot)
-            val mapping = ctrlKeyMap[shortcutKeyCode] ?: return@mapNotNull null
+            val mapping = ctrlKeyMap[keyCode] ?: return@mapNotNull null
             val iconRes = softwareCtrlPreviewIconRes(mapping) ?: return@mapNotNull null
             keyCode to iconRes
         }.toMap()
@@ -3244,28 +2811,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             val label = altMappings[keyCode]?.takeIf { it.isNotBlank() } ?: return@mapNotNull null
             keyCode to label
         }.toMap()
-    }
-
-    private fun resolveSoftwareCtrlPreviewShortcutKeyCode(
-        keyCode: Int,
-        modifierSnapshot: it.palsoftware.pastiera.core.ModifierStateController.Snapshot
-    ): Int {
-        val usesPhysicalNavGrid = modifierSnapshot.ctrlLatchFromNavMode ||
-            (modifierSnapshot.ctrlPhysicallyPressed && SettingsManager.getNavModeCtrlHoldEnabled(this))
-        if (usesPhysicalNavGrid) {
-            return keyCode
-        }
-        if (!SettingsManager.getLayoutAwareCtrlShortcutsEnabled(this)) {
-            return keyCode
-        }
-        val mappedChar = LayoutMappingRepository.getCharacter(keyCode, isShift = false)
-            ?.lowercaseChar()
-            ?: return keyCode
-        return if (mappedChar in 'a'..'z') {
-            KeyEvent.KEYCODE_A + (mappedChar - 'a')
-        } else {
-            keyCode
-        }
     }
 
     private fun softwareCtrlPreviewLabel(mapping: KeyMappingLoader.CtrlMapping): String? {
@@ -3361,7 +2906,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
     
     /**
-     * Disattiva le variazioni.
+     * Deactivates variations.
      */
     private fun deactivateVariations() {
         if (::variationStateController.isInitialized) {
@@ -3399,8 +2944,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         }
         DeferredPunctuationSpaceTracker.clear()
         bounceKeyFilter.reset()
-        clicksPowerShiftTapFilter.reset()
-        accidentalKeyPressFilter.reset()
+        overlappingKeyFilter.reset()
         cancelPendingSelectionDrivenUiWork()
         invalidateRenderedStatusSnapshot()
         editorHasActiveSelection = false
@@ -3443,7 +2987,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 val hasValidInputConnection = inputConnection != null
 
                 if (isReallyEditable && hasValidInputConnection) {
-                    // Ricorda che nav mode era attivo prima di entrare nel campo di testo
+                    // Remember that nav mode was active before entering the text field
                     navModeWasActiveBeforeEditableField = true
                     navModeController.exitNavMode()
                     resetModifierStates(preserveNavMode = false)
@@ -3530,29 +3074,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 inputContextState = state
             )
         }
-
-        // Check if trackpad gestures should be started
-        if (::trackpadGestureDetector.isInitialized) {
-            val gesturesEnabled = SettingsManager.getTrackpadGesturesEnabled(this)
-            if (shouldStartShizukuTrackpadDetector() && !trackpadGestureDetector.isRunning()) {
-                val shizukuRunning = try { Shizuku.pingBinder() } catch (e: Exception) { false }
-                val shizukuAuthorized = try { 
-                    Shizuku.checkSelfPermission() == PackageManager.PERMISSION_GRANTED 
-                } catch (e: Exception) { false }
-                
-                if (shizukuRunning && shizukuAuthorized) {
-                    Log.d(TRACKPAD_DEBUG_TAG, "onStartInputView: Gestures enabled and Shizuku ready, starting detector...")
-                    trackpadGestureDetector.start()
-                } else {
-                    Log.d(TRACKPAD_DEBUG_TAG, "onStartInputView: Gestures enabled but Shizuku not ready (running=$shizukuRunning, authorized=$shizukuAuthorized)")
-                }
-            } else if (!shouldStartShizukuTrackpadDetector() && trackpadGestureDetector.isRunning()) {
-                Log.d(TRACKPAD_DEBUG_TAG, "onStartInputView: stopping Shizuku detector for non-Shizuku provider")
-                trackpadGestureDetector.stop()
-            } else if (gesturesEnabled && trackpadGestureDetector.isRunning()) {
-                Log.d(TRACKPAD_DEBUG_TAG, "onStartInputView: Gestures enabled and detector already running, skipping")
-            }
-        }
     }
 
     override fun onFinishInput() {
@@ -3561,16 +3082,15 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         super.onFinishInput()
         if (::textExpansionController.isInitialized) textExpansionController.clear()
         keyboardVisibilityController.cancelPendingSurfaceTransition()
-        accidentalKeyPressFilter.reset()
+        overlappingKeyFilter.reset()
         isInputViewActive = false
         if (::candidatesBarController.isInitialized) {
             candidatesBarController.resetSuggestionActionMode()
         }
         inputContextState = InputContextState.EMPTY
-        multiTapController.cancelAll()
         disableEmojiSearchInputCapture()
         resetModifierStates(preserveNavMode = true)
-        // Se nav mode era attivo prima di entrare nel campo di testo, riattivalo ora
+        // If nav mode was active before entering the text field, re-enable it now
         if (navModeWasActiveBeforeEditableField) {
             navModeController.enterNavMode()
             navModeWasActiveBeforeEditableField = false
@@ -3591,7 +3111,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         }
         stopClipboardCleanupTimer()
         if (finishingInput) {
-            multiTapController.cancelAll()
             resetModifierStates(preserveNavMode = true)
             suggestionController.onContextReset()
             if (!navModeController.isNavModeActive()) {
@@ -3602,16 +3121,12 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     private fun updateDebugImeContextSnapshot(info: EditorInfo?) {
-        val imm = getSystemService(InputMethodManager::class.java)
-        val subtype = imm.currentInputMethodSubtype
-        val resolvedLayout = runCatching {
-            AdditionalSubtypeUtils.resolveActiveLayout(assets, this, subtype)
-        }.getOrNull()
+        val subtype = getSystemService(InputMethodManager::class.java).currentInputMethodSubtype
         DebugCaptureStore.updateImeContext(
             packageName = info?.packageName ?: currentPackageName,
             inputType = info?.inputType,
             subtypeLocale = subtype?.localeString(),
-            resolvedLayout = resolvedLayout,
+            resolvedLayout = activeKeyboardLayoutName,
             physicalProfileOverride = physicalKeyboardProfileOverride
         )
     }
@@ -3622,16 +3137,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         keyboardVisibilityController.onImeWindowVisibilityChanged(shown = true)
         updateStatusBarText()
         attachTrackpadDecorViewMotionHook("onWindowShown")
-    }
-
-    private fun shouldStartShizukuTrackpadDetector(): Boolean {
-        return SettingsManager.getTrackpadGesturesEnabled(this) &&
-            SettingsManager.getTrackpadProvider(this) == SettingsManager.TRACKPAD_PROVIDER_SHIZUKU
-    }
-
-    private fun isNativeImeTrackpadProviderActive(): Boolean {
-        return SettingsManager.getTrackpadGesturesEnabled(this) &&
-            SettingsManager.getTrackpadProvider(this) == SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME
     }
 
     /** The app asked the keyboard not to learn from this field, as in incognito tabs. */
@@ -3687,7 +3192,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         decorView.requestFocus()
         decorView.setOnGenericMotionListener { _, event ->
             releaseCollapsedSurfaceForTrackpad(event)
-            handleNativeImeTrackpadMotion(event, origin = "ime_decor")
+            false
         }
         Log.d(
             TRACKPAD_DEBUG_TAG,
@@ -3695,362 +3200,11 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         )
     }
     
-    /**
-     * Registers additional subtypes (custom input styles) with the system.
-     * Called on startup and when custom input styles are modified.
-     */
-    private fun registerAdditionalSubtypes() {
-        try {
-            val imm = getSystemService(InputMethodManager::class.java)
-            
-            // Get IME ID - try both formats
-            val componentName = android.content.ComponentName(this, PhysicalKeyboardInputMethodService::class.java)
-            val imeIdShort = componentName.flattenToShortString()
-            val imeIdFull = componentName.flattenToString()
-            
-            // Find the actual IME in the system list to get the correct ID format
-            val inputMethodInfo = imm.getInputMethodList().firstOrNull { info ->
-                info.packageName == packageName && 
-                info.serviceName == PhysicalKeyboardInputMethodService::class.java.name
-            }
-            
-            val imeId = inputMethodInfo?.id ?: imeIdFull
-            
-            Log.d(TAG, "Registering additional subtypes")
-            Log.d(TAG, "Component: $componentName")
-            Log.d(TAG, "IME ID (short): $imeIdShort")
-            Log.d(TAG, "IME ID (full): $imeIdFull")
-            Log.d(TAG, "IME ID (from system): ${inputMethodInfo?.id}")
-            Log.d(TAG, "Using IME ID: $imeId")
-            Log.d(TAG, "IME found in system: ${inputMethodInfo != null}")
-            
-            val prefString = SettingsManager.getCustomInputStyles(this)
-            Log.d(TAG, "Custom input styles pref string: $prefString")
-            
-            val subtypes = AdditionalSubtypeUtils.createAdditionalSubtypesArray(
-                prefString,
-                assets,
-                this
-            )
-            
-            Log.d(TAG, "Created ${subtypes.size} additional subtypes")
-            subtypes.forEachIndexed { index, subtype ->
-                Log.d(TAG, "Subtype $index: locale=${subtype.localeString()}, nameResId=${subtype.nameResId}, extraValue=${subtype.extraValue}")
-            }
-            
-            if (subtypes.isNotEmpty() && inputMethodInfo != null) {
-                // Note: setAdditionalInputMethodSubtypes is deprecated but still works on most Android versions
-                // The subtypes will appear in the IME picker but may need to be enabled manually by the user
-                setAdditionalInputMethodSubtypesCompat(imm, imeId, subtypes)
-                Log.d(TAG, "Successfully called setAdditionalInputMethodSubtypes with ${subtypes.size} subtypes")
-                
-                // Send broadcast to notify system of IME subtype changes (if supported)
-                try {
-                    val intent = Intent("android.view.InputMethod.SUBTYPE_CHANGED").apply {
-                        setPackage("android")
-                        putExtra("imeId", imeId)
-                    }
-                    sendBroadcast(intent)
-                    Log.d(TAG, "Sent SUBTYPE_CHANGED broadcast")
-                } catch (e: Exception) {
-                    Log.w(TAG, "Could not send SUBTYPE_CHANGED broadcast", e)
-                }
-                
-                // Try to explicitly enable the additional subtypes after a delay
-                // This ensures the system has processed the registration first
-                Handler(Looper.getMainLooper()).postDelayed({
-                    try {
-                        // Re-fetch InputMethodInfo to get updated subtype list
-                        val updatedInfo = imm.getInputMethodList().firstOrNull { 
-                            it.packageName == packageName && 
-                            it.serviceName == PhysicalKeyboardInputMethodService::class.java.name
-                        }
-                        
-                        if (updatedInfo != null) {
-                            // Get all subtypes from InputMethodInfo (including base from method.xml and additional)
-                            val allSubtypes = mutableListOf<android.view.inputmethod.InputMethodSubtype>()
-                            for (i in 0 until updatedInfo.subtypeCount) {
-                                allSubtypes.add(updatedInfo.getSubtypeAt(i))
-                            }
-                            
-                            // Get current system locales to filter out removed ones
-                            val currentSystemLocales = getSystemEnabledLocales()
-                            val systemLanguageCodes = currentSystemLocales.map { locale ->
-                                locale.split("_").first().lowercase()
-                            }.toSet()
-                            
-                            // Filter ALL subtypes (base + additional) to keep only visible, valid input styles.
-                            val validSubtypes = allSubtypes.filter { subtype ->
-                                AdditionalSubtypeUtils.shouldKeepSubtype(
-                                    this,
-                                    assets,
-                                    subtype,
-                                    currentSystemLocales,
-                                    systemLanguageCodes
-                                )
-                            }
-                            
-                            // Convert to hash codes for setExplicitlyEnabledInputMethodSubtypes
-                            val validEnabledHashCodes = validSubtypes.map { it.hashCode() }.toIntArray()
-                            
-                            // Always update enabled subtypes, even if empty (to disable removed ones)
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                                imm.setExplicitlyEnabledInputMethodSubtypes(
-                                    updatedInfo.id,
-                                    validEnabledHashCodes
-                                )
-                                val removedBase = allSubtypes.count { !AdditionalSubtypeUtils.isAdditionalSubtype(it) } -
-                                        validSubtypes.count { !AdditionalSubtypeUtils.isAdditionalSubtype(it) }
-                                val removedAdditional = subtypes.size - validSubtypes.count { AdditionalSubtypeUtils.isAdditionalSubtype(it) }
-                                Log.d(TAG, "Updated enabled subtypes: ${validEnabledHashCodes.size} valid (removed ${removedBase} base, ${removedAdditional} additional)")
-                            } else {
-                                Log.d(TAG, "Skipping explicit subtype enable: requires Android 14+")
-                            }
-                        }
-                    } catch (e: Exception) {
-                        Log.w(TAG, "Could not explicitly enable subtypes", e)
-                        e.printStackTrace()
-                    }
-                }, 500) // Wait 500ms for system to process registration
-            } else {
-                // Even when there are no additional subtypes, we should still filter enabled subtypes
-                // to remove base subtypes corresponding to removed system locales
-                if (inputMethodInfo != null) {
-                    Handler(Looper.getMainLooper()).postDelayed({
-                        try {
-                            val updatedInfo = imm.getInputMethodList().firstOrNull { 
-                                it.packageName == packageName && 
-                                it.serviceName == PhysicalKeyboardInputMethodService::class.java.name
-                            }
-                            
-                            if (updatedInfo != null) {
-                                // Get all subtypes from InputMethodInfo (base subtypes from method.xml)
-                                val allSubtypes = mutableListOf<android.view.inputmethod.InputMethodSubtype>()
-                                for (i in 0 until updatedInfo.subtypeCount) {
-                                    allSubtypes.add(updatedInfo.getSubtypeAt(i))
-                                }
-                                
-                                val currentSystemLocales = getSystemEnabledLocales()
-                                val systemLanguageCodes = currentSystemLocales.map { locale ->
-                                    locale.split("_").first().lowercase()
-                                }.toSet()
-                                
-                                // Filter to keep only visible subtypes with valid system locales.
-                                val validSubtypes = allSubtypes.filter { subtype ->
-                                    AdditionalSubtypeUtils.shouldKeepSubtype(
-                                        this,
-                                        assets,
-                                        subtype,
-                                        currentSystemLocales,
-                                        systemLanguageCodes
-                                    )
-                                }
-                                
-                                val validEnabledHashCodes = validSubtypes.map { it.hashCode() }.toIntArray()
-                                
-                                // Always update to disable removed subtypes
-                                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                                    imm.setExplicitlyEnabledInputMethodSubtypes(
-                                        updatedInfo.id,
-                                        validEnabledHashCodes
-                                    )
-                                    Log.d(TAG, "Filtered base subtypes: kept ${validEnabledHashCodes.size}, removed ${allSubtypes.size - validSubtypes.size}")
-                                } else {
-                                    Log.d(TAG, "Skipping base subtype filter update: requires Android 14+")
-                                }
-                            }
-                        } catch (e: Exception) {
-                            Log.w(TAG, "Could not filter enabled subtypes", e)
-                        }
-                    }, 500)
-                }
-                
-                if (subtypes.isEmpty()) {
-                    Log.d(TAG, "No subtypes to register")
-                } else {
-                    Log.w(TAG, "Cannot register subtypes: InputMethodInfo not found")
-                }
-            }
-            
-            // Refresh subtype caches if needed
-            refreshSubtypeCaches()
-            
-            // Force a small delay to ensure system processes the registration
-            Handler(Looper.getMainLooper()).postDelayed({
-                try {
-                    val verifyInfo = imm.getInputMethodList().firstOrNull { 
-                        it.packageName == packageName && 
-                        it.serviceName == PhysicalKeyboardInputMethodService::class.java.name
-                    }
-                    if (verifyInfo != null) {
-                        // Check all subtypes (enabled and disabled)
-                        val allSubtypes = imm.getEnabledInputMethodSubtypeList(verifyInfo, true)
-                        Log.d(TAG, "Verification: ${allSubtypes.size} total subtypes found after registration")
-                        allSubtypes.forEachIndexed { index, subtype ->
-                            val isAdditional = AdditionalSubtypeUtils.isAdditionalSubtype(subtype)
-                            Log.d(TAG, "Subtype $index: locale=${subtype.localeString()}, isAdditional=$isAdditional, extraValue=${subtype.extraValue}")
-                        }
-                        
-                        // Also try to get subtypes directly from InputMethodInfo
-                        try {
-                            val subtypeCount = verifyInfo.subtypeCount
-                            Log.d(TAG, "InputMethodInfo reports $subtypeCount subtypes")
-                            for (i in 0 until subtypeCount) {
-                                val subtype = verifyInfo.getSubtypeAt(i)
-                                val isAdditional = AdditionalSubtypeUtils.isAdditionalSubtype(subtype)
-                                Log.d(TAG, "InputMethodInfo subtype $i: locale=${subtype.localeString()}, isAdditional=$isAdditional, extraValue=${subtype.extraValue}")
-                            }
-                        } catch (e: Exception) {
-                            Log.w(TAG, "Error getting subtypes from InputMethodInfo", e)
-                        }
-                    } else {
-                        Log.w(TAG, "IME not found in system list for verification")
-                    }
-                } catch (e: Exception) {
-                    Log.e(TAG, "Error verifying subtype registration", e)
-                }
-            }, 1000)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error registering additional subtypes", e)
-            e.printStackTrace()
-        }
-    }
     
-    /**
-     * Refreshes subtype caches after registration.
-     * This ensures getEnabledInputMethodSubtypeList reflects the new subtypes.
-     */
-    private fun refreshSubtypeCaches() {
-        try {
-            val imm = getSystemService(InputMethodManager::class.java)
-            // Force refresh by getting the enabled subtypes list
-            val inputMethodInfo = imm.getInputMethodList().firstOrNull { 
-                it.id == packageName + "/" + PhysicalKeyboardInputMethodService::class.java.name 
-            }
-            if (inputMethodInfo != null) {
-                val enabledSubtypes = imm.getEnabledInputMethodSubtypeList(inputMethodInfo, true)
-                Log.d(TAG, "Refreshed subtype caches, ${enabledSubtypes.size} enabled subtypes")
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error refreshing subtype caches", e)
-        }
-    }
     
-    /**
-     * Finds a subtype by locale.
-     */
-    private fun findSubtypeByLocale(locale: String): android.view.inputmethod.InputMethodSubtype? {
-        return try {
-            val imm = getSystemService(InputMethodManager::class.java)
-            val inputMethodInfo = imm.getInputMethodList().firstOrNull { 
-                it.id == packageName + "/" + PhysicalKeyboardInputMethodService::class.java.name 
-            }
-            if (inputMethodInfo != null) {
-                val enabledSubtypes = imm.getEnabledInputMethodSubtypeList(inputMethodInfo, true)
-                AdditionalSubtypeUtils.findSubtypeByLocale(enabledSubtypes.toTypedArray(), locale)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error finding subtype by locale: $locale", e)
-            null
-        }
-    }
-    
-    /**
-     * Finds a subtype by locale and keyboard layout set.
-     */
-    private fun findSubtypeByLocaleAndKeyboardLayoutSet(
-        locale: String,
-        layoutName: String
-    ): android.view.inputmethod.InputMethodSubtype? {
-        return try {
-            val imm = getSystemService(InputMethodManager::class.java)
-            val inputMethodInfo = imm.getInputMethodList().firstOrNull { 
-                it.id == packageName + "/" + PhysicalKeyboardInputMethodService::class.java.name 
-            }
-            if (inputMethodInfo != null) {
-                val enabledSubtypes = imm.getEnabledInputMethodSubtypeList(inputMethodInfo, true)
-                AdditionalSubtypeUtils.findSubtypeByLocaleAndKeyboardLayoutSet(
-                    enabledSubtypes.toTypedArray(),
-                    locale,
-                    layoutName
-                )
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error finding subtype by locale and layout: $locale:$layoutName", e)
-            null
-        }
-    }
-    
-    /**
-     * Gets the list of system-enabled locales.
-     * Returns locales in format "en_US", "it_IT", etc.
-     */
-    private fun getSystemEnabledLocales(): Set<String> {
-        val locales = mutableSetOf<String>()
-        try {
-            val config = resources.configuration
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-                // Android N+ (API 24+)
-                val localeList = config.locales
-                for (i in 0 until localeList.size()) {
-                    val locale = localeList[i]
-                    val localeStr = formatLocaleStringForSystem(locale)
-                    if (localeStr.isNotEmpty()) {
-                        locales.add(localeStr)
-                    }
-                }
-            } else {
-                // Pre-Android N
-                @Suppress("DEPRECATION")
-                val locale = config.locale
-                val localeStr = formatLocaleStringForSystem(locale)
-                if (localeStr.isNotEmpty()) {
-                    locales.add(localeStr)
-                }
-            }
-        } catch (e: Exception) {
-            Log.w(TAG, "Error getting system locales", e)
-        }
-        return locales
-    }
-    
-    /**
-     * Formats a Locale object to "en_US" format.
-     */
-    private fun formatLocaleStringForSystem(locale: Locale): String {
-        val language = locale.language
-        val country = locale.country
-        return if (country.isNotEmpty()) {
-            "${language}_$country"
-        } else {
-            language
-        }
-    }
-    
-    /**
-     * Gets the locale from an IME subtype.
-     * Falls back to the current subtype, then Italian if no subtype is available.
-     */
-    private fun getLocaleFromSubtype(subtypeOverride: InputMethodSubtype? = null): Locale {
-        val imm = getSystemService(InputMethodManager::class.java)
-        val subtype = subtypeOverride ?: imm.currentInputMethodSubtype
-        val localeString = subtype?.localeString() ?: "it-IT"
-        return try {
-            AdditionalSubtypeUtils.localeFromSubtypeString(localeString)
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to parse locale from subtype: $localeString", e)
-            Locale.ITALIAN
-        }
-    }
-
     private fun showAddSubstitutionDialog(word: String) {
         val replacement = word.trim()
         if (replacement.isBlank()) return
-        val languageCode = getLocaleFromSubtype().language.ifBlank { "it" }
         try {
             val intent = Intent(this, AddSubstitutionActivity::class.java).apply {
                 addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
@@ -4058,7 +3212,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                 addFlags(Intent.FLAG_ACTIVITY_NO_HISTORY)
                 addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP)
                 putExtra(AddSubstitutionActivity.EXTRA_REPLACEMENT, replacement)
-                putExtra(AddSubstitutionActivity.EXTRA_LANGUAGE_CODE, languageCode)
             }
             startActivity(intent)
         } catch (e: Exception) {
@@ -4066,51 +3219,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         }
     }
 
-    private fun getAdditionalSuggestionLocalesForActiveInputStyle(): List<Locale> {
-        val imm = getSystemService(InputMethodManager::class.java)
-        val subtypeLocale = imm.currentInputMethodSubtype?.localeString()
-            ?: getLocaleFromSubtype().toLanguageTag()
-        val layout = SettingsManager.getKeyboardLayout(this)
-        return SettingsManager.getAdditionalSuggestionLocalesForInputStyle(this, subtypeLocale, layout)
-            .filterNot { tag -> tag.equals("x-pastiera", ignoreCase = true) }
-            .mapNotNull { tag ->
-                try {
-                    AdditionalSubtypeUtils.localeFromSubtypeString(tag)
-                } catch (e: Exception) {
-                    Log.w(TAG, "Failed to parse additional suggestion locale: $tag", e)
-                    null
-                }
-            }
-    }
-    
-    /**
-     * Called when the user switches IME subtypes (languages).
-     * Reloads the dictionary for the new language and switches to the layout specified in the subtype or JSON mapping.
-     */
-    override fun onCurrentInputMethodSubtypeChanged(newSubtype: android.view.inputmethod.InputMethodSubtype) {
-        super.onCurrentInputMethodSubtypeChanged(newSubtype)
-        
-        if (::suggestionController.isInitialized) {
-            val newLocale = getLocaleFromSubtype(newSubtype)
-            suggestionController.updateLocale(newLocale)
-            if (!inputContextState.shouldDisableSuggestions) {
-                suggestionController.readInitialContext(currentInputConnection)
-            }
-            if (Log.isLoggable(TAG, Log.DEBUG)) {
-                Log.d(TAG, "IME subtype changed, updating locale to: ${newLocale.language}")
-            }
-        }
-        
-        val layoutToUse = AdditionalSubtypeUtils.resolveInputStyleLayout(assets, this, newSubtype)
-
-        val currentLayout = SettingsManager.getKeyboardLayout(this)
-        if (layoutToUse != currentLayout) {
-            Log.d(TAG, "Switching layout for locale ${newSubtype.localeString()}: $layoutToUse (was: $currentLayout)")
-            switchToLayout(layoutToUse, showToast = false)
-        } else {
-            switchToLayout(layoutToUse, showToast = false)
-        }
-    }
     
     override fun onWindowHidden() {
         pendingKeyboardSurfaceTransition?.let(uiHandler::removeCallbacks)
@@ -4120,12 +3228,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             candidatesBarController.dismissEmojiPickerPopups()
         }
         keyboardVisibilityController.onImeWindowVisibilityChanged(shown = false)
-        SoftwareKeyboardAutoDetector.onInputWindowHidden()
         invalidateRenderedStatusSnapshot()
         if (::candidatesBarController.isInitialized) {
             candidatesBarController.resetSuggestionActionMode()
         }
-        multiTapController.finalizeCycle()
         if (steppedAsideForSwipe) steppedAsideForSwipe = false else resetModifierStates(preserveNavMode = true)
         suggestionController.onContextReset()
     }
@@ -4133,25 +3239,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     override fun onConfigurationChanged(newConfig: Configuration) {
         super.onConfigurationChanged(newConfig)
         if (::textExpansionController.isInitialized) textExpansionController.clear()
-
-        val systemLocalesSignature = newConfig.locales.toLanguageTags()
-        if (systemLocalesSignature == lastSystemLocalesSignature) {
-            Log.d(TAG, "Configuration changed without locale changes; keeping IME subtypes and editor session")
-            return
-        }
-        lastSystemLocalesSignature = systemLocalesSignature
-
-        // Only locale changes require subtype registration. Physical-keyboard connect/disconnect
-        // also changes Configuration and must not restart the active editor session.
-        Log.d(TAG, "System locales changed, re-registering IME subtypes")
-        Handler(Looper.getMainLooper()).postDelayed({
-            // First, remove system locales without dictionary that are no longer in system
-            // (only when configuration changes, not when manually adding styles)
-            AdditionalSubtypeUtils.removeSystemLocalesWithoutDictionary(this)
-            // Then, auto-add new system locales without dictionary
-            AdditionalSubtypeUtils.autoAddSystemLocalesWithoutDictionary(this)
-            registerAdditionalSubtypes()
-        }, 500) // Small delay to ensure system has processed locale changes
     }
     
     /**
@@ -4240,163 +3327,18 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         )
     }
 
-    private fun remapHardwareEvent(keyCode: Int, event: KeyEvent?): ClicksPowerButtonEventMapper.Result {
-        val remapped = DeviceSpecific.remapHardwareKeyEvent(
-            keyCode,
-            event,
-            physicalKeyboardProfileOverride
-        )
-        val isClicksPowerKeyboard = !dispatchingClicksAccessibilityKeyEvent &&
-            (event
-                ?.takeIf { it.deviceId >= 0 }
-                ?.let { inputEvent ->
-                    inputEvent.deviceId in connectedClicksInputDeviceIds ||
-                        InputDevice.getDevice(inputEvent.deviceId)
-                            ?.let(DeviceSpecific::isClicksPowerKeyboard) == true
-                } == true)
-        return clicksPowerButtonEventMapper.map(
-            keyCode = remapped.keyCode,
-            event = remapped.event,
-            isClicksPowerKeyboard = isClicksPowerKeyboard,
-            clicksButtonMode = SettingsManager.getClicksButtonMode(this),
-            metaButtonMode = SettingsManager.getClicksMetaButtonMode(this),
-            altButtonMode = SettingsManager.getClicksAltButtonMode(this),
-            microphoneButtonMode = SettingsManager.getClicksMicrophoneButtonMode(this)
-        )
+    private fun isFromPhysicalKeyboard(event: KeyEvent?): Boolean {
+        val device = event?.takeIf { it.deviceId >= 0 }?.let { InputDevice.getDevice(it.deviceId) } ?: return false
+        return !device.isVirtual && device.sources and InputDevice.SOURCE_KEYBOARD == InputDevice.SOURCE_KEYBOARD
     }
 
-    override fun dispatchClicksAccessibilityKeyEvent(event: KeyEvent): Boolean {
-        if (currentInputConnection == null || !inputContextState.isEditable) return false
-
-        val dispatch = {
-            dispatchingClicksAccessibilityKeyEvent = true
-            try {
-                when (event.action) {
-                    KeyEvent.ACTION_DOWN -> onKeyDown(event.keyCode, event)
-                    KeyEvent.ACTION_UP -> onKeyUp(event.keyCode, event)
-                }
-            } finally {
-                dispatchingClicksAccessibilityKeyEvent = false
-            }
-        }
-        if (Looper.myLooper() == Looper.getMainLooper()) {
-            dispatch()
-        } else {
-            uiHandler.post(dispatch)
-        }
-        return true
-    }
-
-    override fun dispatchClicksDirectAction(action: ClicksButtonDirectAction): Boolean {
-        if (action != ClicksButtonDirectAction.TOGGLE_EMOJI_PICKER ||
-            currentInputConnection == null || !inputContextState.isEditable
-        ) {
-            return false
-        }
-        val dispatch = { toggleEmojiPicker() }
-        if (Looper.myLooper() == Looper.getMainLooper()) dispatch() else uiHandler.post(dispatch)
-        return true
-    }
-
-    private fun toggleEmojiPicker() {
-        ensureImeSurfaceVisible()
-        symLayoutController.openEmojiPickerPage()
-        updateStatusBarText()
-    }
-
-    private data class AccidentalKeyInput(
-        val resolution: PhysicalKeyResolver.Resolution,
-        val configuration: AccidentalKeyPressFilter.Configuration
-    )
-
-    private fun accidentalKeyInput(keyCode: Int, event: KeyEvent?): AccidentalKeyInput {
-        val device = event
-            ?.takeIf { it.deviceId >= 0 }
-            ?.let { InputDevice.getDevice(it.deviceId) }
-        val isPhysicalKeyboard = device != null &&
-            !device.isVirtual &&
-            device.sources and InputDevice.SOURCE_KEYBOARD == InputDevice.SOURCE_KEYBOARD
-        val isClicksPowerKeyboard = device?.let(DeviceSpecific::isClicksPowerKeyboard) == true
-        val resolved = physicalKeyResolver.resolve(
-                keyCode = keyCode,
-                event = event,
-                profile = ClicksPowerKeyboardLayout.takeIf { isClicksPowerKeyboard },
-                clicksState = if (isClicksPowerKeyboard) {
-                    ClicksPowerKeyboardController.currentState().keyboard
-                } else {
-                    null
-                }
-            )
-        val configuredButtonMode = if (isClicksPowerKeyboard) {
-            when (keyCode) {
-                KeyEvent.KEYCODE_TAB -> SettingsManager.getClicksButtonMode(this)
-                KeyEvent.KEYCODE_META_LEFT -> SettingsManager.getClicksMetaButtonMode(this)
-                KeyEvent.KEYCODE_F12 -> SettingsManager.getClicksAltButtonMode(this)
-                KeyEvent.KEYCODE_F11 -> SettingsManager.getClicksMicrophoneButtonMode(this)
-                else -> null
-            }
-        } else {
-            null
-        }
-        val isConfiguredModifier = when (configuredButtonMode) {
-            SettingsManager.ClicksPowerButtonMode.ALT,
-            SettingsManager.ClicksPowerButtonMode.SYM,
-            SettingsManager.ClicksPowerButtonMode.QUICK_LAUNCHER,
-            SettingsManager.ClicksPowerButtonMode.OPEN_PASTIERA,
-            SettingsManager.ClicksPowerButtonMode.TOGGLE_KEYBOARD_MODE,
-            SettingsManager.ClicksPowerButtonMode.TOGGLE_EMOJI_PICKER -> true
-            SettingsManager.ClicksPowerButtonMode.TAB -> false
-            SettingsManager.ClicksPowerButtonMode.NATIVE,
-            null -> resolved.isModifier
-        }
-        return AccidentalKeyInput(
-            resolution = resolved.copy(isModifier = isConfiguredModifier),
-            configuration = AccidentalKeyPressPolicy.configuration(
-                isPhysicalKeyboard = isPhysicalKeyboard,
-                isClicksPowerKeyboard = isClicksPowerKeyboard,
-                globalOverlapEnabled = SettingsManager.getOverlappingKeysEnabled(this),
-                clicksOverlapMode = SettingsManager.getClicksOverlappingKeysMode(this),
-                clicksNumberRowMode = SettingsManager.getClicksNumberRowInputMode(this),
-                clicksNumberRowRepeatEnabled = SettingsManager.isClicksNumberRowRepeatEnabled(this),
-                longPressThresholdMs = SettingsManager.getLongPressThreshold(this)
-            )
-        )
-    }
-
-    private fun replayProtectedNumberKey(
-        keyCode: Int,
-        replay: AccidentalKeyPressFilter.KeyUpResult.ReplayTap
-    ) {
-        replayingProtectedNumberKey = true
-        try {
-            val downHandled = onKeyDown(keyCode, replay.downEvent)
-            if (downHandled) {
-                onKeyUp(keyCode, replay.upEvent)
-            } else {
-                currentInputConnection?.let { inputConnection ->
-                    inputConnection.sendKeyEvent(replay.downEvent)
-                    inputConnection.sendKeyEvent(replay.upEvent)
-                }
-            }
-        } finally {
-            replayingProtectedNumberKey = false
-        }
-    }
+    private fun overlappingKeysEnabled(event: KeyEvent?): Boolean =
+        SettingsManager.getOverlappingKeysEnabled(this) && isFromPhysicalKeyboard(event)
 
     override fun onKeyLongPress(keyCode_: Int, event_: KeyEvent?): Boolean {
-        if (!replayingProtectedNumberKey) {
-            val accidentalInput = accidentalKeyInput(keyCode_, event_)
-            accidentalKeyPressFilter.shouldConsumeKeyDown(
-                keyCode = keyCode_,
-                event = event_,
-                resolution = accidentalInput.resolution,
-                configuration = accidentalInput.configuration
-            )?.let { return true }
-        }
-        val remapped = remapHardwareEvent(keyCode_, event_)
-        if (remapped.consume) return true
-        val keyCode = remapped.keyCode
-        val event = remapped.event
+        overlappingKeyFilter.shouldConsumeKeyDown(keyCode_, event_, overlappingKeysEnabled(event_))?.let { return true }
+        val keyCode = keyCode_
+        val event = event_
         // Handle long press even when the keyboard is hidden but we still have a valid InputConnection.
         val inputConnection = currentInputConnection
         if (inputConnection == null) {
@@ -4413,7 +3355,7 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
         
         // Intercept long presses BEFORE Android handles them
         if (alternateCharacterManager.hasAltMapping(keyCode)) {
-            // Consumiamo l'evento per evitare il popup di Android
+            // Consume the event to avoid Android's popup
             return true
         }
         
@@ -4430,48 +3372,18 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             suggestionController.onTypingKey()
         }
         try {
-        if (!replayingProtectedNumberKey) {
-            val accidentalInput = accidentalKeyInput(keyCode_, event_)
-            accidentalKeyPressFilter.shouldConsumeKeyDown(
+        overlappingKeyFilter.shouldConsumeKeyDown(keyCode_, event_, overlappingKeysEnabled(event_))?.let { suppressed ->
+            notifyDebugKeyEvent(
                 keyCode = keyCode_,
                 event = event_,
-                resolution = accidentalInput.resolution,
-                configuration = accidentalInput.configuration
-            )?.let { suppressed ->
-                notifyDebugKeyEvent(
-                    keyCode = keyCode_,
-                    event = event_,
-                    action = "KEY_DOWN_SUPPRESSED",
-                    origin = "accidental_keys",
-                    outputKeyCodeName = suppressed.debugOutput()
-                )
-                return true
-            }
-        }
-        val remapped = remapHardwareEvent(keyCode_, event_)
-        if (remapped.consume) {
-            remapped.directAction?.let { ClicksButtonDirectActionExecutor.execute(this, it) }
-            return true
-        }
-        val keyCode = remapped.keyCode
-        val event = remapped.event
-        clicksPowerShiftTapFilter.shouldConsumeKeyDown(
-            isClicksPowerKeyboard = DeviceSpecific.resolveInputProfile(
-                event,
-                physicalKeyboardProfileOverride
-            ).profileId == "clicks_power",
-            keyCode = keyCode,
-            event = event
-        )?.let { suppressed ->
-            notifyDebugKeyEvent(
-                keyCode = keyCode,
-                event = event,
                 action = "KEY_DOWN_SUPPRESSED",
-                origin = "clicks_shift_bounce",
+                origin = "accidental_keys",
                 outputKeyCodeName = suppressed.debugOutput()
             )
             return true
         }
+        val keyCode = keyCode_
+        val event = event_
         bounceKeyFilter.shouldConsumeKeyDown(this, keyCode, event)?.let { suppressed ->
             notifyDebugKeyEvent(
                 keyCode = keyCode,
@@ -4589,37 +3501,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             updateStatusBarText()
         }
 
-        // Minimal Phone dedicated keys (skip while Alt is active so its configured mapping can run)
-        // Gate this behavior to Minimal Phone devices only.
-        val altActiveForDedicatedKeys = event?.isAltPressed == true || altLatchActive || altOneShot
-        if (
-            hasEditableField &&
-            isMinimalPhoneHardwareActive() &&
-            keyCode == KEYCODE_EM &&
-            event?.repeatCount == 0 &&
-            !altActiveForDedicatedKeys
-        ) {
-            if (symPage == 4) {
-                symLayoutController.closeSymPage()
-                updateStatusBarText()
-            } else {
-                ensureImeSurfaceVisible()
-                symLayoutController.openEmojiPickerPage()
-                updateStatusBarText()
-            }
-            return true
-        }
-        if (
-            hasEditableField &&
-            isMinimalPhoneHardwareActive() &&
-            keyCode == KEYCODE_MIC &&
-            event?.repeatCount == 0 &&
-            !altActiveForDedicatedKeys
-        ) {
-            startSpeechRecognition()
-            return true
-        }
-
         if (
             hasEditableField &&
             (symTogglePendingOnKeyUp || event?.isSymPressed == true) &&
@@ -4731,28 +3612,11 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             otherKeyInteractedDuringHold = false
             modifierDownTimes[keyCode] = event.eventTime
         } else if (!isModifierKey && event?.repeatCount == 0) {
-            if (
-                CompatibilityWorkarounds.isClicksPowerSyntheticShiftChord(
-                    profileId = DeviceSpecific.resolveInputProfile(
-                        event,
-                        physicalKeyboardProfileOverride
-                    ).profileId,
-                    event = event,
-                    activeShiftDownTimes = sequenceOf(
-                        modifierDownTimes[KeyEvent.KEYCODE_SHIFT_LEFT],
-                        modifierDownTimes[KeyEvent.KEYCODE_SHIFT_RIGHT]
-                    ).filterNotNull()
-                )
-            ) {
-                modifierStateBeforeHold?.let(modifierStateController::restoreLogicalState)
-                updateStatusBarText()
-            }
             otherKeyInteractedDuringHold = true
             lastShiftTapUpTime = 0L
             lastAltTapUpTime = 0L
         }
 
-        multiTapController.resetForNewKey(keyCode)
         if (!isModifierKey) {
             modifierStateController.registerNonModifierKey()
         }
@@ -4811,71 +3675,10 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             InputEventRouter.EditableFieldRoutingResult.Continue -> {}
         }
         
-        // Handle Alt+Shift for subtype cycling
-        if (
-            hasEditableField &&
-            event != null &&
-            event.repeatCount == 0 &&
-            SettingsManager.isAltShiftLayoutSwitchEnabled(this) &&
-            (((keyCode == KeyEvent.KEYCODE_SHIFT_LEFT || keyCode == KeyEvent.KEYCODE_SHIFT_RIGHT) &&
-                (event.isAltPressed || altPhysicallyPressed)) ||
-                ((keyCode == KeyEvent.KEYCODE_ALT_LEFT || keyCode == KeyEvent.KEYCODE_ALT_RIGHT) &&
-                    (event.isShiftPressed || shiftPhysicallyPressed)))
-        ) {
-            modifierStateController.clearAltState(resetPressedState = true)
-            modifierStateController.clearShiftState(resetPressedState = true)
-
-            val showToast = SettingsManager.isToastOnLayoutSwitchEnabled(this)
-            SubtypeCycler.cycleToNextSubtype(
-                context = this,
-                imeServiceClass = PhysicalKeyboardInputMethodService::class.java,
-                assets = assets,
-                showToast = showToast
-            )
-
-            updateStatusBarText()
-            return true
-        }
-
-        if (keyCode == KeyEvent.KEYCODE_ENTER && event?.repeatCount == 0) {
-            // Recover if a previous chord lost its key-up while the input context changed.
-            consumeAltEnterUntilKeyUp = false
-        }
-
-        // Keep repeats from a consumed Alt+Enter chord away from the editor.
-        if (keyCode == KeyEvent.KEYCODE_ENTER && consumeAltEnterUntilKeyUp) {
-            return true
-        }
-
-        // Handle Alt+Enter for subtype cycling
-        if (
-            hasEditableField &&
-            event != null &&
-            event.repeatCount == 0 &&
-            SettingsManager.isAltEnterLayoutSwitchEnabled(this) &&
-            (keyCode == KeyEvent.KEYCODE_ENTER &&
-                    (event.isAltPressed || altPhysicallyPressed))
-        ) {
-            consumeAltEnterUntilKeyUp = true
-            modifierStateController.clearAltState(resetPressedState = true)
-
-            val showToast = SettingsManager.isToastOnLayoutSwitchEnabled(this)
-            SubtypeCycler.cycleToNextSubtype(
-                context = this,
-                imeServiceClass = PhysicalKeyboardInputMethodService::class.java,
-                assets = assets,
-                showToast = showToast
-            )
-
-            updateStatusBarText()
-            return true
-        }
-
-        // Handle Ctrl+Space for subtype cycling
+        // Ctrl+Space switched languages in Pastiera; it still only resets the modifiers.
         if (
             hasEditableField &&
             keyCode == KeyEvent.KEYCODE_SPACE &&
-            SettingsManager.isCtrlSpaceLayoutSwitchEnabled(this) &&
             (event?.isCtrlPressed == true || ctrlPressed || ctrlLatchActive || ctrlOneShot)
         ) {
             var shouldUpdateStatusBar = false
@@ -4911,12 +3714,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                     navModeController.cancelNotification()
                     navModeController.refreshNavModeState()
                 }
-                shouldUpdateStatusBar = true
-            }
-
-            // Cycle to next subtype
-            val showToast = SettingsManager.isToastOnLayoutSwitchEnabled(this)
-            if (SubtypeCycler.cycleToNextSubtype(this, PhysicalKeyboardInputMethodService::class.java, assets, showToast = showToast)) {
                 shouldUpdateStatusBar = true
             }
 
@@ -5031,9 +3828,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
             }
         }
 
-        if (!altActiveNow && !ctrlActiveNow && handleVietnameseTelexKey(keyCode, event, ic)) {
-            return true
-        }
         
         val routingDecision = inputEventRouter.routeEditableFieldKeyDown(
             keyCode = keyCode,
@@ -5088,13 +3882,6 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
                     super.onKeyDown(defaultKeyCode, defaultEvent)
                 },
                 startSpeechRecognition = { startSpeechRecognition() },
-                getMapping = { code -> LayoutMappingRepository.getMapping(code) },
-                handleMultiTapCommit = { code, mapping, uppercase, inputConnection, allowLongPress ->
-                    handleMultiTapCommit(code, mapping, uppercase, inputConnection, allowLongPress)
-                },
-                isLongPressSuppressed = { code ->
-                    multiTapController.isLongPressSuppressed(code)
-                },
                 toggleMinimalUi = { keyboardVisibilityController.togglePastierinaMode() },
                 handleBoundaryText = { text, inputConnection ->
                     handleBoundaryTextBeforeCommit(text, inputConnection)
@@ -5132,43 +3919,18 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
 
     override fun onKeyUp(keyCode_: Int, event_: KeyEvent?): Boolean {
         event_?.let { collapsedSwipeDetector.onKeyUp(keyCode_, it.eventTime) }
-        if (!replayingProtectedNumberKey) {
-            when (val result = accidentalKeyPressFilter.onKeyUp(keyCode_, event_)) {
-                is AccidentalKeyPressFilter.KeyUpResult.Suppressed -> {
-                    notifyDebugKeyEvent(
-                        keyCode = keyCode_,
-                        event = event_,
-                        action = "KEY_UP_SUPPRESSED",
-                        origin = "accidental_keys",
-                        outputKeyCodeName = result.event.debugOutput()
-                    )
-                    return true
-                }
-                is AccidentalKeyPressFilter.KeyUpResult.ReplayTap -> {
-                    replayProtectedNumberKey(keyCode_, result)
-                    return true
-                }
-                null -> Unit
-            }
-        }
-        val remapped = remapHardwareEvent(keyCode_, event_)
-        if (remapped.consume) return true
-        val keyCode = remapped.keyCode
-        val event = remapped.event
-        if (keyCode == KeyEvent.KEYCODE_ENTER && consumeAltEnterUntilKeyUp) {
-            consumeAltEnterUntilKeyUp = false
-            return true
-        }
-        clicksPowerShiftTapFilter.shouldConsumeKeyUp(keyCode, event)?.let { suppressed ->
+        overlappingKeyFilter.onKeyUp(keyCode_, event_)?.let { suppressed ->
             notifyDebugKeyEvent(
-                keyCode = keyCode,
-                event = event,
+                keyCode = keyCode_,
+                event = event_,
                 action = "KEY_UP_SUPPRESSED",
-                origin = "clicks_shift_bounce",
+                origin = "accidental_keys",
                 outputKeyCodeName = suppressed.debugOutput()
             )
             return true
         }
+        val keyCode = keyCode_
+        val event = event_
         bounceKeyFilter.shouldConsumeKeyUp(keyCode, event)?.let { suppressed ->
             notifyDebugKeyEvent(
                 keyCode = keyCode,
@@ -5398,580 +4160,19 @@ class PhysicalKeyboardInputMethodService : InputMethodService(), ClicksAccessibi
     }
 
     /**
-     * Aggiunge una nuova mappatura Alt+tasto -> carattere.
+     * Adds a new Alt+key -> character mapping.
      */
     fun addAltKeyMapping(keyCode: Int, character: String) {
         alternateCharacterManager.addAltKeyMapping(keyCode, character)
     }
 
     /**
-     * Rimuove una mappatura Alt+tasto esistente.
+     * Removes an existing Alt+key mapping.
      */
     fun removeAltKeyMapping(keyCode: Int) {
         alternateCharacterManager.removeAltKeyMapping(keyCode)
     }
     
-    /**
-     * Updates additional IME subtypes from SharedPreferences.
-     * This must be called from within the IME service process.
-     */
-    private fun updateAdditionalSubtypes() {
-        try {
-            val imm = getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
-            val packageName = packageName
-            val serviceName = PhysicalKeyboardInputMethodService::class.java.name
-            
-            val imeInfo = imm.enabledInputMethodList.find {
-                it.packageName == packageName && 
-                it.serviceName == serviceName
-            } ?: run {
-                Log.w(TAG, "IME not found, cannot update additional subtypes")
-                return
-            }
-            
-            val imeId = imeInfo.id
-            val additionalSubtypes = SettingsManager.getAdditionalImeSubtypes(this)
-            
-            Log.d(TAG, "Updating additional subtypes from IME service: ${additionalSubtypes.joinToString(", ")}")
-            
-            if (additionalSubtypes.isEmpty()) {
-                // Clear additional subtypes
-                setAdditionalInputMethodSubtypesCompat(imm, imeId, emptyArray())
-                Log.d(TAG, "Cleared additional subtypes")
-                return
-            }
-            
-            // Build subtypes
-            val subtypes = additionalSubtypes.map { langCode ->
-                val localeTag = getLocaleTagForLanguage(langCode)
-                val nameResId = getSubtypeNameResourceId(langCode)
-                InputMethodSubtype.InputMethodSubtypeBuilder()
-                    .setSubtypeNameResId(nameResId)
-                    .setSubtypeLocale(localeTag)
-                    .setSubtypeMode("keyboard")
-                    .setSubtypeExtraValue("noSuggestions=true")
-                    .build()
-            }
-            
-            setAdditionalInputMethodSubtypesCompat(imm, imeId, subtypes.toTypedArray())
-            Log.d(TAG, "Updated ${subtypes.size} additional subtypes from IME service")
-            
-            // Verify
-            val verifySubtypes = imm.getEnabledInputMethodSubtypeList(imeInfo, true)
-            Log.d(TAG, "Verification: Android reports ${verifySubtypes.size} enabled subtypes after update")
-            verifySubtypes.forEach { subtype ->
-                val name = try {
-                    if (subtype.nameResId != 0) {
-                        getString(subtype.nameResId)
-                    } else {
-                        "N/A"
-                    }
-                } catch (e: Exception) {
-                    "Error: ${e.message}"
-                }
-                Log.d(TAG, "  - locale: ${subtype.localeString()}, name: $name")
-            }
-            
-        } catch (e: Exception) {
-            Log.e(TAG, "Error updating additional subtypes from IME service", e)
-        }
-    }
     
-    private fun getLocaleTagForLanguage(languageCode: String): String {
-        val localeMap = mapOf(
-            "ru" to "ru_RU",
-            "pt" to "pt_PT",
-            "de" to "de_DE",
-            "da" to "da_DK",
-            "no" to "no_NO",
-            "nb" to "nb_NO",
-            "nn" to "nn_NO",
-            "fr" to "fr_FR",
-            "es" to "es_ES",
-            "pl" to "pl_PL",
-            "it" to "it_IT",
-            "en" to "en_US"
-        )
-        return localeMap[languageCode.lowercase()] ?: languageCode
-    }
     
-    private fun getSubtypeNameResourceId(languageCode: String): Int {
-        val resourceName = "input_method_name_$languageCode"
-        return resources.getIdentifier(resourceName, "string", packageName)
-            .takeIf { it != 0 } ?: R.string.input_method_name
-    }
-
-    private fun handleNativeImeTrackpadMotion(event: MotionEvent, origin: String): Boolean {
-        if (!isNativeImeTrackpadProviderActive()) {
-            return false
-        }
-        if (!DeviceSpecific.isTitan2Device()) {
-            return false
-        }
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.BAKLAVA) {
-            return false
-        }
-
-        val deviceName = InputDevice.getDevice(event.deviceId)?.name.orEmpty()
-        val isTrackpadEvent = event.isFromSource(InputDevice.SOURCE_TOUCHPAD) ||
-            deviceName.equals("touchPad", ignoreCase = true)
-        if (!isTrackpadEvent) {
-            return false
-        }
-
-        Log.d(
-            TRACKPAD_DEBUG_TAG,
-            "NativeMotion[$origin]: action=${motionActionName(event.actionMasked)} source=${event.source}(0x${event.source.toString(16)}) deviceId=${event.deviceId} device='$deviceName' x=${event.x} y=${event.y}"
-        )
-
-        when (event.actionMasked) {
-            MotionEvent.ACTION_DOWN -> {
-                val xRange = nativeImeTrackpadAxisRange(event, MotionEvent.AXIS_X)
-                nativeTrackpadGestureStart = NativeTrackpadGestureStart(
-                    x = event.x,
-                    y = event.y,
-                    xRange = xRange,
-                    origin = origin,
-                    actionName = motionActionName(event.actionMasked),
-                    deviceId = event.deviceId,
-                    source = event.source,
-                    eventTimeUptimeMs = event.eventTime
-                )
-                DebugCaptureStore.recordRawTrackpadEvent(
-                    provider = SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME,
-                    origin = origin,
-                    phase = "down",
-                    action = motionActionName(event.actionMasked),
-                    outcome = "start",
-                    startX = event.x,
-                    startY = event.y,
-                    x = event.x,
-                    y = event.y,
-                    deltaX = 0f,
-                    deltaY = 0f,
-                    threshold = nativeImeTrackpadSuggestionSwipeThreshold(),
-                    deviceId = event.deviceId,
-                    source = event.source,
-                    eventTimeUptimeMs = event.eventTime
-                )
-                nativeTrackpadLastX = event.x
-                nativeTrackpadLastY = event.y
-                nativeTrackpadLastEventTimeUptimeMs = event.eventTime
-                nativeTrackpadGestureHandled = false
-                return true
-            }
-            MotionEvent.ACTION_MOVE -> {
-                nativeTrackpadGestureStart ?: NativeTrackpadGestureStart(
-                    x = event.x,
-                    y = event.y,
-                    xRange = nativeImeTrackpadAxisRange(event, MotionEvent.AXIS_X),
-                    origin = origin,
-                    actionName = motionActionName(event.actionMasked),
-                    deviceId = event.deviceId,
-                    source = event.source,
-                    eventTimeUptimeMs = event.eventTime
-                ).also { nativeTrackpadGestureStart = it }
-                for (index in 0 until event.historySize) {
-                    val historicalX = event.getHistoricalX(0, index)
-                    val historicalY = event.getHistoricalY(0, index)
-                    nativeTrackpadLastX = historicalX
-                    nativeTrackpadLastY = historicalY
-                    nativeTrackpadLastEventTimeUptimeMs = event.getHistoricalEventTime(index)
-                }
-                nativeTrackpadLastX = event.x
-                nativeTrackpadLastY = event.y
-                nativeTrackpadLastEventTimeUptimeMs = event.eventTime
-                return true
-            }
-            MotionEvent.ACTION_UP -> {
-                val start = nativeTrackpadGestureStart
-                if (start != null && !nativeTrackpadGestureHandled) {
-                    handleNativeImeTrackpadSwipeCandidate(
-                        start = start,
-                        x = nativeTrackpadLastX,
-                        y = nativeTrackpadLastY,
-                        phase = "up",
-                        eventTimeUptimeMs = nativeTrackpadLastEventTimeUptimeMs.takeIf { it > 0L } ?: event.eventTime
-                    )
-                }
-                nativeTrackpadGestureStart = null
-                nativeTrackpadGestureHandled = false
-                nativeTrackpadLastEventTimeUptimeMs = 0L
-                return true
-            }
-            MotionEvent.ACTION_CANCEL -> {
-                nativeTrackpadGestureStart = null
-                nativeTrackpadGestureHandled = false
-                nativeTrackpadLastEventTimeUptimeMs = 0L
-                return true
-            }
-            else -> return false
-        }
-    }
-
-    private fun handleNativeImeTrackpadSwipeCandidate(
-        start: NativeTrackpadGestureStart,
-        x: Float,
-        y: Float,
-        phase: String,
-        eventTimeUptimeMs: Long
-    ): Boolean {
-        val deltaX = x - start.x
-        val deltaY = y - start.y
-        val upwardDistance = -deltaY
-        val leftwardDistance = -deltaX
-        val suggestionThreshold = nativeImeTrackpadSuggestionSwipeThreshold()
-        val deleteThreshold = nativeImeTrackpadDeleteSwipeThreshold()
-        val durationMs = (eventTimeUptimeMs - start.eventTimeUptimeMs).coerceAtLeast(1L)
-        val upVelocity = upwardDistance / durationMs
-        val leftVelocity = leftwardDistance / durationMs
-        val verticalEnough = upwardDistance >= suggestionThreshold
-        val mostlyVertical = kotlin.math.abs(deltaX) < upwardDistance / 4f
-        val verticalFastEnough = upVelocity >= NATIVE_TRACKPAD_MIN_SWIPE_VELOCITY_PX_PER_MS
-        val leftEnough = leftwardDistance >= deleteThreshold
-        val mostlyHorizontal = kotlin.math.abs(deltaY) < leftwardDistance / 4f
-        val horizontalFastEnough = leftVelocity >= NATIVE_TRACKPAD_MIN_SWIPE_VELOCITY_PX_PER_MS
-        Log.d(
-            TRACKPAD_DEBUG_TAG,
-            "Native candidate[$phase]: startX=${start.x}, startY=${start.y}, x=$x, y=$y, dx=$deltaX, dy=$deltaY, up=$upwardDistance, left=$leftwardDistance, suggestionThreshold=$suggestionThreshold, deleteThreshold=$deleteThreshold, duration=${durationMs}ms, upVelocity=$upVelocity, leftVelocity=$leftVelocity, verticalEnough=$verticalEnough, mostlyVertical=$mostlyVertical, verticalFastEnough=$verticalFastEnough, leftEnough=$leftEnough, mostlyHorizontal=$mostlyHorizontal, horizontalFastEnough=$horizontalFastEnough"
-        )
-        val candidateThreshold = if (leftwardDistance > upwardDistance) deleteThreshold else suggestionThreshold
-        val direction = when {
-            verticalEnough && mostlyVertical && verticalFastEnough -> NativeTrackpadSwipeDirection.UP
-            leftEnough &&
-                mostlyHorizontal &&
-                horizontalFastEnough &&
-                SettingsManager.getSwipeToDelete(this) &&
-                SettingsManager.getSwipeToDeleteProvider(this) == SettingsManager.SWIPE_TO_DELETE_PROVIDER_NATIVE_IME -> NativeTrackpadSwipeDirection.LEFT
-            else -> {
-                DebugCaptureStore.recordRawTrackpadEvent(
-                    provider = SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME,
-                    origin = start.origin,
-                    phase = phase,
-                    action = start.actionName,
-                    outcome = "candidate",
-                    startX = start.x,
-                    startY = start.y,
-                    x = x,
-                    y = y,
-                    deltaX = deltaX,
-                    deltaY = deltaY,
-                    threshold = candidateThreshold,
-                    deviceId = start.deviceId,
-                    source = start.source,
-                    eventTimeUptimeMs = eventTimeUptimeMs
-                )
-                return false
-            }
-        }
-
-        val now = System.currentTimeMillis()
-        if (now - nativeTrackpadGestureAtMs < 250L) {
-            DebugCaptureStore.recordRawTrackpadEvent(
-                provider = SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME,
-                origin = start.origin,
-                phase = phase,
-                action = start.actionName,
-                outcome = "debounced",
-                startX = start.x,
-                startY = start.y,
-                x = x,
-                y = y,
-                deltaX = deltaX,
-                deltaY = deltaY,
-                threshold = when (direction) {
-                    NativeTrackpadSwipeDirection.UP -> suggestionThreshold
-                    NativeTrackpadSwipeDirection.LEFT -> deleteThreshold
-                },
-                deviceId = start.deviceId,
-                source = start.source,
-                eventTimeUptimeMs = eventTimeUptimeMs
-            )
-            nativeTrackpadGestureHandled = true
-            return true
-        }
-        nativeTrackpadGestureAtMs = now
-        nativeTrackpadGestureHandled = true
-
-        when (direction) {
-            NativeTrackpadSwipeDirection.UP -> {
-                val third = TrackpadCoordinateMapper.third(start.x, start.xRange)
-                Log.d(
-                    TRACKPAD_DEBUG_TAG,
-                    "Native swipe accepted[$phase]: direction=UP startX=${start.x}, startY=${start.y}, x=$x, y=$y, dx=$deltaX, dy=$deltaY, duration=${durationMs}ms, velocity=$upVelocity, xRange=${start.xRange.min}..${start.xRange.max}, third=$third"
-                )
-                KeyboardEventTracker.notifySyntheticGestureKeyEvent(
-                    provider = SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME,
-                    origin = start.origin,
-                    phase = phase,
-                    action = start.actionName,
-                    direction = direction.name.lowercase(),
-                    outcome = "accepted_suggestion_$third",
-                    startX = start.x,
-                    startY = start.y,
-                    x = x,
-                    y = y,
-                    deltaX = deltaX,
-                    deltaY = deltaY,
-                    threshold = suggestionThreshold,
-                    deviceId = start.deviceId,
-                    source = start.source,
-                    eventTimeUptimeMs = eventTimeUptimeMs
-                )
-                acceptSuggestionAtIndex(third)
-            }
-            NativeTrackpadSwipeDirection.LEFT -> {
-                Log.d(
-                    TRACKPAD_DEBUG_TAG,
-                    "Native swipe accepted[$phase]: direction=LEFT startX=${start.x}, startY=${start.y}, x=$x, y=$y, dx=$deltaX, dy=$deltaY, duration=${durationMs}ms, velocity=$leftVelocity"
-                )
-                KeyboardEventTracker.notifySyntheticGestureKeyEvent(
-                    provider = SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME,
-                    origin = start.origin,
-                    phase = phase,
-                    action = start.actionName,
-                    direction = direction.name.lowercase(),
-                    outcome = "accepted_delete",
-                    startX = start.x,
-                    startY = start.y,
-                    x = x,
-                    y = y,
-                    deltaX = deltaX,
-                    deltaY = deltaY,
-                    threshold = deleteThreshold,
-                    deviceId = start.deviceId,
-                    source = start.source,
-                    eventTimeUptimeMs = eventTimeUptimeMs
-                )
-                deleteWordFromNativeTrackpadSwipe()
-            }
-        }
-        return true
-    }
-
-    private fun nativeImeTrackpadSuggestionSwipeThreshold(): Float {
-        return SettingsManager.getTrackpadSuggestionSwipeThreshold(this)
-    }
-
-    private fun nativeImeTrackpadDeleteSwipeThreshold(): Float {
-        return SettingsManager.getTrackpadDeleteSwipeThreshold(this)
-    }
-
-    private fun nativeImeTrackpadAxisRange(event: MotionEvent, axis: Int): TrackpadAxisRange {
-        val inputDevice = InputDevice.getDevice(event.deviceId)
-        val motionRange = inputDevice?.getMotionRange(axis, event.source)
-            ?: inputDevice?.getMotionRange(axis)
-        val detectedRange = motionRange?.let { TrackpadAxisRange(it.min, it.max) }
-        if (detectedRange?.isValid == true) {
-            return detectedRange
-        }
-
-        val fallbackMax = when (axis) {
-            MotionEvent.AXIS_X -> trackpadDecorMotionView?.width?.takeIf { it > 0 }
-                ?: resources.displayMetrics.widthPixels
-            MotionEvent.AXIS_Y -> trackpadDecorMotionView?.height?.takeIf { it > 0 }
-                ?: resources.displayMetrics.heightPixels
-            else -> 1
-        }.toFloat()
-        return TrackpadAxisRange(0f, fallbackMax.coerceAtLeast(1f))
-    }
-
-    private fun motionActionName(action: Int): String {
-        return when (action) {
-            MotionEvent.ACTION_DOWN -> "ACTION_DOWN"
-            MotionEvent.ACTION_UP -> "ACTION_UP"
-            MotionEvent.ACTION_MOVE -> "ACTION_MOVE"
-            MotionEvent.ACTION_CANCEL -> "ACTION_CANCEL"
-            MotionEvent.ACTION_SCROLL -> "ACTION_SCROLL"
-            else -> "ACTION_$action"
-        }
-    }
-
-    private fun deleteWordFromNativeTrackpadSwipe() {
-        val ic = currentInputConnection
-        if (ic == null) {
-            Log.w(TRACKPAD_DEBUG_TAG, "Native swipe-to-delete ignored: no InputConnection")
-            return
-        }
-        if (TextSelectionHelper.deleteLastWord(ic)) {
-            Log.d(TRACKPAD_DEBUG_TAG, "Native swipe-to-delete deleted previous word")
-        } else {
-            Log.d(TRACKPAD_DEBUG_TAG, "Native swipe-to-delete found nothing to delete")
-        }
-    }
-
-    private fun acceptSuggestionAtIndex(third: Int) {
-        val visibleSuggestions = visibleSuggestionStrings()
-
-        // Clear latched UI layers when selecting a suggestion via trackpad.
-        if (shiftLayerLatched || altModifierLayerLatched) {
-            shiftLayerLatched = false
-            altModifierLayerLatched = false
-            modifierStateBeforeHold?.let { modifierStateController.restoreLogicalState(it) }
-            modifierStateBeforeHold = null
-        }
-        variationInteractedDuringHold = true
-
-        // Allow gesture only when suggestions bar should be visible/usable
-        val addWordCandidate = suggestionController.pendingAddWord()
-        val addWordGestureEnabled = SettingsManager.getTrackpadGestureAddWordEnabled(this)
-        val canAddWordByGesture = TrackpadAddWordGesturePolicy.canAddWordByGesture(
-            third = third,
-            addWordGestureEnabled = addWordGestureEnabled,
-            fullWidthWhenAddOnlyEnabled = SettingsManager.getTrackpadGestureAddWordFullWidthEnabled(this),
-            addWordCandidate = addWordCandidate,
-            visibleSuggestions = visibleSuggestions
-        )
-        val allowGesture =
-            symPage == 0 &&
-            (visibleSuggestions.isNotEmpty() || canAddWordByGesture) &&
-            SettingsManager.getSuggestionsEnabled(this) &&
-            !shouldDisableSmartFeatures
-        if (!allowGesture) {
-            Log.d(
-                TAG,
-                "Trackpad gesture ignored: bar not visible/usable (sym=$symPage, suggestions=${visibleSuggestions.size})"
-            )
-            return
-        }
-
-        if (canAddWordByGesture) {
-            val wordToAdd = addWordCandidate ?: return
-            Log.d(TAG, "Adding user word '$wordToAdd' from trackpad gesture")
-            uiHandler.post {
-                val ic = currentInputConnection
-                candidatesBarController.flashSuggestionSlot(2)
-                suggestionController.addUserWord(wordToAdd)
-                suggestionController.clearPendingAddWord()
-                if (ic != null) {
-                    AddWordCommitHelper.commitAutoSpaceAfterAddWord(ic)
-                }
-                updateStatusBarText()
-                NotificationHelper.triggerHapticFeedback(this)
-            }
-            return
-        }
-
-        // Log current suggestions
-        Log.d(TAG, "Current latestSuggestions: $visibleSuggestions")
-
-        // Map third to suggestion index based on FullSuggestionsBar slot layout
-        // slots[0] = left = suggestions[2]
-        // slots[1] = center = suggestions[0]
-        // slots[2] = right = suggestions[1]
-        val suggestionIndex = when (third) {
-            0 -> 2  // Left third → suggestions[2]
-            1 -> 0  // Center third → suggestions[0]
-            2 -> 1  // Right third → suggestions[1]
-            else -> return
-        }
-
-        val suggestion = visibleSuggestions.getOrNull(suggestionIndex)
-        if (suggestion == null) {
-            Log.d(TAG, "No suggestion at index $suggestionIndex (third=$third), latestSuggestions=$visibleSuggestions")
-            return
-        }
-
-        uiHandler.post {
-            val ic = currentInputConnection
-            if (ic == null) {
-                Log.w(TAG, "No InputConnection available")
-                return@post
-            }
-
-            // Provide visual feedback on the suggestions bar, matching variation press color
-            candidatesBarController.flashSuggestionSlot(suggestionIndex)
-
-            val forceLeadingCapital = AutoCapitalizeHelper.shouldAutoCapitalizeAtCursor(
-                context = this,
-                inputConnection = ic,
-                shouldDisableAutoCapitalize = shouldDisableAutoCapitalize
-            ) && SettingsManager.getAutoCapitalizeFirstLetter(this)
-
-            Log.d(TAG, "Accepting suggestion '$suggestion' from third=$third (index=$suggestionIndex)")
-
-            // Use the same logic as SuggestionButtonHandler
-            val before = ic.getTextBeforeCursor(64, 0)?.toString().orEmpty()
-            val after = ic.getTextAfterCursor(64, 0)?.toString().orEmpty()
-            fun isBoundaryChar(ch: Char, prev: Char?, next: Char?): Boolean {
-                return it.palsoftware.pastiera.core.Punctuation.isWordBoundary(ch, prev, next)
-            }
-
-            // Find start of word in 'before'
-            var start = before.length
-            while (start > 0) {
-                val ch = before[start - 1]
-                val prev = before.getOrNull(start - 2)
-                val next = before.getOrNull(start)
-                if (!isBoundaryChar(ch, prev, next)) {
-                    start--
-                    continue
-                }
-                break
-            }
-
-            // Find end of word in 'after'
-            var end = 0
-            while (end < after.length) {
-                val ch = after[end]
-                val prev = if (end == 0) before.lastOrNull() else after[end - 1]
-                val next = after.getOrNull(end + 1)
-                if (!isBoundaryChar(ch, prev, next)) {
-                    end++
-                    continue
-                }
-                break
-            }
-
-            val wordBeforeCursor = before.substring(start)
-            val wordAfterCursor = after.substring(0, end)
-            val currentWord = wordBeforeCursor + wordAfterCursor
-
-            val deleteBefore = wordBeforeCursor.length
-            val deleteAfter = wordAfterCursor.length
-            val replacement = it.palsoftware.pastiera.core.suggestions.CasingHelper.applyCasing(
-                suggestion, currentWord, forceLeadingCapital
-            )
-            val shouldAppendSpace = !replacement.endsWith("'")
-
-            ic.deleteSurroundingText(deleteBefore, deleteAfter)
-            val textToCommit = if (shouldAppendSpace) "$replacement " else replacement
-            ic.commitText(textToCommit, 1)
-            if (shiftOneShot) {
-                modifierStateController.consumeShiftOneShot()
-            }
-            DebugCaptureStore.recordAutoCorrectionCommit(
-                before = currentWord,
-                after = replacement,
-                trigger = DebugCaptureStore.AutoCorrectionTrigger.SUGGESTION_TAP,
-                source = "UNKNOWN"
-            )
-
-            if (shouldAppendSpace) {
-                it.palsoftware.pastiera.core.AutoSpaceTracker.markAutoSpace()
-            }
-
-            // CRITICAL FIX: Reset tracker after accepting suggestion to prevent duplicate letters
-            // The cursor debounce can cause tracker to be out of sync when user types quickly after accepting
-            suggestionController.onContextReset()
-            NotificationHelper.triggerHapticFeedback(this)
-            Log.d(TAG, "Suggestion '$suggestion' inserted successfully")
-        }
-    }
-
-    private data class NativeTrackpadGestureStart(
-        val x: Float,
-        val y: Float,
-        val xRange: TrackpadAxisRange,
-        val origin: String,
-        val actionName: String,
-        val deviceId: Int,
-        val source: Int,
-        val eventTimeUptimeMs: Long
-    )
-
-    private enum class NativeTrackpadSwipeDirection {
-        UP,
-        LEFT
-    }
 }

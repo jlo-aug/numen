@@ -14,10 +14,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenuItem
@@ -32,11 +29,9 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -48,15 +43,9 @@ import it.palsoftware.pastiera.inputmethod.DeviceSpecific
 
 private val hardwareKeyboardProfiles = listOf(
     "auto" to R.string.keyboard_profile_option_auto,
-    "key2" to R.string.keyboard_profile_option_key2,
-    "Q25" to R.string.keyboard_profile_option_q25,
     "titan" to R.string.keyboard_profile_option_titan,
     "titan2" to R.string.keyboard_profile_option_titan2,
-    "titan2elite_qwerty" to R.string.keyboard_profile_option_titan2elite_qwerty,
-    "mp01" to R.string.keyboard_profile_option_mp01,
-    "clicks_razr" to R.string.keyboard_profile_option_clicks_razr,
-    "clicks_pixel" to R.string.keyboard_profile_option_clicks_pixel,
-    "clicks_power" to R.string.keyboard_profile_option_clicks_power_converted
+    "titan2elite_qwerty" to R.string.keyboard_profile_option_titan2elite_qwerty
 )
 
 @Composable
@@ -64,37 +53,14 @@ fun HardwareKeyboardSettingsScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit
 ) {
-    var destination by rememberSaveable { mutableStateOf(HardwareKeyboardDestination.Main) }
-
-    val settingHighlight = LocalSettingHighlightId.current
-    androidx.compose.runtime.LaunchedEffect(settingHighlight) {
-        if (settingHighlight != null) destination = HardwareKeyboardDestination.Main
-    }
-
-    when (destination) {
-        HardwareKeyboardDestination.Main -> HardwareKeyboardListScreen(
-            modifier = modifier,
-            onBack = onBack,
-            onDeviceSymLayerEditor = { destination = HardwareKeyboardDestination.DeviceSymLayerEditor }
-        )
-        HardwareKeyboardDestination.DeviceSymLayerEditor -> DeviceSymLayerEditorStubScreen(
-            modifier = modifier,
-            onBack = { destination = HardwareKeyboardDestination.Main }
-        )
-    }
-}
-
-private enum class HardwareKeyboardDestination {
-    Main,
-    DeviceSymLayerEditor
+    HardwareKeyboardListScreen(modifier = modifier, onBack = onBack)
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun HardwareKeyboardListScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
-    onDeviceSymLayerEditor: () -> Unit
+    onBack: () -> Unit
 ) {
     val context = LocalContext.current
     var selectedProfile by remember {
@@ -229,27 +195,6 @@ private fun HardwareKeyboardListScreen(
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
             )
 
-            if (BuildConfig.UPSTREAM_BRANDING) { // Custom profiles and the SYM layer editor are not built yet.
-                HardwareKeyboardSectionDivider(stringResource(R.string.hardware_keyboard_custom_profiles_title))
-            }
-            if (BuildConfig.UPSTREAM_BRANDING) {
-                Text(
-                    text = stringResource(R.string.hardware_keyboard_custom_profiles_empty),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-                )
-            }
-            if (BuildConfig.UPSTREAM_BRANDING) {
-                HardwareKeyboardNavigationRow(
-                    title = stringResource(R.string.alt_key_editor_title),
-                    linkId = "hardware.alt_editor",
-                    description = stringResource(R.string.alt_key_editor_summary),
-                    icon = Icons.Filled.Edit,
-                    status = FeatureStatus.Construction,
-                    onClick = onDeviceSymLayerEditor
-                )
-            }
 
             HardwareKeyboardSectionDivider(stringResource(R.string.hardware_keyboard_behavior_title))
 
@@ -324,55 +269,6 @@ private fun HardwareKeyboardSectionTitle(text: String) {
 @Composable
 private fun HardwareKeyboardSectionDivider(text: String) {
     it.palsoftware.pastiera.ui.SettingsSectionLabel(text)
-}
-
-@Composable
-private fun HardwareKeyboardNavigationRow(
-    title: String,
-    linkId: String? = null,
-    description: String,
-    icon: androidx.compose.ui.graphics.vector.ImageVector,
-    status: FeatureStatus? = null,
-    onClick: () -> Unit
-) {
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .settingRow(linkId, onClick)
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            Icon(
-                imageVector = icon,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-            status?.let { FeatureStatusIcon(it) }
-            Icon(
-                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
 }
 
 @Composable

@@ -2,7 +2,6 @@ package it.palsoftware.pastiera.inputmethod.suggestions.ui
 
 import android.content.Context
 import android.content.Intent
-import android.content.res.AssetManager
 import android.graphics.Color
 import android.graphics.drawable.GradientDrawable
 import android.os.Handler
@@ -35,8 +34,6 @@ import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarButtonRegistry
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarCallbacks
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarButtonPosition
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarButtonStyles
-import android.view.inputmethod.InputMethodManager
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils.languageCode
 
 /**
  * Renders the full-width suggestion bar with up to 3 items. Always occupies
@@ -66,8 +63,6 @@ class FullSuggestionsBar(
     private var modifierIndicatorView: ModifierIndicatorView? = null
     private var lastMinimalUiActive: Boolean? = null
     private var lastSlots: List<String?> = emptyList()
-    private var assets: AssetManager? = null
-    private var imeServiceClass: Class<*>? = null
     private var showMinimalUiButtons: Boolean = false
     private var showModifierMenuIndicators: Boolean = false
     private val buttonHost = buttonRegistry?.let { StatusBarButtonHost(context, it) }
@@ -109,14 +104,6 @@ class FullSuggestionsBar(
 
     private val targetHeightPx: Int
         get() = dpToPx(BASE_HEIGHT_DP * (themeOverride?.suggestionsHeightScale ?: 1f).coerceIn(0.65f, 1.6f))
-
-    /**
-     * Sets the assets and IME service class needed for subtype cycling.
-     */
-    fun setSubtypeCyclingParams(assets: AssetManager, imeServiceClass: Class<*>) {
-        this.assets = assets
-        this.imeServiceClass = imeServiceClass
-    }
 
     fun setAccessibilityAnnouncementConfig(
         liveAnnouncementsEnabled: Boolean,
@@ -291,13 +278,6 @@ class FullSuggestionsBar(
         buttonHost?.updateClipboardCount(count)
     }
     
-    /**
-     * Refreshes the language button text.
-     */
-    fun refreshLanguageText() {
-        hamburgerMenuView?.refreshLanguageText()
-        buttonHost?.refreshLanguageText()
-    }
 
     fun setMinimalUiActive(isActive: Boolean) {
         lastMinimalUiActive = isActive
@@ -334,16 +314,10 @@ class FullSuggestionsBar(
         lastSlots = emptyList()
     }
 
-    /**
-     * Checks if a dictionary file exists for the current IME subtype.
-     * Returns true if a dictionary is found (serialized format).
-     */
-    private fun hasDictionaryForCurrentSubtype(): Boolean {
+    /** Checks that the English dictionary is available. */
+    private fun hasEnglishDictionary(): Boolean {
         return try {
-            val imm = context.getSystemService(Context.INPUT_METHOD_SERVICE) as? InputMethodManager
-            val currentSubtype = imm?.currentInputMethodSubtype
-            val langCode = currentSubtype?.languageCode() ?: return false
-            it.palsoftware.pastiera.core.suggestions.AndroidDictionaryRepository.hasDictionaryForLocale(context, langCode)
+            it.palsoftware.pastiera.core.suggestions.AndroidDictionaryRepository.hasDictionaryForLocale(context, "en")
         } catch (e: Exception) {
             false
         }
@@ -368,7 +342,7 @@ class FullSuggestionsBar(
         val frame = frameContainer ?: return
         
         // Hide suggestions when unavailable, but keep Pastierina buttons visible.
-        val hasDictionary = !requireDictionaryForSuggestions || hasDictionaryForCurrentSubtype()
+        val hasDictionary = !requireDictionaryForSuggestions || hasEnglishDictionary()
         val canShowSuggestions = shouldShow && hasDictionary
         if (!canShowSuggestions && !showMinimalUiButtons) {
             cancelPendingSuggestionsAccessibilityEnable()

@@ -3,6 +3,8 @@ package it.palsoftware.pastiera
 import it.palsoftware.pastiera.backup.PreferenceSchemas
 import it.palsoftware.pastiera.backup.PreferenceValueType
 import org.junit.Assert.assertEquals
+import org.json.JSONArray
+import org.json.JSONObject
 import org.junit.Assert.assertFalse
 import org.junit.Before
 import org.junit.Test
@@ -61,7 +63,7 @@ class SettingsManagerKeyboardThemeAssignmentTest {
     }
 
     @Test
-    fun overrideBeatsFollowSystem() {
+    fun legacyOverrideForQwerty_becomesFixedTheme_evenOverFollowSystem() {
         val context = RuntimeEnvironment.getApplication()
         val dark = theme(0xFF111111.toInt())
         val override = theme(0xFFABCDEF.toInt())
@@ -72,137 +74,78 @@ class SettingsManagerKeyboardThemeAssignmentTest {
             SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM
         )
         SettingsManager.setKeyboardThemeSystemSlot(context, SettingsManager.KeyboardThemeTarget.HARDWARE, dark = true, dark)
-        SettingsManager.upsertKeyboardThemeLayoutOverride(
-            context,
-            SettingsManager.KeyboardThemeTarget.HARDWARE,
-            locale = "de-DE",
-            layout = "qwertz",
-            theme = override
-        )
-
+        putLegacyOverrides("hardware", legacyOverride("en-US", "qwerty", override))
         RuntimeEnvironment.setQualifiers("+night")
 
-        assertEquals(
-            override.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "de-DE", "qwertz").background
-        )
-    }
-
-    @Test
-    fun overrideBeatsFixedMode() {
-        val context = RuntimeEnvironment.getApplication()
-        val fixed = theme(0xFF111111.toInt())
-        val override = theme(0xFF222222.toInt())
-
-        SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, fixed)
-        SettingsManager.upsertKeyboardThemeLayoutOverride(
-            context,
-            SettingsManager.KeyboardThemeTarget.HARDWARE,
-            locale = null,
-            layout = "qwerty",
-            theme = override
-        )
+        SettingsManager.migrateKeyboardThemeLayoutOverrides(context)
 
         assertEquals(
             override.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "en-US", "qwerty").background
+            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE).background
         )
+        assertEquals(
+            SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED,
+            SettingsManager.getKeyboardThemeAssignmentMode(context, SettingsManager.KeyboardThemeTarget.HARDWARE)
+        )
+        assertFalse(prefs().contains("keyboard_theme_layout_overrides_hardware"))
     }
 
     @Test
-    fun mostSpecificOverrideWinsOverLanguageAndLayoutOnlyMatches() {
+    fun legacyOverrides_mostSpecificMatchWins_andOtherLayoutsAreIgnored() {
         val context = RuntimeEnvironment.getApplication()
         val layoutOnly = theme(0xFF111111.toInt())
         val languageAndLayout = theme(0xFF222222.toInt())
-        val exactLocaleAndLayout = theme(0xFF333333.toInt())
+        val exactLocale = theme(0xFF333333.toInt())
+        val otherLayout = theme(0xFF444444.toInt())
 
-        SettingsManager.upsertKeyboardThemeLayoutOverride(context, SettingsManager.KeyboardThemeTarget.HARDWARE, null, "qwertz", layoutOnly)
-        SettingsManager.upsertKeyboardThemeLayoutOverride(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "de", "qwertz", languageAndLayout)
-        SettingsManager.upsertKeyboardThemeLayoutOverride(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "de-DE", "qwertz", exactLocaleAndLayout)
+        putLegacyOverrides(
+            "software",
+            legacyOverride(null, "qwerty", layoutOnly),
+            legacyOverride("de-DE", "qwertz", otherLayout),
+            legacyOverride("en_US", null, exactLocale),
+            legacyOverride("en", "qwerty", languageAndLayout)
+        )
+
+        SettingsManager.migrateKeyboardThemeLayoutOverrides(context)
 
         assertEquals(
-            exactLocaleAndLayout.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "de-DE", "qwertz").background
-        )
-        assertEquals(
-            languageAndLayout.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "de-AT", "qwertz").background
-        )
-        assertEquals(
-            layoutOnly.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "en-US", "qwertz").background
+            exactLocale.background,
+            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.SOFTWARE).background
         )
     }
 
     @Test
-    fun localeUnderscoresAreNormalizedForOverrides() {
-        val context = RuntimeEnvironment.getApplication()
-        val override = theme(0xFFABCDEF.toInt())
-
-        SettingsManager.upsertKeyboardThemeLayoutOverride(
-            context,
-            SettingsManager.KeyboardThemeTarget.HARDWARE,
-            locale = "de_DE",
-            layout = "qwertz",
-            theme = override
-        )
-
-        assertEquals(
-            override.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "de-DE", "qwertz").background
-        )
-    }
-
-    @Test
-    fun overridesAreIsolatedByHardwareAndSoftwareTarget() {
-        val context = RuntimeEnvironment.getApplication()
-        val hardwareOverride = theme(0xFF123456.toInt())
-        val softwareFixed = theme(0xFF654321.toInt())
-
-        SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.SOFTWARE, softwareFixed)
-        SettingsManager.upsertKeyboardThemeLayoutOverride(
-            context,
-            SettingsManager.KeyboardThemeTarget.HARDWARE,
-            locale = "en-US",
-            layout = "qwerty",
-            theme = hardwareOverride
-        )
-
-        assertEquals(
-            softwareFixed.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.SOFTWARE, "en-US", "qwerty").background
-        )
-    }
-
-    @Test
-    fun removingOverrideRevealsUnderlyingMode() {
+    fun legacyOverridesForOtherLayoutsOnly_leaveThemeUnchanged() {
         val context = RuntimeEnvironment.getApplication()
         val fixed = theme(0xFF111111.toInt())
-        val override = theme(0xFF222222.toInt())
-
         SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, fixed)
-        SettingsManager.upsertKeyboardThemeLayoutOverride(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "en-US", "qwerty", override)
-        SettingsManager.removeKeyboardThemeLayoutOverride(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "en_US", "qwerty")
+        putLegacyOverrides("hardware", legacyOverride("de-DE", "qwertz", theme(0xFF222222.toInt())))
+
+        SettingsManager.migrateKeyboardThemeLayoutOverrides(context)
 
         assertEquals(
             fixed.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "en-US", "qwerty").background
+            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE).background
         )
+        assertFalse(prefs().contains("keyboard_theme_layout_overrides_hardware"))
     }
 
     @Test
-    fun malformedOverrideJsonFallsBackWithoutCrashing() {
+    fun malformedLegacyOverrideJson_isDroppedWithoutCrashing() {
         val context = RuntimeEnvironment.getApplication()
         val fixed = theme(0xFF111111.toInt())
         SettingsManager.setKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, fixed)
-        SettingsManager.getPreferences(context).edit()
+        prefs().edit()
             .putString("keyboard_theme_layout_overrides_hardware", "{broken")
             .commit()
 
+        SettingsManager.migrateKeyboardThemeLayoutOverrides(context)
+
         assertEquals(
             fixed.background,
-            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE, "en-US", "qwerty").background
+            SettingsManager.getEffectiveKeyboardTheme(context, SettingsManager.KeyboardThemeTarget.HARDWARE).background
         )
+        assertFalse(prefs().contains("keyboard_theme_layout_overrides_hardware"))
     }
 
     @Test
@@ -261,8 +204,6 @@ class SettingsManagerKeyboardThemeAssignmentTest {
             "keyboard_theme_light_software",
             "keyboard_theme_dark_hardware",
             "keyboard_theme_dark_software",
-            "keyboard_theme_layout_overrides_hardware",
-            "keyboard_theme_layout_overrides_software",
             "modifier_indicator_mode"
         ).forEach { key ->
             assertEquals(
@@ -270,6 +211,21 @@ class SettingsManagerKeyboardThemeAssignmentTest {
                 PreferenceSchemas.expectedType("pastiera_prefs", key)
             )
         }
+    }
+
+    private fun prefs() = SettingsManager.getPreferences(RuntimeEnvironment.getApplication())
+
+    private fun legacyOverride(locale: String?, layout: String?, theme: SettingsManager.KeyboardThemeSettings) =
+        JSONObject().apply {
+            locale?.let { put("locale", it) }
+            layout?.let { put("layout", it) }
+            put("theme", JSONObject(SettingsManager.keyboardThemeToJsonString(theme)))
+        }
+
+    private fun putLegacyOverrides(target: String, vararg overrides: JSONObject) {
+        prefs().edit()
+            .putString("keyboard_theme_layout_overrides_$target", JSONArray(overrides.toList()).toString())
+            .commit()
     }
 
     private fun theme(background: Int): SettingsManager.KeyboardThemeSettings =

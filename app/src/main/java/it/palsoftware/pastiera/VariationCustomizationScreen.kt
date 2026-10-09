@@ -34,11 +34,7 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import it.palsoftware.pastiera.R
-import it.palsoftware.pastiera.data.layout.LayoutMappingRepository
 import it.palsoftware.pastiera.data.variation.VariationRepository
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils.localeString
-import android.view.inputmethod.InputMethodManager
 import org.json.JSONObject
 
 private fun staticVariationPresetOptions(): List<String> {
@@ -95,19 +91,8 @@ fun VariationCustomizationScreen(
     
     // Load active variations (from file or assets)
     // Convert from Map<Char, List<String>> to Map<String, List<String>>
-    val activeLayoutName = remember { resolveActiveLayoutForVariationScreen(context) }
-    val availableLayouts = remember {
-        LayoutMappingRepository.getAvailableLayouts(context.assets, context).sorted()
-    }
-    var globalVariationLayoutOverride by remember {
-        mutableStateOf(SettingsManager.getGlobalVariationLayoutOverride(context))
-    }
-    var variations by remember(activeLayoutName) {
-        val repoVariations = VariationRepository.loadVariations(
-            assets = context.assets,
-            context = context,
-            activeLayoutName = activeLayoutName
-        )
+    var variations by remember {
+        val repoVariations = VariationRepository.loadVariations(assets = context.assets, context = context)
         mutableStateOf(repoVariations.mapKeys { it.key.toString() })
     }
     
@@ -156,7 +141,6 @@ fun VariationCustomizationScreen(
     var staticVariationLayerSticky by remember {
         mutableStateOf(SettingsManager.isStaticVariationBarLayerStickyEnabled(context))
     }
-    var showGlobalOverrideMenu by remember { mutableStateOf(false) }
     
     Scaffold(
         topBar = {
@@ -356,93 +340,6 @@ fun VariationCustomizationScreen(
                 }
             }
             
-            Surface(
-                modifier = Modifier.fillMaxWidth().settingRow("variations.layout_override")
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.variation_global_layout_override_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.variation_global_layout_override_description,
-                            activeLayoutName
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    ExposedDropdownMenuBox(
-                        expanded = showGlobalOverrideMenu,
-                        onExpandedChange = { showGlobalOverrideMenu = it }
-                    ) {
-                        val selectedText = globalVariationLayoutOverride
-                            ?: stringResource(R.string.variation_global_layout_override_none)
-                        OutlinedTextField(
-                            value = selectedText,
-                            onValueChange = {},
-                            readOnly = true,
-                            trailingIcon = {
-                                ExposedDropdownMenuDefaults.TrailingIcon(expanded = showGlobalOverrideMenu)
-                            },
-                            colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                        )
-                        ExposedDropdownMenu(
-                            expanded = showGlobalOverrideMenu,
-                            onDismissRequest = { showGlobalOverrideMenu = false }
-                        ) {
-                            DropdownMenuItem(
-                                text = { Text(stringResource(R.string.variation_global_layout_override_none)) },
-                                onClick = {
-                                    showGlobalOverrideMenu = false
-                                    globalVariationLayoutOverride = null
-                                    SettingsManager.setGlobalVariationLayoutOverride(context, null)
-                                    val repoVariations = VariationRepository.loadVariations(
-                                        assets = context.assets,
-                                        context = context,
-                                        activeLayoutName = activeLayoutName
-                                    )
-                                    variations = repoVariations.mapKeys { it.key.toString() }
-                                }
-                            )
-                            val options = if (
-                                globalVariationLayoutOverride != null &&
-                                !availableLayouts.contains(globalVariationLayoutOverride)
-                            ) {
-                                listOfNotNull(globalVariationLayoutOverride) + availableLayouts
-                            } else {
-                                availableLayouts
-                            }
-                            options.forEach { layoutName ->
-                                DropdownMenuItem(
-                                    text = { Text(layoutName) },
-                                    onClick = {
-                                        showGlobalOverrideMenu = false
-                                        globalVariationLayoutOverride = layoutName
-                                        SettingsManager.setGlobalVariationLayoutOverride(context, layoutName)
-                                        val repoVariations = VariationRepository.loadVariations(
-                                            assets = context.assets,
-                                            context = context,
-                                            activeLayoutName = activeLayoutName
-                                        )
-                                        variations = repoVariations.mapKeys { it.key.toString() }
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-
             // Static and per-letter mappings share one addressable editor heading.
             Text(
                 text = stringResource(R.string.setting_link_variation_mappings),
@@ -747,8 +644,7 @@ fun VariationCustomizationScreen(
                         SettingsManager.resetVariationsToDefault(context)
                         val repoVariations = VariationRepository.loadVariations(
                             assets = context.assets,
-                            context = context,
-                            activeLayoutName = activeLayoutName
+                            context = context
                         )
                         variations = repoVariations.mapKeys { it.key.toString() }
                         staticVariationPreset = SettingsManager.getStaticVariationBarPreset(context)
@@ -1127,25 +1023,5 @@ private fun loadAllVariationsFromJson(context: Context): Map<String, List<String
         result
     } catch (e: Exception) {
         emptyMap()
-    }
-}
-
-private fun resolveActiveLayoutForVariationScreen(context: Context): String {
-    return try {
-        val imm = context.getSystemService(InputMethodManager::class.java)
-        val subtype = imm?.currentInputMethodSubtype
-        val fromSubtype = subtype?.let { AdditionalSubtypeUtils.getKeyboardLayoutFromSubtype(it) }
-        if (!fromSubtype.isNullOrBlank()) {
-            return fromSubtype
-        }
-
-        val locale = subtype?.localeString()
-        if (!locale.isNullOrBlank()) {
-            return AdditionalSubtypeUtils.getLayoutForLocale(context.assets, locale, context)
-        }
-
-        SettingsManager.getKeyboardLayout(context)
-    } catch (_: Exception) {
-        SettingsManager.getKeyboardLayout(context)
     }
 }

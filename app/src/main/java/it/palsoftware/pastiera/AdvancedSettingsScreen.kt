@@ -5,11 +5,6 @@ import android.content.SharedPreferences
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -26,13 +21,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Crop
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.CheckCircle
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.BugReport
 import androidx.compose.material.icons.filled.Info
@@ -51,8 +43,6 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -76,15 +66,10 @@ import it.palsoftware.pastiera.backup.BackupManager
 import it.palsoftware.pastiera.backup.RestoreManager
 import it.palsoftware.pastiera.backup.RestoreInspectionResult
 import androidx.compose.material3.Surface
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
-import rikka.shizuku.Shizuku
-import androidx.compose.runtime.LaunchedEffect
-import android.content.pm.PackageManager
-import androidx.compose.material.icons.filled.Warning
 
 /**
  * Advanced settings screen.
@@ -108,8 +93,6 @@ fun AdvancedSettingsScreen(
     var clipboardRetentionTime by remember {
         mutableStateOf(SettingsManager.getClipboardRetentionTime(context).toString())
     }
-    var shizukuStatus by remember { mutableStateOf(ShizukuStatus.NotConnected) }
-    var trackpadProvider by remember { mutableStateOf(SettingsManager.getTrackpadProvider(context)) }
     var experimentalCandidatesViewEnabled by remember {
         mutableStateOf(SettingsManager.getExperimentalCandidatesViewEnabled(context))
     }
@@ -118,8 +101,7 @@ fun AdvancedSettingsScreen(
     }
     val currentDestination = remember { when (settingsChild(context, "advanced")) {
         "ImeTest" -> AdvancedDestination.ImeTest
-        "TrackpadGestures" -> AdvancedDestination.TrackpadGestures
-        else -> if (BuildConfig.UPSTREAM_BRANDING && context.settingsActivity().intent.data?.let(SettingLinkRegistry::parseSettingLinkUri) in TRACKPAD_SETTING_LINK_IDS) AdvancedDestination.TrackpadGestures else AdvancedDestination.Main
+        else -> AdvancedDestination.Main
     } }
     val highlightedSettingId = LocalSettingHighlightId.current
     // Listen to SharedPreferences changes to update UI when values are restored
@@ -132,9 +114,6 @@ fun AdvancedSettingsScreen(
                 "clipboard_retention_time" -> {
                     clipboardRetentionTime = SettingsManager.getClipboardRetentionTime(context).toString()
                 }
-                "trackpad_provider" -> {
-                    trackpadProvider = SettingsManager.getTrackpadProvider(context)
-                }
                 "experimental_candidates_view_enabled" -> {
                     experimentalCandidatesViewEnabled = SettingsManager.getExperimentalCandidatesViewEnabled(context)
                 }
@@ -146,19 +125,10 @@ fun AdvancedSettingsScreen(
         }
     }
 
-    // Check Shizuku connection and authorization status periodically
-    LaunchedEffect(Unit) {
-        while (true) {
-            shizukuStatus = resolveShizukuStatus()
-            delay(2000) // Check every 2 seconds
-        }
-    }
-
     fun navigateTo(destination: AdvancedDestination) {
-        openSettingsChild(context, "advanced", when (destination) { AdvancedDestination.Main -> "Main"; AdvancedDestination.ImeTest -> "ImeTest"; AdvancedDestination.TrackpadGestures -> "TrackpadGestures" })
+        openSettingsChild(context, "advanced", when (destination) { AdvancedDestination.Main -> "Main"; AdvancedDestination.ImeTest -> "ImeTest" })
     }
     fun navigateBack() { context.settingsActivity().finish() }
-
 
     fun defaultBackupName(): String {
         val formatter = SimpleDateFormat("yyyyMMdd-HHmm", Locale.US)
@@ -305,98 +275,6 @@ fun AdvancedSettingsScreen(
                             .padding(paddingValues)
                             .verticalScroll(rememberScrollState())
                     ) {
-                        // Numen: the keyboard surface only scrolls; no trackpad gestures.
-                        if (BuildConfig.UPSTREAM_BRANDING) {
-                            // Trackpad Gesture Settings
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .settingRow(SettingLinkIds.ADVANCED_TRACKPAD_GESTURES) {
-                                        navigateTo(AdvancedDestination.TrackpadGestures)
-                                    }
-                            ) {
-                                Column(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = Icons.Filled.TouchApp,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.primary,
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        Column(modifier = Modifier.weight(1f)) {
-                                            Text(
-                                                text = stringResource(R.string.trackpad_gestures_title),
-                                                style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Medium,
-                                                maxLines = 1
-                                            )
-                                            Text(
-                                                text = stringResource(R.string.trackpad_gestures_description),
-                                                style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 1
-                                            )
-                                        }
-                                        FeatureStatusIcon(FeatureStatus.Experimental)
-                                        Icon(
-                                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                            contentDescription = null,
-                                            tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    // Trackpad provider status row
-                                    Row(
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .padding(start = 36.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Icon(
-                                            imageVector = when {
-                                                trackpadProvider == SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME -> Icons.Filled.CheckCircle
-                                                shizukuStatus == ShizukuStatus.Connected -> Icons.Filled.CheckCircle
-                                                shizukuStatus == ShizukuStatus.NotAuthorized -> Icons.Filled.Warning
-                                                else -> Icons.Filled.Error
-                                            },
-                                            contentDescription = null,
-                                            tint = when {
-                                                trackpadProvider == SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME -> MaterialTheme.colorScheme.primary
-                                                shizukuStatus == ShizukuStatus.Connected -> MaterialTheme.colorScheme.primary
-                                                shizukuStatus == ShizukuStatus.NotAuthorized -> MaterialTheme.colorScheme.tertiary
-                                                else -> MaterialTheme.colorScheme.error
-                                            },
-                                            modifier = Modifier.size(14.dp)
-                                        )
-                                        Text(
-                                            text = when {
-                                                trackpadProvider == SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME -> stringResource(R.string.trackpad_provider_native_ime_status)
-                                                shizukuStatus == ShizukuStatus.Connected -> stringResource(R.string.trackpad_gestures_shizuku_connected)
-                                                shizukuStatus == ShizukuStatus.NotAuthorized -> stringResource(R.string.trackpad_gestures_shizuku_not_authorized)
-                                                else -> stringResource(R.string.trackpad_gestures_shizuku_not_connected)
-                                            },
-                                            style = MaterialTheme.typography.labelSmall,
-                                            color = when {
-                                                trackpadProvider == SettingsManager.TRACKPAD_PROVIDER_NATIVE_IME -> MaterialTheme.colorScheme.primary
-                                                shizukuStatus == ShizukuStatus.Connected -> MaterialTheme.colorScheme.primary
-                                                shizukuStatus == ShizukuStatus.NotAuthorized -> MaterialTheme.colorScheme.tertiary
-                                                else -> MaterialTheme.colorScheme.error
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-
                         // Backup
                         Surface(
                             modifier = Modifier
@@ -604,7 +482,7 @@ fun AdvancedSettingsScreen(
                             }
                         }
 
-                        if (BuildConfig.UPSTREAM_BRANDING || SettingsManager.getExperimentalCandidatesViewEnabled(context)) { // Numen only offers turning this off, since this mode cannot hide the bar.
+                        if (SettingsManager.getExperimentalCandidatesViewEnabled(context)) { // Numen only offers turning this off, since this mode cannot hide the bar.
                             Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
@@ -638,57 +516,6 @@ fun AdvancedSettingsScreen(
                                             experimentalCandidatesViewEnabled = enabled
                                             SettingsManager.setExperimentalCandidatesViewEnabled(context, enabled)
                                         }
-                                    )
-                                }
-                            }
-                        }
-
-                        // Pastiera's tuning tool for the Elite's corner curve. Numen ships the tuned
-                        // default and keeps Settings simple.
-                        if (BuildConfig.UPSTREAM_BRANDING && (
-                                it.palsoftware.pastiera.inputmethod.DeviceSpecific.isTitan2EliteDevice() ||
-                                    SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)
-                                )
-                        ) {
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 64.dp)
-                                    .settingRow("advanced.corner_calibration") {
-                                        context.startActivity(Intent(context, CornerCalibrationActivity::class.java))
-                                    }
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Crop,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = stringResource(R.string.corner_calibration_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.corner_calibration_description),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 2
-                                        )
-                                    }
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                             }
@@ -828,68 +655,12 @@ fun AdvancedSettingsScreen(
                             }
                         }
 
-                        if (BuildConfig.UPSTREAM_BRANDING) { // Pastiera release notes.
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 64.dp)
-                                    .settingRow(SettingLinkIds.ADVANCED_SHOW_RELEASE_NOTES_TUTORIAL) {
-                                        val intent = Intent(context, TutorialActivity::class.java).apply {
-                                            putExtra(TutorialActivity.EXTRA_UPDATE_TUTORIAL, true)
-                                            putExtra(TutorialActivity.EXTRA_PREVIEW_UPDATE_TUTORIAL, true)
-                                            putExtra(TutorialActivity.EXTRA_PREVIOUS_VERSION, "0.84beta")
-                                        }
-                                        context.startActivity(intent)
-                                    }
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.History,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = stringResource(R.string.tutorial_show_release_notes),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.tutorial_show_release_notes_description),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1
-                                        )
-                                    }
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
                     }
                 }
             }
 
             AdvancedDestination.ImeTest -> {
                 ImeTestScreen(
-                    modifier = modifier,
-                    onBack = { navigateBack() }
-                )
-            }
-
-            AdvancedDestination.TrackpadGestures -> {
-                TrackpadGestureSettingsScreen(
                     modifier = modifier,
                     onBack = { navigateBack() }
                 )
@@ -902,21 +673,4 @@ fun AdvancedSettingsScreen(
 private sealed class AdvancedDestination {
     object Main : AdvancedDestination()
     object ImeTest : AdvancedDestination()
-    object TrackpadGestures : AdvancedDestination()
 }
-
-
-
-private val TRACKPAD_SETTING_LINK_IDS = setOf(
-    "trackpad.add_word",
-    "trackpad.add_word_full_width",
-    "trackpad.swipe_to_delete",
-    "trackpad.swipe_to_delete_provider",
-    SettingLinkIds.TRACKPAD_GESTURES_ENABLED,
-    SettingLinkIds.TRACKPAD_PROVIDER,
-    SettingLinkIds.TRACKPAD_SHIZUKU_DEVICE,
-    SettingLinkIds.TRACKPAD_SENSITIVITY,
-    SettingLinkIds.TRACKPAD_SUGGESTION_SWIPE_THRESHOLD,
-    SettingLinkIds.TRACKPAD_DELETE_SWIPE_THRESHOLD,
-    SettingLinkIds.TRACKPAD_DEBUG
-)

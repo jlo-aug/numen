@@ -28,6 +28,16 @@ class SpeechRecognitionManagerLanguageTagTest {
     }
 
     @Test
+    fun `falls back to US English when no locale is known`() {
+        val tag = SpeechRecognitionManager.buildRecognitionLanguageTag(
+            imeSubtypeLocale = null,
+            deviceLocale = null
+        )
+
+        assertEquals("en-US", tag)
+    }
+
+    @Test
     fun `normalizes subtype locale with underscore`() {
         assertEquals(
             "it-IT",

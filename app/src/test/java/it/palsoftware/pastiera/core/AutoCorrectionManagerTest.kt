@@ -32,9 +32,8 @@ class AutoCorrectionManagerTest {
     }
 
     @Test
-    fun boundaryKeyAppliesTwoLetterCustomSubstitutionFromEnabledLanguage() {
-        SettingsManager.saveCustomAutoCorrections(context, "fr", mapOf("ct" to "c'était"))
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("fr"))
+    fun boundaryKeyAppliesTwoLetterCustomSubstitution() {
+        SettingsManager.saveCustomAutoCorrections(context, mapOf("ct" to "can't"))
         AutoCorrector.loadCorrections(context.assets, context)
         val inputConnection = FakeInputConnection(context, "Ct")
 
@@ -44,19 +43,17 @@ class AutoCorrectionManagerTest {
             inputConnection = inputConnection,
             isAutoCorrectEnabled = true,
             commitBoundary = true,
-            isKnownWord = { it.equals("ct", ignoreCase = true) },
             onStatusBarUpdate = {}
         )
 
         assertTrue(handled)
-        assertEquals("C'était ", inputConnection.text)
+        assertEquals("Can't ", inputConnection.text)
     }
 
     @Test
-    fun boundaryKeyAppliesBundledFrenchTwoLetterSubstitution() {
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("fr"))
+    fun boundaryKeyAppliesBundledEnglishTwoLetterSubstitution() {
         AutoCorrector.loadCorrections(context.assets, context)
-        val inputConnection = FakeInputConnection(context, "Ct")
+        val inputConnection = FakeInputConnection(context, "Im")
 
         val handled = AutoCorrectionManager(context).handleBoundaryKey(
             keyCode = KeyEvent.KEYCODE_SPACE,
@@ -64,35 +61,11 @@ class AutoCorrectionManagerTest {
             inputConnection = inputConnection,
             isAutoCorrectEnabled = true,
             commitBoundary = true,
-            isKnownWord = { it.equals("ct", ignoreCase = true) },
             onStatusBarUpdate = {}
         )
 
         assertTrue(handled)
-        assertEquals("C'était ", inputConnection.text)
-    }
-
-    @Test
-    fun boundaryKeyAppliesFrenchSpacingAfterSubstitution() {
-        SettingsManager.saveCustomAutoCorrections(context, "fr", mapOf("ct" to "c'était"))
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("fr"))
-        SettingsManager.setFrenchPunctuationSpacing(context, true)
-        AutoCorrector.loadCorrections(context.assets, context)
-        val inputConnection = FakeInputConnection(context, "Ct")
-
-        val handled = AutoCorrectionManager(context).handleBoundaryKey(
-            keyCode = KeyEvent.KEYCODE_UNKNOWN,
-            event = null,
-            inputConnection = inputConnection,
-            isAutoCorrectEnabled = true,
-            commitBoundary = true,
-            boundaryCharOverride = '?',
-            isKnownWord = { it.equals("ct", ignoreCase = true) },
-            onStatusBarUpdate = {}
-        )
-
-        assertTrue(handled)
-        assertEquals("C'était ?", inputConnection.text)
+        assertEquals("I'm ", inputConnection.text)
     }
 
     @Test

@@ -9,7 +9,6 @@ import android.view.View
 sealed class StatusBarButtonId(val key: String) {
     object Clipboard : StatusBarButtonId("clipboard")
     object Microphone : StatusBarButtonId("microphone")
-    object Language : StatusBarButtonId("language")
     object Emoji : StatusBarButtonId("emoji")
     object Hamburger : StatusBarButtonId("hamburger")
     object MinimalUi : StatusBarButtonId("minimal_ui")
@@ -50,15 +49,6 @@ data class StatusBarButtonConfig(
     val position: StatusBarButtonPosition,
     val enabled: Boolean = true,
     val order: Int = 0
-)
-
-/**
- * Callbacks for button interactions.
- * All callbacks are optional - pass null for unused ones.
- */
-data class ButtonCallbacks(
-    val onClick: (() -> Unit)? = null,
-    val onLongClick: (() -> Boolean)? = null
 )
 
 /**

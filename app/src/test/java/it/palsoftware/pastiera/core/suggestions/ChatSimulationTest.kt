@@ -141,7 +141,18 @@ class ChatSimulationTest {
             "ngl im tryna lowkey yeet it rn" to "ngl I'm tryna lowkey yeet it rn",
             "lmk if u wanna hmu tmrw" to "lmk if u wanna hmu tmrw",
             "that was sooo good pleaseee come" to "that was sooo good pleaseee come",
-            "we alll went" to "we all went"
+            "we alll went" to "we all went",
+            // Spelling mistakes: one vowel for another.
+            "we need a sepereate permit" to "we need a separate permit",
+            "that is definatly true" to "that is definitely true",
+            // Words run together, from the common misspellings list.
+            "alot of people like it aswell now" to "a lot of people like it as well now",
+            // Doubled letters left out of a long word; a split only where the two words go together.
+            "the acomodation was nice" to "the accommodation was nice",
+            // A short non-word that both neighbours explain; unclear ones and real words stay.
+            "the cat hs fur" to "the cat has fur",
+            "I hs a car" to "I hs a car",
+            "return the ewe to her" to "return the ewe to her"
         )
         val wrong = cases.mapNotNull { (typed, expected) ->
             type(context, controller, typed).takeIf { it != expected }?.let { "$typed -> $it (want $expected)" }
@@ -152,8 +163,6 @@ class ChatSimulationTest {
 
     @Test
     fun contractionsFollowTheSentence() {
-        // Numen only: Pastiera's build keeps its original text replacements.
-        org.junit.Assume.assumeFalse(it.palsoftware.pastiera.BuildConfig.UPSTREAM_BRANDING)
         val context = RuntimeEnvironment.getApplication()
         val (controller, _) = englishController(context)
         val cases = listOf(
@@ -168,6 +177,12 @@ class ChatSimulationTest {
             "I ll quit now" to "I'll quit now",
             "I don t know" to "I don't know",
             "she fell ill and stayed home" to "she fell ill and stayed home",
+            "id like that a lot" to "I'd like that a lot",
+            "show your id card please" to "show your id card please",
+            // Field reports: the next word shows the apostrophe was missed; possessives stay.
+            "it's messy and its mostly on there" to "it's messy and it's mostly on there",
+            "it was it's own thing" to "it was its own thing",
+            "the dog wagged its tail" to "the dog wagged its tail",
             "He was very ill" to "He was very ill",
             "the dog wagged its tail" to "the dog wagged its tail",
             "Have you got your ID" to "Have you got your ID",
@@ -438,7 +453,10 @@ class ChatSimulationTest {
         val KEY_POSITIONS: Map<Char, Pair<Int, Int>> = buildMap {
             "qwertyuiop".forEachIndexed { i, c -> put(c, 0 to i) }
             "asdfghjkl".forEachIndexed { i, c -> put(c, 1 to i) }
-            listOf('z' to 0, 'x' to 1, 'c' to 2, 'v' to 3, 'b' to 6, 'n' to 7, 'm' to 8).forEach { (c, i) -> put(c, 2 to i) }
+            // The keyboard the build is for: Numen's Titan 2 Elite has no gap in the bottom row.
+            "zxcvbnm".mapIndexed { i, c -> c to i + 1 }
+        
+.forEach { (c, i) -> put(c, 2 to i) }
         }
     }
 }

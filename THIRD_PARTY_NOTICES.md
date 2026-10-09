@@ -104,6 +104,12 @@ Only aggregated counts are included. The file is distributed under CC BY-SA 4.0.
 `tools/build_context_triples.py` (details in `app/src/main/assets/common/dictionaries/en_triples_NOTICE.txt`) from
 Tatoeba English sentences (https://tatoeba.org), CC BY 2.0 FR. Only aggregated counts are included.
 
+## English real-word confusions (autocorrect)
+
+`app/src/main/assets/common/dictionaries/en_confusions.txt` contains real-word confusion counts built by
+`tools/build_confusions.py` (details in `app/src/main/assets/common/dictionaries/en_confusions_NOTICE.txt`) from
+the Aalto ITE typing dataset (doi:10.5281/zenodo.12528163), CC BY 4.0. Only aggregated counts are included.
+
 ## English common misspellings (Wikipedia)
 
 `app/src/main/assets/common/dictionaries/en_misspellings.txt` lists common misspellings and their fixes, built by
@@ -116,6 +122,13 @@ The file is distributed under CC BY-SA 4.0.
 `app/src/main/assets/common/dictionaries/en_names.txt` lists common first names that autocorrect leaves alone, built by
 `tools/build_first_names.py` from US Social Security Administration baby-name data (public domain, a work of the
 US government), via the top-1000-per-year table at https://github.com/hadley/data-baby-names.
+
+## Typing research used for tuning (not included in the app)
+
+Autocorrect's weights were fitted and tested on two research datasets, which are not shipped:
+the Aalto ITE typing dataset (Aalto University, CC BY 4.0, https://doi.org/10.5281/zenodo.12528163)
+and the 136M keystrokes dataset (Dhakal et al. 2018, Aalto University,
+https://userinterfaces.aalto.fi/136Mkeystrokes/, research and non-commercial use with attribution).
 
 ## English recognised words (SCOWL)
 

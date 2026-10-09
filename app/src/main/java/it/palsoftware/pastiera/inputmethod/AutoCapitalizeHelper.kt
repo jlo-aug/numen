@@ -1,6 +1,5 @@
 package it.palsoftware.pastiera.inputmethod
 
-import android.text.TextUtils
 import android.view.KeyEvent
 import android.view.inputmethod.ExtractedTextRequest
 import android.view.inputmethod.InputConnection

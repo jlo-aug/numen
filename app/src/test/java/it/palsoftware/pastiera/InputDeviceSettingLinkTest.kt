@@ -78,6 +78,5 @@ class InputDeviceSettingLinkTest {
             }
         }
         assertEquals(KeyboardsDevicesDestination.BuiltIn, requireNotNull(SettingLinkRegistry.byId("hardware.profile")).route.keyboardsDevicesDestination)
-        assertEquals(KeyboardsDevicesDestination.PowerKeyboard, requireNotNull(SettingLinkRegistry.byId("clicks.buttons.red_button")).route.keyboardsDevicesDestination)
     }
 }

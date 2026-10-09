@@ -1,8 +1,8 @@
 package it.palsoftware.pastiera
 
+import androidx.activity.ComponentActivity
 import android.content.Intent
 import android.os.Bundle
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.layout.fillMaxSize
@@ -16,11 +16,10 @@ data class SettingLinkRequest(
     val serial: Long
 )
 
-class SettingsActivity : LocalizedComponentActivity() {
+class SettingsActivity : ComponentActivity() {
     companion object {
         const val EXTRA_DESTINATION = "it.palsoftware.pastiera.SETTINGS_DESTINATION"
         const val DESTINATION_CUSTOMIZATION = "customization"
-        const val DESTINATION_DEVICE_SYM_LAYER_EDITOR = "device_sym_layer_editor"
         const val DESTINATION_MODIFIERS = "modifiers"
         const val EXTRA_CUSTOMIZATION_DESTINATION = "it.palsoftware.pastiera.CUSTOMIZATION_DESTINATION"
         const val CUSTOMIZATION_DESTINATION_VARIATIONS = "variations"

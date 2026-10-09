@@ -13,7 +13,6 @@ import android.util.Log
 import android.view.KeyEvent
 import android.view.ViewGroup
 import android.view.WindowManager
-import android.view.inputmethod.InputMethodManager
 import android.widget.ImageView
 import androidx.activity.compose.setContent
 import androidx.lifecycle.lifecycleScope
@@ -78,8 +77,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import it.palsoftware.pastiera.AppListHelper
-import it.palsoftware.pastiera.LocalizedComponentActivity
-import it.palsoftware.pastiera.BuildConfig
+import androidx.activity.ComponentActivity
 import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.SettingsManager
 import it.palsoftware.pastiera.commands.CommandExecutor
@@ -93,14 +91,13 @@ import it.palsoftware.pastiera.commands.CommandTarget
 import it.palsoftware.pastiera.data.layout.JsonLayoutLoader
 import it.palsoftware.pastiera.data.layout.LayoutMapping
 import it.palsoftware.pastiera.data.layout.LayoutMappingRepository
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils
 import it.palsoftware.pastiera.ui.theme.PastieraTheme
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
-class QuickLauncherActivity : LocalizedComponentActivity() {
+class QuickLauncherActivity : ComponentActivity() {
     private var commands: List<CommandTarget> = emptyList()
     private var query by mutableStateOf("")
     private var autoStartSingle by mutableStateOf(false)
@@ -445,26 +442,15 @@ class QuickLauncherActivity : LocalizedComponentActivity() {
         }
     }
 
-    private fun loadActiveKeyboardLayout(): Map<Int, LayoutMapping> {
-        val layoutName = try {
-            val imm = getSystemService(InputMethodManager::class.java)
-            AdditionalSubtypeUtils.resolveActiveLayout(
-                assets,
-                this,
-                imm.currentInputMethodSubtype
-            )
-        } catch (error: Exception) {
-            SettingsManager.getKeyboardLayout(this)
-        }
-        return JsonLayoutLoader.loadLayout(assets, layoutName, this).orEmpty()
-    }
+    private fun loadActiveKeyboardLayout(): Map<Int, LayoutMapping> =
+        JsonLayoutLoader.loadLayout(assets, SettingsManager.getKeyboardLayout(this)).orEmpty()
 
     private fun resolveTypedText(keyCode: Int, event: KeyEvent?): String? {
         if (respectKeyboardLayout) {
             keyboardLayout[keyCode]
                 ?.let { mapping ->
                     val mappedText = LayoutMappingRepository.resolveText(mapping, event?.isShiftPressed == true)
-                    if (!mappedText.isNullOrEmpty()) {
+                    if (mappedText.isNotEmpty()) {
                         return mappedText
                     }
                 }
@@ -608,7 +594,7 @@ private fun QuickLauncherSheet(
                     ),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-                if (!isCollapsedPill && BuildConfig.UPSTREAM_BRANDING) { // Numen: the search pill is the header
+                if (!isCollapsedPill && false) { // Numen: the search pill is the header
                     Row(
                         modifier = Modifier.fillMaxWidth(),
                         verticalAlignment = Alignment.CenterVertically,
@@ -799,7 +785,7 @@ private fun QuickLauncherCommandRow(
     val effectiveCustomization = customization ?: SettingsManager.QuickLauncherCommandCustomization(command.id)
     // Numen keeps rows plain: one soft highlight for the top match, colors only when the user
     // picked them (a custom color, or icon colors turned on in Appearance).
-    val clean = !BuildConfig.UPSTREAM_BRANDING
+    val clean = true
     val rowTint = when {
         customColor != null -> Color(customColor)
         isFavorite && !clean -> commandIconDerivedColor(command)

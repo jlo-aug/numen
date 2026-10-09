@@ -47,7 +47,7 @@ import kotlin.math.abs
  * AOSP LatinIME alphabet key plane embedded in Pastiera.
  *
  * This intentionally keeps Pastiera's IME lifecycle/suggestions/status bars, but mirrors the
- * AOSP qwerty/qwertz/azerty key geometry from rows_*.xml and row_qwerty4.xml.
+ * AOSP qwerty key geometry from rows_qwerty.xml and row_qwerty4.xml.
  */
 class AospKeyboardView @JvmOverloads constructor(
     context: Context,
@@ -168,16 +168,6 @@ class AospKeyboardView @JvmOverloads constructor(
     )
 
     var listener: Listener? = null
-    var layoutName: String = "qwerty"
-        set(value) {
-            val normalized = value.trim().lowercase(Locale.ROOT).ifBlank { "qwerty" }
-            if (field == normalized) {
-                return
-            }
-            field = normalized
-            rebuildKeys(width, height)
-            invalidateKeyboard()
-        }
     var layoutStyle: SoftwareLayoutStyle = SoftwareLayoutStyle.COMPACT
         set(value) {
             if (field == value) {
@@ -851,7 +841,7 @@ class AospKeyboardView @JvmOverloads constructor(
         val usableWidth = ((viewWidth - horizontalPaddingPx * 2) * totalWidthScale).toInt()
         val horizontalOffset = horizontalPaddingPx + ((viewWidth - horizontalPaddingPx * 2) - usableWidth) / 2f
         val visualWidthScale = if (theme?.distributeHorizontalSpacing == false) 1f else keyWidthScale
-        val rows = rowsFor(layoutName, layoutStyle)
+        val rows = rowsFor(layoutStyle)
         val rowCount = rows.size.coerceAtLeast(1)
         val desiredRowHeights = rowHeights(rowCount).map { it.toFloat() }
         val availableHeight = viewHeight - verticalPaddingPx * 2 - rowGapPx * (rowCount - 1)
@@ -884,9 +874,8 @@ class AospKeyboardView @JvmOverloads constructor(
             if (includeNumberRow && rowIndex == 0) preferredNumberRowHeightPx else preferredKeyHeightPx
         }
 
-    private fun rowsFor(layout: String, style: SoftwareLayoutStyle): List<List<KeySpec>> {
-        val family = SoftwareKeyboardLayoutTemplates.familyFor(layout)
-        val rowStrings = SoftwareKeyboardLayoutTemplates.rowTemplateFor(family, style)
+    private fun rowsFor(style: SoftwareLayoutStyle): List<List<KeySpec>> {
+        val rowStrings = SoftwareKeyboardLayoutTemplates.rowTemplateFor(style)
         if (style == SoftwareLayoutStyle.FULL_ANSI || style == SoftwareLayoutStyle.FULL_ISO) {
             return maybeWithNumberRow(fullRowsFor(rowStrings, style))
         }
@@ -896,7 +885,6 @@ class AospKeyboardView @JvmOverloads constructor(
         }
         val row2Start = if (
             themeOverride?.ortholinear == true ||
-            family == SoftwareKeyboardLayoutTemplates.Family.AZERTY ||
             style == SoftwareLayoutStyle.EXTENDED_ISO
         ) 0f else 5f
         val row2Width = if (style == SoftwareLayoutStyle.EXTENDED_ISO) {
@@ -1643,7 +1631,7 @@ class AospKeyboardView @JvmOverloads constructor(
 
     private fun physicalKeyCodeForText(text: String): Int {
         val char = text.firstOrNull() ?: return KeyEvent.KEYCODE_UNKNOWN
-        return SoftwareKeyboardSymLabels.keyCodeForChar(char, layoutName)
+        return SoftwareKeyboardSymLabels.keyCodeForChar(char)
             ?: keyCodeForText(text)
     }
 

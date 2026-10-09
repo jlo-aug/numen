@@ -6,7 +6,6 @@ import it.palsoftware.pastiera.SettingsManager
 import it.palsoftware.pastiera.inputmethod.statusbar.button.ClipboardButtonFactory
 import it.palsoftware.pastiera.inputmethod.statusbar.button.EmojiButtonFactory
 import it.palsoftware.pastiera.inputmethod.statusbar.button.HamburgerButtonFactory
-import it.palsoftware.pastiera.inputmethod.statusbar.button.LanguageButtonFactory
 import it.palsoftware.pastiera.inputmethod.statusbar.button.MinimalUiButtonFactory
 import it.palsoftware.pastiera.inputmethod.statusbar.button.MicrophoneButtonFactory
 import it.palsoftware.pastiera.inputmethod.statusbar.button.SettingsButtonFactory
@@ -40,7 +39,6 @@ class StatusBarButtonRegistry {
     // Keep references to specific factories for direct access when needed
     private val clipboardFactory = ClipboardButtonFactory()
     private val microphoneFactory = MicrophoneButtonFactory()
-    private val languageFactory = LanguageButtonFactory()
     private val emojiFactory = EmojiButtonFactory()
     private val hamburgerFactory = HamburgerButtonFactory()
     private val minimalUiFactory = MinimalUiButtonFactory()
@@ -54,7 +52,6 @@ class StatusBarButtonRegistry {
         // Register built-in button factories
         factories[StatusBarButtonId.Clipboard] = clipboardFactory
         factories[StatusBarButtonId.Microphone] = microphoneFactory
-        factories[StatusBarButtonId.Language] = languageFactory
         factories[StatusBarButtonId.Emoji] = emojiFactory
         factories[StatusBarButtonId.Hamburger] = hamburgerFactory
         factories[StatusBarButtonId.MinimalUi] = minimalUiFactory
@@ -84,7 +81,7 @@ class StatusBarButtonRegistry {
      * @return true if the factory was removed, false if it wasn't registered or is built-in
      */
     fun unregister(id: StatusBarButtonId): Boolean {
-        if (id in listOf(StatusBarButtonId.Clipboard, StatusBarButtonId.Microphone, StatusBarButtonId.Language, StatusBarButtonId.Emoji, StatusBarButtonId.Hamburger, StatusBarButtonId.MinimalUi, StatusBarButtonId.SoftwareKeyboardMode, StatusBarButtonId.Settings, StatusBarButtonId.Symbols, StatusBarButtonId.Undo, StatusBarButtonId.Redo)) {
+        if (id in listOf(StatusBarButtonId.Clipboard, StatusBarButtonId.Microphone, StatusBarButtonId.Emoji, StatusBarButtonId.Hamburger, StatusBarButtonId.MinimalUi, StatusBarButtonId.SoftwareKeyboardMode, StatusBarButtonId.Settings, StatusBarButtonId.Symbols, StatusBarButtonId.Undo, StatusBarButtonId.Redo)) {
             return false // Cannot unregister built-in buttons
         }
         return factories.remove(id) != null
@@ -171,9 +168,12 @@ class StatusBarButtonRegistry {
         rightSlots: List<String>
     ): List<StatusBarButtonConfig> {
         val enabledButtons = mutableListOf<StatusBarButtonConfig>()
-        
+        // Each button can show once. A bar saved by an older version can name one twice: its
+        // "language" button now reads as emoji.
+        val seen = mutableSetOf<StatusBarButtonId>()
+
         leftSlots.forEachIndexed { index, button ->
-            buttonIdFromString(button)?.let { id ->
+            buttonIdFromString(button)?.takeIf(seen::add)?.let { id ->
                 enabledButtons.add(StatusBarButtonConfig(
                     id = id,
                     position = StatusBarButtonPosition.LEFT,
@@ -182,9 +182,9 @@ class StatusBarButtonRegistry {
                 ))
             }
         }
-        
+
         rightSlots.forEachIndexed { index, button ->
-            buttonIdFromString(button)?.let { id ->
+            buttonIdFromString(button)?.takeIf(seen::add)?.let { id ->
                 enabledButtons.add(StatusBarButtonConfig(
                     id = id,
                     position = StatusBarButtonPosition.RIGHT,
@@ -206,7 +206,6 @@ class StatusBarButtonRegistry {
             SettingsManager.STATUS_BAR_BUTTON_CLIPBOARD -> StatusBarButtonId.Clipboard
             SettingsManager.STATUS_BAR_BUTTON_MICROPHONE -> StatusBarButtonId.Microphone
             SettingsManager.STATUS_BAR_BUTTON_EMOJI -> StatusBarButtonId.Emoji
-            SettingsManager.STATUS_BAR_BUTTON_LANGUAGE -> StatusBarButtonId.Language
             SettingsManager.STATUS_BAR_BUTTON_HAMBURGER -> StatusBarButtonId.Hamburger
             SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> StatusBarButtonId.MinimalUi
             SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> StatusBarButtonId.SoftwareKeyboardMode
@@ -222,7 +221,7 @@ class StatusBarButtonRegistry {
     /**
      * Gets the default button configuration.
      * 
-     * Default layout: [Clipboard] [---variations---] [Emoji] [Language]
+     * Default layout: [Clipboard] [---variations---] [Emoji]
      */
     fun getDefaultConfiguration(): List<StatusBarButtonConfig> {
         return listOf(
@@ -237,12 +236,6 @@ class StatusBarButtonRegistry {
                 position = StatusBarButtonPosition.RIGHT,
                 enabled = true,
                 order = 0
-            ),
-            StatusBarButtonConfig(
-                id = StatusBarButtonId.Language,
-                position = StatusBarButtonPosition.RIGHT,
-                enabled = true,
-                order = 1
             )
         )
     }
@@ -257,7 +250,6 @@ class StatusBarButtonRegistry {
     /**
      * Direct access to the language factory for text updates.
      */
-    fun getLanguageFactory(): LanguageButtonFactory = languageFactory
     
     /**
      * Direct access to the clipboard factory for badge updates.

@@ -2,36 +2,26 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
-    <!-- Permesso per le notifiche (richiesto da Android 13+) -->
+    <!-- Notification permission (required on Android 13+) -->
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     
-    <!-- Permesso per la vibrazione (richiesto per haptic feedback) -->
+    <!-- Vibration permission (required for haptic feedback) -->
     <uses-permission android:name="android.permission.VIBRATE" />
 
-    <!-- Riavvia il timeout dello schermo dopo un tocco sulla tastiera -->
+    <!-- Restart the screen timeout after a keyboard touch -->
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     
-    <!-- Permesso per il riconoscimento vocale -->
+    <!-- Speech recognition permission -->
     <uses-permission android:name="android.permission.RECORD_AUDIO" />
     
-    <!-- Permesso per l'accesso a Internet (richiesto per il controllo aggiornamenti) -->
-    <uses-permission android:name="android.permission.INTERNET" />
-
-    <!-- Lettura delle informazioni del Clicks Power Keyboard tramite BLE GATT -->
-    <uses-permission android:name="android.permission.BLUETOOTH" android:maxSdkVersion="30" />
-    <uses-permission android:name="android.permission.BLUETOOTH_CONNECT" />
-
-    <!-- Permesso per mostrare finestre overlay (per debug trackpad) -->
-    <uses-permission android:name="android.permission.SYSTEM_ALERT_WINDOW" />
-
-    <!-- Query per vedere tutte le app installate che possono essere avviate -->
+    <!-- Query to see all installed launchable apps -->
     <queries>
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.LAUNCHER" />
         </intent>
         
-        <!-- Query per vedere i launcher -->
+        <!-- Query to see launchers -->
         <intent>
             <action android:name="android.intent.action.MAIN" />
             <category android:name="android.intent.category.HOME" />
@@ -41,7 +31,6 @@
         <package android:name="bitpit.launcher" />
         <package android:name="net.dinglisch.android.taskerm" />
         <package android:name="io.homeassistant.companion.android" />
-        <package android:name="com.clicks.companionapp" />
     </queries>
 
     <application
@@ -88,34 +77,26 @@
             </intent-filter>
         </activity>
         
-        <!-- Activity per la personalizzazione SYM -->
+        <!-- SYM customization activity -->
         <activity
             android:name=".SymCustomizationActivity"
             android:exported="false"
             android:label="@string/sym_customize_title"
             android:theme="@style/Theme.Pastiera" />
         
-        <activity android:name=".KeyboardLayoutActivity" android:exported="false" android:theme="@style/Theme.Pastiera" />
 
         <activity android:name=".DiagnosticsActivity" android:exported="false"
             android:configChanges="keyboard|keyboardHidden|navigation"
             android:label="@string/home_diagnostics_title" android:theme="@style/Theme.Pastiera" />
 
-        <activity android:name=".CornerCalibrationActivity" android:exported="false"
-            android:label="@string/corner_calibration_title" android:theme="@style/Theme.Pastiera" />
-
-        <!-- Activity per le impostazioni -->
+        <!-- Settings activity -->
         <activity
             android:name=".SettingsActivity"
             android:configChanges="keyboard|keyboardHidden|navigation"
             android:exported="true"
             android:label="@string/settings_title"
             android:theme="@style/Theme.Pastiera">
-            <!-- Settings links only navigate and highlight; they never change values.
-                 The scheme is per flavor; Pastiera's https App Links live in src/stable.
-                 Future: if multiple Stable/Nightly or Pastiera/Plektra apps are installed,
-                 consider an in-app choice with explicit forwarding to the selected package.
-                 Verified overlapping App Links do not guarantee an Android chooser. -->
+            <!-- Settings links only navigate and highlight; they never change values. -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -128,35 +109,7 @@
             </intent-filter>
         </activity>
         
-        <!-- Activity per gestire le lingue degli input method subtypes -->
-        <activity
-            android:name=".LanguagesActivity"
-            android:exported="false"
-            android:label="@string/languages_title"
-            android:theme="@style/Theme.Pastiera" />
-        
-        <activity
-            android:name=".dictionaries.InstalledDictionariesActivity"
-            android:exported="false"
-            android:label="@string/installed_dictionaries_title"
-            android:theme="@style/Theme.Pastiera.InstalledDictionariesAnimation" />
-
-        <activity
-            android:name=".layout.OnlineLayoutsActivity"
-            android:exported="false"
-            android:label="@string/online_layouts_title"
-            android:theme="@style/Theme.Pastiera" />
-
-        <!-- Activity for trackpad debug -->
-        <activity
-            android:name=".TrackpadDebugActivity"
-            android:exported="false"
-            android:label="@string/trackpad_debug_title"
-            android:theme="@android:style/Theme.Translucent.NoTitleBar"
-            android:excludeFromRecents="true"
-            android:launchMode="singleInstance" />
-
-        <!-- Servizio di immissione per tastiera fisica -->
+        <!-- Physical keyboard input method service -->
         <service
             android:name=".inputmethod.PhysicalKeyboardInputMethodService"
             android:label="${imeLabel}"
@@ -170,20 +123,7 @@
                 android:resource="@xml/method" />
         </service>
 
-        <service
-            android:name=".inputmethod.ClicksLauncherButtonAccessibilityService"
-            android:exported="true"
-            android:label="@string/clicks_launcher_interception_service_label"
-            android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
-            <intent-filter>
-                <action android:name="android.accessibilityservice.AccessibilityService" />
-            </intent-filter>
-            <meta-data
-                android:name="android.accessibilityservice"
-                android:resource="@xml/clicks_launcher_button_accessibility_service" />
-        </service>
-
-        <!-- Attività helper per il riconoscimento vocale -->
+        <!-- Helper activity for speech recognition -->
         <activity
             android:name=".inputmethod.SpeechRecognitionActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
@@ -192,7 +132,7 @@
             android:launchMode="singleTask"
             android:taskAffinity="com.google.android.inputmethod.latin" />
         
-        <!-- Attività helper per richiedere il permesso del microfono -->
+        <!-- Helper activity for requesting microphone permission -->
         <activity
             android:name=".inputmethod.PermissionRequestActivity"
             android:theme="@android:style/Theme.Translucent.NoTitleBar"
@@ -201,7 +141,7 @@
             android:launchMode="singleTask"
             android:taskAffinity="" />
         
-        <!-- Attività per assegnare scorciatoie del launcher -->
+        <!-- Activity for assigning launcher shortcuts -->
         <activity
             android:name=".inputmethod.LauncherShortcutAssignmentActivity"
             android:theme="@style/Theme.Pastiera.OverlayDialog"
@@ -231,15 +171,6 @@
             android:taskAffinity=""
             android:noHistory="true"
             android:finishOnTaskLaunch="true" />
-
-        <!-- Shizuku provider -->
-        <provider
-            android:name="rikka.shizuku.ShizukuProvider"
-            android:authorities="${applicationId}.shizuku"
-            android:multiprocess="false"
-            android:enabled="true"
-            android:exported="true"
-            android:permission="android.permission.INTERACT_ACROSS_USERS_FULL" />
 
         <provider
             android:name="androidx.core.content.FileProvider"

@@ -28,27 +28,17 @@ class SettingLinkCoverageTest {
         val controls = mapOf(
             "nav_mode.enabled" to R.string.nav_mode_enable_title,
             "nav_mode.ctrl_hold" to R.string.nav_mode_ctrl_hold_title,
-            "nav_mode.layout_aware_ctrl_shortcuts" to R.string.layout_aware_ctrl_shortcuts_title,
-            "accessibility.bounce_keys_delay" to R.string.settings_accessibility_bounce_keys_delay_link_title,
-            "trackpad.add_word" to R.string.trackpad_gesture_add_word_title,
-            "trackpad.add_word_full_width" to R.string.trackpad_gesture_add_word_full_width_title,
-            "trackpad.swipe_to_delete" to R.string.swipe_to_delete_title,
-            "trackpad.swipe_to_delete_provider" to R.string.swipe_to_delete_provider_title
+            "accessibility.bounce_keys_delay" to R.string.settings_accessibility_bounce_keys_delay_link_title
         )
         controls.forEach { (id, titleRes) ->
             val results = SettingLinkRegistry.search(context, context.getString(titleRes))
-            // Numen has no trackpad gestures: their settings must not be reachable at all.
-            if (id.startsWith("trackpad.") && !BuildConfig.UPSTREAM_BRANDING) {
-                assertFalse("Search exposes hidden $id", results.any { it.id == id })
-            } else {
-                assertTrue("Search does not expose $id", results.any { it.id == id })
-            }
+            assertTrue("Search does not expose $id", results.any { it.id == id })
         }
     }
 
     @Test
     fun hiddenNavControlsResolveToVisibleEnableSwitchAndReturnWhenEnabled() {
-        val ids = listOf("nav_mode.ctrl_hold", "nav_mode.layout_aware_ctrl_shortcuts")
+        val ids = listOf("nav_mode.ctrl_hold")
         SettingsManager.setNavModeEnabled(context, false)
         ids.forEach { id ->
             val entry = requireNotNull(SettingLinkRegistry.byId(id))
@@ -65,20 +55,10 @@ class SettingLinkCoverageTest {
     }
 
     @Test
-    fun disabledButVisibleLayoutShortcutStillResolvesToItsOwnRow() {
-        SettingsManager.setNavModeEnabled(context, true)
-        SettingsManager.setNavModeCtrlHoldEnabled(context, true)
-        val entry = requireNotNull(SettingLinkRegistry.byId("nav_mode.layout_aware_ctrl_shortcuts"))
-        assertTrue(entry.isAvailable(context))
-        assertEquals(entry.id, SettingLinkRegistry.visibleTarget(context, entry).id)
-    }
-
-    @Test
     fun registeredDeviceControlsRetainTheirActualSubscreenInNavigationStack() {
         val expectedTargets = mapOf(
             "on_screen.number_row" to KeyboardsDevicesDestination.OnScreen,
-            "hardware.currency" to KeyboardsDevicesDestination.BuiltIn,
-            "clicks.backlight" to KeyboardsDevicesDestination.PowerKeyboard
+            "hardware.currency" to KeyboardsDevicesDestination.BuiltIn
         )
         expectedTargets.forEach { (id, expected) ->
             val route = requireNotNull(SettingLinkRegistry.byId(id)).route
@@ -91,12 +71,6 @@ class SettingLinkCoverageTest {
             requireNotNull(SettingLinkRegistry.byId(SettingLinkIds.MAIN_KEYBOARDS_DEVICES))
                 .route.toSettingsPage().keyboardsDevicesDestination
         )
-    }
-
-    @Test
-    fun appLanguageLinkResolvesToLanguageScreen() {
-        val entry = requireNotNull(SettingLinkRegistry.byId(SettingLinkIds.MAIN_APP_LANGUAGE))
-        assertEquals(SettingsDestination.AppLanguage, entry.route.toSettingsPage().destination)
     }
 
     @Test

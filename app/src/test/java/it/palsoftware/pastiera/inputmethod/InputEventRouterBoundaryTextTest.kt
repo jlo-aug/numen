@@ -31,8 +31,7 @@ class InputEventRouterBoundaryTextTest {
         context = RuntimeEnvironment.getApplication()
         SettingsManager.getPreferences(context).edit().clear().commit()
         AutoSpaceTracker.clear()
-        SettingsManager.saveCustomAutoCorrections(context, "test", mapOf("teh" to "the"))
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("test"))
+        SettingsManager.saveCustomAutoCorrections(context, mapOf("teh" to "the"))
         AutoCorrector.loadCorrections(context.assets, context)
         router = InputEventRouter(
             context,

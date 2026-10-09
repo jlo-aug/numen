@@ -1,6 +1,5 @@
 package it.palsoftware.pastiera.data.layout
 
-import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
 import android.view.KeyEvent
@@ -45,10 +44,9 @@ object LayoutMappingRepository {
 
     fun loadLayout(
         assets: AssetManager,
-        layoutName: String,
-        context: Context? = null
+        layoutName: String
     ): Map<Int, LayoutMapping> {
-        val layout = JsonLayoutLoader.loadLayout(assets, layoutName, context) ?: defaultLayout
+        val layout = JsonLayoutLoader.loadLayout(assets, layoutName) ?: defaultLayout
         currentLayout = layout
         Log.d(TAG, "Keyboard layout loaded: $layoutName")
         return layout
@@ -60,31 +58,12 @@ object LayoutMappingRepository {
 
     fun getLayout(): Map<Int, LayoutMapping> = currentLayout
 
-    fun getMapping(keyCode: Int): LayoutMapping? = currentLayout[keyCode]
+    fun resolveText(mapping: LayoutMapping, useUppercase: Boolean): String =
+        if (useUppercase) mapping.uppercase else mapping.lowercase
 
-    fun resolveText(
-        mapping: LayoutMapping,
-        useUppercase: Boolean,
-        tapIndex: Int? = null
-    ): String? {
-        val tapMapping = if (mapping.isRealMultiTap && tapIndex != null) {
-            val safeIndex = if (mapping.taps.isNotEmpty()) tapIndex % mapping.taps.size else 0
-            mapping.taps.getOrNull(safeIndex)
-        } else {
-            null
-        }
-        val lower = tapMapping?.lowercase ?: mapping.lowercase
-        val upper = tapMapping?.uppercase ?: mapping.uppercase
-        return if (useUppercase) upper else lower
-    }
-
-    fun getCharacter(
-        keyCode: Int,
-        isShift: Boolean,
-        tapIndex: Int? = null
-    ): Char? {
+    fun getCharacter(keyCode: Int, isShift: Boolean): Char? {
         val mapping = currentLayout[keyCode] ?: return null
-        return resolveText(mapping, isShift, tapIndex)?.firstOrNull()
+        return resolveText(mapping, isShift).firstOrNull()
     }
 
     fun getLowercase(keyCode: Int): String? = currentLayout[keyCode]?.lowercase
@@ -95,15 +74,13 @@ object LayoutMappingRepository {
         keyCode: Int,
         isShiftPressed: Boolean,
         capsLockEnabled: Boolean,
-        shiftOneShot: Boolean,
-        tapIndex: Int? = null
+        shiftOneShot: Boolean
     ): Char? {
         return getCharacterStringWithModifiers(
             keyCode,
             isShiftPressed,
             capsLockEnabled,
-            shiftOneShot,
-            tapIndex
+            shiftOneShot
         ).firstOrNull()
     }
 
@@ -111,8 +88,7 @@ object LayoutMappingRepository {
         keyCode: Int,
         isShiftPressed: Boolean,
         capsLockEnabled: Boolean,
-        shiftOneShot: Boolean,
-        tapIndex: Int? = null
+        shiftOneShot: Boolean
     ): String {
         val mapping = currentLayout[keyCode] ?: return ""
         val needsUppercase = when {
@@ -121,13 +97,11 @@ object LayoutMappingRepository {
             isShiftPressed -> true
             else -> false
         }
-        return resolveText(mapping, needsUppercase, tapIndex) ?: ""
+        return resolveText(mapping, needsUppercase)
     }
 
     fun isMapped(keyCode: Int): Boolean = currentLayout.containsKey(keyCode)
 
-    fun getAvailableLayouts(
-        assets: AssetManager,
-        context: Context? = null
-    ): List<String> = JsonLayoutLoader.getAvailableLayouts(assets, context)
+    fun getAvailableLayouts(assets: AssetManager): List<String> =
+        JsonLayoutLoader.getAvailableLayouts(assets)
 }

@@ -97,7 +97,6 @@ class BackupPreferenceContractIntegrationTest {
                 populatedFields = setOf("background")
             )
         )
-        SettingsManager.setKeyboardLayoutAutoByLocale(context, false)
         SettingsManager.setAppEnterBehaviorEnabled(context, true)
         SettingsManager.setAppEnterBehaviorPreset(
             context,
@@ -117,12 +116,8 @@ class BackupPreferenceContractIntegrationTest {
         val typingSoundBytes = writeRealOgg(typingSoundFile)
         SettingsManager.getPreferences(context).edit()
             .putString("user_dictionary_entries", "[\"ContractWord\"]")
-            .putString("auto_correct_custom_de", "{\"ctr\":\"ContractReplacement\"}")
-            .putString("app_language_tag", "de-DE")
-            .putBoolean("alt_shift_default_initialized", true)
+            .putString("auto_correct_custom_en", "{\"ctr\":\"ContractReplacement\"}")
             .putInt("current_sym_page", 2)
-            .putBoolean("legacy_german_qwertz_default_migrated", true)
-            .putInt("last_seen_whats_new_version", 86)
             .putInt("nav_mode_default_mappings_version", 3)
             .putBoolean("quick_launcher_default_assigned", true)
             .putFloat("keyboard_theme_preview_viewport_scale", 1.4f)
@@ -193,7 +188,6 @@ class BackupPreferenceContractIntegrationTest {
             ),
             SettingsManager.getKeyboardThemeDrafts(context)
         )
-        assertFalse(SettingsManager.isKeyboardLayoutAutoByLocale(context))
         assertTrue(SettingsManager.getAppEnterBehaviorEnabled(context))
         assertEquals(
             SettingsManager.ENTER_BEHAVIOR_PRESET_CUSTOM,
@@ -208,9 +202,8 @@ class BackupPreferenceContractIntegrationTest {
         )
         assertEquals(
             "{\"ctr\":\"ContractReplacement\"}",
-            SettingsManager.getPreferences(context).getString("auto_correct_custom_de", null)
+            SettingsManager.getPreferences(context).getString("auto_correct_custom_en", null)
         )
-        assertEquals("de-DE", SettingsManager.getAppLanguageTag(context))
         assertEquals(SettingsManager.TYPING_SOUND_MODE_CUSTOM, SettingsManager.getTypingSoundMode(context))
         assertEquals(
             SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION,
@@ -232,7 +225,6 @@ class BackupPreferenceContractIntegrationTest {
             "keyboard_theme_software" to PreferenceValueType.STRING,
             "keyboard_theme_saved_themes" to PreferenceValueType.STRING,
             "keyboard_theme_drafts" to PreferenceValueType.STRING,
-            "keyboard_layout_auto_by_locale" to PreferenceValueType.BOOLEAN,
             "app_enter_behavior_enabled" to PreferenceValueType.BOOLEAN,
             "app_enter_behavior_preset" to PreferenceValueType.STRING,
             "app_enter_behavior_overrides" to PreferenceValueType.STRING,
@@ -250,11 +242,8 @@ class BackupPreferenceContractIntegrationTest {
             assertEquals(type, PreferenceSchemas.expectedType("pastiera_prefs", key))
         }
         listOf(
-            "alt_shift_default_initialized",
             "current_sym_page",
-            "legacy_german_qwertz_default_migrated",
             "titan2_elite_rounded_corners_enforced_v1",
-            "last_seen_whats_new_version",
             "nav_mode_default_mappings_version",
             "quick_launcher_default_assigned",
             "keyboard_theme_preview_viewport_scale",
@@ -265,7 +254,7 @@ class BackupPreferenceContractIntegrationTest {
         }
         assertEquals(
             PreferenceValueType.STRING,
-            BackupPreferenceContract.expectedExportType("pastiera_prefs", "auto_correct_custom_de")
+            BackupPreferenceContract.expectedExportType("pastiera_prefs", "auto_correct_custom_en")
         )
     }
 
@@ -484,22 +473,25 @@ class BackupPreferenceContractIntegrationTest {
     }
 
     @Test
-    fun backupAboveRestoreEntryLimitReturnsFailure() = runBlocking {
-        val generatedLayoutDir = File(context.filesDir, "keyboard_layouts/zip-limit-test")
-        val backupFile = File.createTempFile("entry_limit_backup_", ".zip", context.cacheDir)
+    fun leftoverLayoutFiles_areNotBackedUp() = runBlocking {
+        val layoutDir = File(context.filesDir, "keyboard_layouts")
+        val mappingFile = File(context.filesDir, "locale_layout_mapping.json")
+        val backupFile = File.createTempFile("leftover_layouts_", ".zip", context.cacheDir)
         try {
-            repeat(ZipHelper.DEFAULT_ARCHIVE_LIMITS.maxEntries + 1) { index ->
-                File(generatedLayoutDir, "$index.json").apply {
-                    parentFile?.mkdirs()
-                    writeText("{}")
-                }
+            File(layoutDir, "custom.json").apply {
+                parentFile?.mkdirs()
+                writeText("{}")
             }
+            mappingFile.writeText("""{"en_US":"qwerty"}""")
 
             val result = BackupManager.createBackup(context, Uri.fromFile(backupFile))
+            val entries = readZipEntries(backupFile)
 
-            assertTrue(result is BackupResult.Failure)
+            assertTrue(result is BackupResult.Success)
+            assertTrue(entries.keys.none { it.contains("keyboard_layouts") || it.contains("locale_layout_mapping") })
         } finally {
-            generatedLayoutDir.deleteRecursively()
+            layoutDir.deleteRecursively()
+            mappingFile.delete()
             backupFile.delete()
         }
     }
@@ -691,76 +683,6 @@ class BackupPreferenceContractIntegrationTest {
         } finally {
             extractedFiles.deleteRecursively()
         }
-    }
-
-    @Test
-    fun everyPastieraKeyObservedInIssue179Backup_isExplicitlyExportedOrExcluded() {
-        val observedKeys = """
-            alt_shift_default_initialized
-            alt_shift_layout_switch
-            app_enter_behavior_enabled
-            app_enter_behavior_overrides
-            app_enter_behavior_preset
-            auto_capitalize_first_letter
-            auto_correct_custom_de
-            auto_correct_custom_fr
-            auto_correct_enabled_languages
-            auto_replace_on_space_enter
-            auto_space_punctuation
-            comma_space
-            current_sym_page
-            custom_input_styles
-            dismissed_releases
-            dynamic_variation_bar_resize_to_content
-            french_punctuation_only_french
-            french_punctuation_spacing
-            input_style_suggestion_locales
-            keyboard_layout
-            keyboard_layout_auto_by_locale
-            keyboard_layout_list
-            keyboard_theme_hardware
-            keyboard_theme_saved_themes
-            last_seen_whats_new_version
-            launcher_shortcuts
-            launcher_shortcuts_enabled
-            legacy_german_qwertz_default_migrated
-            long_press_modifier
-            long_press_threshold
-            mid_word_quote_to_apostrophe
-            modifier_indicator_mode
-            nav_mode_ctrl_hold_enabled
-            nav_mode_default_mappings_version
-            nav_mode_mappings_updated
-            pastierina_mode_override
-            physical_keyboard_currency_symbol
-            physical_keyboard_profile_override
-            quick_launcher_animation_duration_ms
-            quick_launcher_auto_start_single
-            quick_launcher_behavior
-            quick_launcher_default_assigned
-            quick_launcher_limit_results
-            shift_backspace_delete
-            smart_quotes
-            software_keyboard_mode
-            space_after_punctuation
-            spaced_hyphen_to_en_dash
-            static_variation_bar_base_layer_enabled
-            static_variation_bar_mode
-            static_variation_bar_preset
-            sym_mappings_custom
-            titan2_elite_rounded_corner_insets
-            trackpad_gestures_enabled
-            tutorial_completed
-            user_dictionary_entries
-            variations_updated
-        """.trimIndent().lineSequence().filter(String::isNotBlank).toSet()
-
-        val unclassified = observedKeys.filterNot { key ->
-            BackupPreferenceContract.isExportable("pastiera_prefs", key) ||
-                BackupPreferenceContract.deliberatelyExcludedPastieraKeys.containsKey(key)
-        }
-
-        assertTrue("Unclassified observed keys: $unclassified", unclassified.isEmpty())
     }
 
     private fun readZipEntries(zipFile: File): Map<String, String> {

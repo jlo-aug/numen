@@ -2,16 +2,13 @@ package it.palsoftware.pastiera.inputmethod
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.app.PendingIntent
 import android.content.Context
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.graphics.Canvas
 import android.graphics.Color
 import android.graphics.Paint
 import android.graphics.Typeface
-import android.net.Uri
 import android.os.Build
 import android.os.DeadSystemException
 import android.os.VibrationEffect
@@ -19,13 +16,9 @@ import android.os.Vibrator
 import android.os.VibratorManager
 import android.view.HapticFeedbackConstants
 import android.view.View
-import androidx.core.app.ActivityCompat
-import androidx.core.app.NotificationCompat
 import androidx.core.content.ContextCompat
-import androidx.core.graphics.drawable.IconCompat
 import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.SettingsManager
-import it.palsoftware.pastiera.update.successorReleasesPage
 
 /**
  * Helper for managing app notifications.
@@ -34,8 +27,6 @@ object NotificationHelper {
     private const val CHANNEL_ID = "pastiera_nav_mode_channel"
     private const val NOTIFICATION_ID = 1
     
-    private const val UPDATE_CHANNEL_ID = "pastiera_update_channel"
-    private const val UPDATE_NOTIFICATION_ID = 2
     
     /**
      * Checks whether notification permission is granted.
@@ -191,29 +182,6 @@ object NotificationHelper {
         }
     }
     
-    /**
-     * Creates the notification channel for update notifications (Android 8.0+).
-     */
-    private fun createUpdateNotificationChannel(context: Context) {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-            
-            val channel = NotificationChannel(
-                UPDATE_CHANNEL_ID,
-                context.getString(R.string.notification_update_channel_name),
-                NotificationManager.IMPORTANCE_DEFAULT
-            ).apply {
-                description = context.getString(R.string.notification_update_channel_description)
-                setShowBadge(true)
-                enableLights(false)
-                enableVibration(true)
-                vibrationPattern = longArrayOf(0, 50)
-                setSound(null, null)
-            }
-            
-            notificationManager.createNotificationChannel(channel)
-        }
-    }
     
     /**
      * Creates a bitmap icon with the letter "N" for the nav mode notification.
@@ -254,88 +222,6 @@ object NotificationHelper {
         return bitmap
     }
     
-    /**
-     * Shows a notification when a new app update is available.
-     * Respects notification permissions on Android 13+.
-     */
-    fun showUpdateAvailableNotification(
-        context: Context,
-        displayName: String,
-        releasePageUrl: String?,
-        isNightlyUpdate: Boolean = false,
-        isPastieraStableUpdate: Boolean = false
-    ) {
-        if (!hasNotificationPermission(context)) {
-            android.util.Log.w("NotificationHelper", "Notification permission not granted")
-            return
-        }
-        
-        val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-        
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-            createUpdateNotificationChannel(context)
-        }
-        
-        val targetUrl = releasePageUrl ?: if (isNightlyUpdate || isPastieraStableUpdate) {
-            "https://github.com/palsoftware/pastiera/releases"
-        } else {
-            successorReleasesPage()
-        }
-        val intent = Intent(Intent.ACTION_VIEW, Uri.parse(targetUrl)).apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        }
-        
-        val pendingIntentFlags = when {
-            Build.VERSION.SDK_INT >= Build.VERSION_CODES.M ->
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            else -> PendingIntent.FLAG_UPDATE_CURRENT
-        }
-        
-        val pendingIntent = PendingIntent.getActivity(
-            context,
-            0,
-            intent,
-            pendingIntentFlags
-        )
-        
-        val titleResource = when {
-            isNightlyUpdate -> R.string.nightly_update_title
-            isPastieraStableUpdate -> R.string.notification_pastiera_stable_update_title
-            else -> R.string.notification_successor_release_title
-        }
-        val textResource = when {
-            isNightlyUpdate -> R.string.nightly_update_message
-            isPastieraStableUpdate -> R.string.notification_pastiera_stable_update_text
-            else -> R.string.notification_successor_release_text
-        }
-        val notificationBuilder = NotificationCompat.Builder(context, UPDATE_CHANNEL_ID)
-            .setContentTitle(context.getString(titleResource))
-            .setContentText(
-                context.getString(
-                    textResource,
-                    displayName
-                )
-            )
-            .setSmallIcon(R.drawable.ic_launcher_monochrome)
-            .setContentIntent(pendingIntent)
-            .setAutoCancel(true)
-            .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-            .setCategory(NotificationCompat.CATEGORY_STATUS)
-            .setVisibility(NotificationCompat.VISIBILITY_PUBLIC)
-        
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) {
-            @Suppress("DEPRECATION")
-            notificationBuilder.setVibrate(longArrayOf(0, 50))
-        }
-        
-        val notification = notificationBuilder.build()
-        val notificationId = when {
-            isNightlyUpdate -> UPDATE_NOTIFICATION_ID + 1
-            isPastieraStableUpdate -> UPDATE_NOTIFICATION_ID + 2
-            else -> UPDATE_NOTIFICATION_ID
-        }
-        notificationManager.notify(notificationId, notification)
-    }
     
     /**
      * Cancels the nav mode notification.

@@ -17,12 +17,12 @@ class BundledLayoutAssetsTest {
     @Test
     fun unsafeIdsNeverConsultOrOpenAssets() {
         listOf(
-            "../qwertz",
-            "..\\qwertz",
+            "../qwerty",
+            "..\\qwerty",
             ".",
             "..",
-            "qwertz.variant",
-            "qwertz\u0000"
+            "qwerty.variant",
+            "qwerty\u0000"
         ).forEach { layoutId ->
             assertNull(BundledLayoutAssets.openLayout(assets, layoutId))
         }
@@ -32,18 +32,18 @@ class BundledLayoutAssetsTest {
 
     @Test
     fun exactRealAssetNameIsOpened() {
-        `when`(assets.list("common/layouts")).thenReturn(arrayOf("qwertz.json", "qwerty.json"))
-        `when`(assets.open("common/layouts/qwertz.json"))
+        `when`(assets.list("common/layouts")).thenReturn(arrayOf("qwerty.json"))
+        `when`(assets.open("common/layouts/qwerty.json"))
             .thenReturn(ByteArrayInputStream("{}".toByteArray()))
 
-        assertNotNull(BundledLayoutAssets.openLayout(assets, "qwertz"))
+        assertNotNull(BundledLayoutAssets.openLayout(assets, "qwerty"))
 
-        verify(assets).open("common/layouts/qwertz.json")
+        verify(assets).open("common/layouts/qwerty.json")
     }
 
     @Test
     fun syntacticallyValidButUnknownIdIsNotOpened() {
-        `when`(assets.list("common/layouts")).thenReturn(arrayOf("qwertz.json"))
+        `when`(assets.list("common/layouts")).thenReturn(arrayOf("qwerty.json"))
 
         assertNull(BundledLayoutAssets.openLayout(assets, "not_bundled"))
 

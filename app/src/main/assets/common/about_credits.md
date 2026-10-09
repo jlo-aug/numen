@@ -1,6 +1,15 @@
+# Numen
+A keyboard app for the Unihertz Titan 2 Elite, tuned for typing in English.
 
-# Pastiera - La Tastiera per la tua Tastiera
+In ancient Rome, a numen was a small spirit that protected the places people loved. The character you met on first launch is the numen of your keyboard.
+
+Numen is a fork of [Pastiera](https://github.com/palsoftware/pastiera) 0.86 (GPL-3.0). It keeps the keyboard bar hidden while you type and adds stronger autocorrect, sentence-aware fixes and typing stats. It is not an official Pastiera release.
 ---
+## Numen
+#### [Source code & releases](https://github.com/jlo-aug/numen)
+#### [Report an issue](https://github.com/jlo-aug/numen/issues)
+---
+## Based on Pastiera
 #### Creator
 Andrea Palumbo (PalSoftware) · [Support the creator on Ko-fi](https://ko-fi.com/palsoftware)
 
@@ -16,16 +25,7 @@ Laggy Luke, Vittorio, Emmanuel, Sadako, NotTeganQuinn, DrumSyBeat, [Shane Craig 
 #### Special Thanks
 Unihertz Titan 2 Discord, Unihertz Titan 2 FB page and all the people for the outstanding support! 
 ---
-## Links
-#### [Project website & docs](https://pastiera.eu/)
-#### [GitHub repository](https://github.com/palsoftware/pastiera)
-#### [Issue tracker](https://github.com/palsoftware/pastiera/issues/)
-#### [Nightly GitHub releases](https://github.com/palsoftware/pastiera/releases?q=nightly%2F)
-#### [Nightly F-Droid repo](https://pastiera.eu/fdroid/nightly/repo)
-#### [Support the project on Open Collective](https://pastiera.eu/donate)
----
-**Grazie for using Pastiera! <3**
-
+#### [Original project: Pastiera on GitHub](https://github.com/palsoftware/pastiera)
 ---
 ## Open Source Notices
 #### Android Open Source Project LatinIME
@@ -53,3 +53,9 @@ Bundled base dictionaries are frequency-list derivatives built mainly from [Leip
 
 #### eellak GSOC 2019 Greek Morphological Dictionary
 The downloadable Greek base dictionary is derived from the top frequency-ranked entries in the [eellak GSOC 2019 Greek spelling dictionary](https://github.com/eellak/gsoc2019-greek-morpho), with Pastiera-specific filtering and normalization. The project source code is GPLv3; the produced morphological database is documented as CC BY-SA 3.0.
+
+#### English word-pair counts (sentence-aware corrections)
+Numen's word-pair counts are built from [Simple English Wikipedia](https://simple.wikipedia.org) (CC BY-SA 4.0), [Tatoeba](https://tatoeba.org) sentences (CC BY 2.0 FR) and the Google Books Ngram top English 2-grams via [orgtre/google-books-ngram-frequency](https://github.com/orgtre/google-books-ngram-frequency) (CC BY 3.0). Only aggregated counts are included; the file is distributed under CC BY-SA 4.0.
+
+#### SCOWL word list
+Numen's list of recognised English words is built from [SCOWL](http://wordlist.aspell.net) size 60. Copyright 2000-2018 by Kevin Atkinson; permission to use, copy, modify, distribute and sell is granted provided the copyright and permission notice appear in all copies. SCOWL includes public-domain material from Moby Words II, 12Dicts and ENABLE.

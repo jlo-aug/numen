@@ -2,7 +2,6 @@ package it.palsoftware.pastiera
 
 import android.content.Context
 import android.content.Intent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -31,19 +30,14 @@ import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.SmartButton
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.Language
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Engineering
-import androidx.compose.material.icons.filled.VolunteerActivism
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import android.net.Uri
-import androidx.compose.foundation.Image
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.consumeWindowInsets
@@ -53,14 +47,10 @@ import androidx.compose.foundation.layout.windowInsetsPadding
 import it.palsoftware.pastiera.R
 import android.widget.Toast
 import it.palsoftware.pastiera.BuildConfig
-import it.palsoftware.pastiera.inputmethod.DeviceSpecific
-import it.palsoftware.pastiera.update.checkForUpdateNotices
-import it.palsoftware.pastiera.update.showReleaseNotice
-import it.palsoftware.pastiera.update.shouldUseGithubUpdateChecks
 import kotlinx.coroutines.delay
 
 /**
- * Sealed class per rappresentare lo stato della navigazione nelle settings.
+ * Navigation state within the settings screens.
  */
 enum class SettingsDestination {
     Main,
@@ -72,9 +62,6 @@ enum class SettingsDestination {
     NavMode,
     Advanced,
     About,
-    CustomInputStyles,
-    AppLanguage,
-    DeviceSymLayerEditor,
     Modifiers
 }
 
@@ -110,7 +97,6 @@ fun SettingsScreen(
     val context = LocalContext.current
     val activity = context as? ComponentActivity
 
-    var checkingForUpdates by remember { mutableStateOf(false) }
     val currentEntry = remember { context.settingsActivity().intent.settingsPage() }
     val currentDestination = currentEntry.destination
     var highlightSettingId by rememberSaveable { mutableStateOf<String?>(null) }
@@ -172,21 +158,6 @@ fun SettingsScreen(
         }
     }
 
-    // Automatic update check on screen open (only once, respecting dismissed releases)
-    if (currentDestination == SettingsDestination.Main && shouldUseGithubUpdateChecks(context)) {
-        LaunchedEffect(Unit) {
-            it.palsoftware.pastiera.update.checkForUpdateNotices(
-                context = context,
-                releaseChannel = BuildConfig.RELEASE_CHANNEL,
-                ignoreDismissedReleases = true
-            ) { result ->
-                if (result.hasAnnouncement && result.releaseTag != null && result.displayName != null) {
-                    it.palsoftware.pastiera.update.showReleaseNotice(context, result)
-                }
-            }
-        }
-    }
-
 
     CompositionLocalProvider(
         LocalSettingHighlightId provides highlightSettingId,
@@ -198,8 +169,6 @@ fun SettingsScreen(
                 SettingsMainScreen(
                     modifier = modifier,
                     context = context,
-                    checkingForUpdates = checkingForUpdates,
-                    onCheckingForUpdatesChange = { checkingForUpdates = it },
                     onOpenSettingEntry = { target ->
                         context.startActivity(Intent(context, SettingsActivity::class.java).apply {
                             data = android.net.Uri.parse("${SettingLinkRegistry.LINK_SCHEME}://${SettingLinkRegistry.LINK_HOST}/${target.id}")
@@ -231,9 +200,7 @@ fun SettingsScreen(
                     },
                     onAdvancedClick = { navigateTo(SettingsDestination.Advanced) },
                     onAboutClick = { navigateTo(SettingsDestination.About) },
-                    onBackClick = { navigateBack() },
-                    onCustomInputStylesClick = { navigateTo(SettingsDestination.CustomInputStyles) },
-                    onAppLanguageClick = { navigateTo(SettingsDestination.AppLanguage) }
+                    onBackClick = { navigateBack() }
                 )
             }
             SettingsDestination.KeyboardsDevices -> {
@@ -304,18 +271,6 @@ fun SettingsScreen(
                     onBack = { navigateBack() }
                 )
             }
-            SettingsDestination.CustomInputStyles -> {
-                CustomInputStylesScreen(
-                    modifier = modifier,
-                    onBack = { navigateBack() }
-                )
-            }
-            SettingsDestination.AppLanguage -> {
-                AppLanguageSettingsScreen(modifier = modifier, onBack = { navigateBack() })
-            }
-            SettingsDestination.DeviceSymLayerEditor -> {
-                DeviceSymLayerEditorStubScreen(modifier = modifier, onBack = { navigateBack() })
-            }
             SettingsDestination.Modifiers -> {
                 ModifierSettingsScreen(
                     modifier = modifier,
@@ -348,8 +303,6 @@ Intent(context, SymCustomizationActivity::class.java)
 private fun SettingsMainScreen(
     modifier: Modifier,
     context: Context,
-    checkingForUpdates: Boolean,
-    onCheckingForUpdatesChange: (Boolean) -> Unit,
     onModifiersClick: () -> Unit,
     onKeyboardsDevicesClick: () -> Unit,
     onTextInputClick: () -> Unit,
@@ -364,8 +317,6 @@ private fun SettingsMainScreen(
     onAdvancedClick: () -> Unit,
     onAboutClick: () -> Unit,
     onBackClick: () -> Unit,
-    onCustomInputStylesClick: () -> Unit,
-    onAppLanguageClick: () -> Unit,
     onOpenSettingEntry: (SettingEntry) -> Unit
 ) {
     var searchQuery by rememberSaveable { mutableStateOf("") }
@@ -447,14 +398,13 @@ private fun SettingsMainScreen(
                         .verticalScroll(rememberScrollState())
                 ) {
             // The most-used setup in Numen: what SYM + a key opens.
-            if (!BuildConfig.UPSTREAM_BRANDING) {
-                SettingsCategoryRow(
-                    icon = Icons.Filled.Apps,
-                    title = stringResource(R.string.settings_key_shortcuts_title),
-                    description = stringResource(R.string.settings_key_shortcuts_description),
-                    onClick = { it.palsoftware.pastiera.ui.openKeyShortcuts(context) }
-                )
-            }
+            SettingsCategoryRow(
+                icon = Icons.Filled.Apps,
+                title = stringResource(R.string.settings_key_shortcuts_title),
+                description = stringResource(R.string.settings_key_shortcuts_description),
+                onClick = { it.palsoftware.pastiera.ui.openKeyShortcuts(context) }
+            )
+        
 
             // Typing: what the keys type.
             SettingsGroupDivider(stringResource(R.string.settings_group_typing))
@@ -541,25 +491,11 @@ private fun SettingsMainScreen(
             SettingsGroupDivider(stringResource(R.string.settings_group_system))
 
             SettingsCategoryRow(
-                icon = Icons.Filled.Language,
-                title = stringResource(R.string.custom_input_styles_title),
-                description = stringResource(R.string.settings_row_languages_description),
-                linkId = SettingLinkIds.MAIN_CUSTOM_INPUT_STYLES,
-                onClick = onCustomInputStylesClick
-            )
-            SettingsCategoryRow(
                 icon = Icons.Filled.TouchApp,
                 title = stringResource(R.string.settings_category_accessibility),
                 description = stringResource(R.string.settings_row_accessibility_description),
                 linkId = SettingLinkIds.MAIN_ACCESSIBILITY,
                 onClick = onAccessibilityClick
-            )
-            SettingsCategoryRow(
-                icon = ImageVector.vectorResource(R.drawable.translate_24),
-                title = stringResource(R.string.app_language_title),
-                description = currentAppLanguageLabel(context),
-                linkId = SettingLinkIds.MAIN_APP_LANGUAGE,
-                onClick = onAppLanguageClick
             )
             SettingsCategoryRow(
                 icon = Icons.Filled.Engineering,
@@ -581,83 +517,6 @@ private fun SettingsMainScreen(
                 linkId = SettingLinkIds.MAIN_ABOUT,
                 onClick = onAboutClick
             )
-            if (BuildConfig.UPSTREAM_BRANDING) { // Pastiera donations only.
-                SettingsCategoryRow(
-                    icon = Icons.Filled.VolunteerActivism,
-                    title = stringResource(R.string.settings_support_open_collective),
-                    description = stringResource(R.string.settings_support_open_collective_description),
-                    onClick = {
-                        context.startActivity(
-                            Intent(
-                                Intent.ACTION_VIEW,
-                                Uri.parse("https://pastiera.eu/donate")
-                            )
-                        )
-                    }
-                )
-            }
-
-            if (shouldUseGithubUpdateChecks(context)) {
-                SettingsCategoryRow(
-                    icon = ImageVector.vectorResource(R.drawable.plektra_open_monochrome_24),
-                    title = if (checkingForUpdates) {
-                        stringResource(
-                            if (BuildConfig.RELEASE_CHANNEL == "stable") {
-                                R.string.settings_stable_update_checking
-                            } else {
-                                R.string.settings_update_checking
-                            }
-                        )
-                    } else {
-                        stringResource(
-                            if (BuildConfig.RELEASE_CHANNEL == "stable") {
-                                R.string.settings_stable_update_section_title
-                            } else {
-                                R.string.settings_update_section_title
-                            }
-                        )
-                    },
-                    description = stringResource(
-                        if (BuildConfig.RELEASE_CHANNEL == "stable") {
-                            R.string.settings_stable_update_section_description
-                        } else {
-                            R.string.settings_update_section_description
-                        }
-                    ),
-                    enabled = !checkingForUpdates,
-                    onClick = {
-                        onCheckingForUpdatesChange(true)
-                        val onResult: (it.palsoftware.pastiera.update.UpdateCheckResult) -> Unit = { result ->
-                            onCheckingForUpdatesChange(false)
-                            when {
-                                result.hasAnnouncement -> showReleaseNotice(context, result)
-                                !result.successful -> Toast.makeText(
-                                    context,
-                                    context.getString(R.string.settings_update_check_failed),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                                else -> Toast.makeText(
-                                    context,
-                                    context.getString(
-                                        if (BuildConfig.RELEASE_CHANNEL == "stable") {
-                                            R.string.settings_stable_update_up_to_date
-                                        } else {
-                                            R.string.settings_update_up_to_date
-                                        }
-                                    ),
-                                    Toast.LENGTH_SHORT
-                                ).show()
-                            }
-                        }
-                        checkForUpdateNotices(
-                            context = context,
-                            releaseChannel = BuildConfig.RELEASE_CHANNEL,
-                            ignoreDismissedReleases = false,
-                            callback = onResult
-                        )
-                    }
-                )
-            }
 
                     Spacer(modifier = Modifier.height(16.dp))
                 }

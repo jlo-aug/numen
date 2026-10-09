@@ -3,7 +3,4 @@
     <cache-path
         name="debug_reports"
         path="debug-reports/" />
-    <cache-path
-        name="sbom"
-        path="sbom/" />
 </paths>

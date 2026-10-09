@@ -1,0 +1,9 @@
+en_confusions.txt: how often people typed one real English word when they meant another ("he" for
+"the"), which helps Numen's autocorrect fix typos that spell a different word. Built with
+tools/build_confusions.py from:
+
+- The Aalto ITE typing dataset (Aalto University; Zenodo, doi:10.5281/zenodo.12528163), licensed
+  under the Creative Commons Attribution 4.0 International License (CC BY 4.0). Only aggregated
+  counts are included, together with counts from Numen's word pairs (see en_pairs_NOTICE.txt).
+
+This file is distributed under CC BY 4.0.

@@ -5,7 +5,6 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -23,7 +22,6 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -81,15 +79,9 @@ fun ModifierSettingsScreen(
         AltModifierBinding.FirstEnabledSymKeyLayer to stringResource(R.string.alt_binding_first_key_layer),
         AltModifierBinding.Emoji to stringResource(R.string.sym_cycle_emoji_layer),
         AltModifierBinding.Symbols to stringResource(R.string.sym_cycle_symbols_layer),
-        AltModifierBinding.DeviceSymProfile("key2") to stringResource(R.string.keyboard_profile_option_key2),
-        AltModifierBinding.DeviceSymProfile("Q25") to stringResource(R.string.keyboard_profile_option_q25),
         AltModifierBinding.DeviceSymProfile("titan") to stringResource(R.string.keyboard_profile_option_titan),
         AltModifierBinding.DeviceSymProfile("titan2") to stringResource(R.string.keyboard_profile_option_titan2),
-        AltModifierBinding.DeviceSymProfile("titan2elite_qwerty") to stringResource(R.string.keyboard_profile_option_titan2elite_qwerty),
-        AltModifierBinding.DeviceSymProfile("mp01") to stringResource(R.string.keyboard_profile_option_mp01),
-        AltModifierBinding.DeviceSymProfile("clicks_razr") to stringResource(R.string.keyboard_profile_option_clicks_razr),
-        AltModifierBinding.DeviceSymProfile("clicks_pixel") to stringResource(R.string.keyboard_profile_option_clicks_pixel),
-        AltModifierBinding.DeviceSymProfile("clicks_power") to stringResource(R.string.clicks_power_keyboard_title)
+        AltModifierBinding.DeviceSymProfile("titan2elite_qwerty") to stringResource(R.string.keyboard_profile_option_titan2elite_qwerty)
     )
 
     Scaffold(

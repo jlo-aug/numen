@@ -46,25 +46,11 @@ class SettingLinkRegistryTest {
     @Test
     fun buildLinkAndParseLinkRoundTrip() {
         val scheme = BuildConfig.SETTINGS_LINK_SCHEME
-        val webHost = BuildConfig.SETTINGS_WEB_LINK_HOST
         SettingLinkRegistry.entries.forEach { entry ->
-            if (webHost.isEmpty()) {
-                // Numen: its own scheme only, and no claim on Pastiera's web links.
-                assertEquals("$scheme://setting/${entry.id}", SettingLinkRegistry.buildLink(entry.id))
-                assertNull(SettingLinkRegistry.parseSettingLink("https", "pastiera.eu", "/settings/${entry.id}"))
-            } else {
-                assertEquals("https://$webHost/settings/${entry.id}", SettingLinkRegistry.buildLink(entry.id))
-                for (host in listOf("pkb.rocks", webHost)) {
-                    assertEquals(
-                        entry.id,
-                        SettingLinkRegistry.parseSettingLink("https", host, "/settings/${entry.id}")
-                    )
-                }
-            }
-            assertEquals(
-                entry.id,
-                SettingLinkRegistry.parseSettingLink(scheme, "setting", "/${entry.id}")
-            )
+            assertEquals("$scheme://setting/${entry.id}", SettingLinkRegistry.buildLink(entry.id))
+            assertEquals(entry.id, SettingLinkRegistry.parseSettingLink(scheme, "setting", "/${entry.id}"))
+            // Web links are not Numen's.
+            assertNull(SettingLinkRegistry.parseSettingLink("https", "pastiera.eu", "/settings/${entry.id}"))
         }
     }
 
@@ -83,21 +69,6 @@ class SettingLinkRegistryTest {
             "text_input.auto_capitalize",
             SettingLinkRegistry.parseSettingLink(BuildConfig.SETTINGS_LINK_SCHEME, "setting", " /text_input.auto_capitalize ")
         )
-    }
-
-    @Test
-    fun webLinksRejectOtherOriginsAndMalformedPaths() {
-        val id = "text_input.auto_capitalize"
-        for (host in listOf("www.pkb.rocks", "pkb.rocks.example.org", "example.org")) {
-            assertNull(SettingLinkRegistry.parseSettingLink("https", host, "/settings/$id"))
-        }
-        for (host in listOf("pkb.rocks", "pastiera.eu")) {
-            assertNull(SettingLinkRegistry.parseSettingLink("http", host, "/settings/$id"))
-            for (path in listOf("/", "/settings/", "/setting/$id", "/settings/$id/extra",
-                "/settings/$id/", "/settings/../$id", "/settings/ $id", "/settingsx/$id")) {
-                assertNull(SettingLinkRegistry.parseSettingLink("https", host, path))
-            }
-        }
     }
 
     @Test
@@ -192,26 +163,6 @@ class SettingLinkRegistryTest {
                     fallbackId?.let(SettingLinkRegistry::byId) != null
                 )
             }
-    }
-
-    @Test
-    fun trackpadDetailLinksRouteThroughAdvancedSettings() {
-        val trackpadIds = setOf(
-            SettingLinkIds.TRACKPAD_GESTURES_ENABLED,
-            SettingLinkIds.TRACKPAD_PROVIDER,
-            SettingLinkIds.TRACKPAD_SHIZUKU_DEVICE,
-            SettingLinkIds.TRACKPAD_SENSITIVITY,
-            SettingLinkIds.TRACKPAD_SUGGESTION_SWIPE_THRESHOLD,
-            SettingLinkIds.TRACKPAD_DELETE_SWIPE_THRESHOLD,
-            SettingLinkIds.TRACKPAD_DEBUG
-        )
-
-        trackpadIds.forEach { id ->
-            assertEquals(
-                SettingsDestination.Advanced,
-                requireNotNull(SettingLinkRegistry.byId(id)).route.destination
-            )
-        }
     }
 
     @Test

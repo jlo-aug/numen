@@ -3,7 +3,6 @@ package it.palsoftware.pastiera.ui
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.foundation.selection.toggleable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -44,7 +43,6 @@ import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import it.palsoftware.pastiera.BuildConfig
 import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.SettingsManager
 import it.palsoftware.pastiera.core.suggestions.TypingStats
@@ -67,15 +65,8 @@ fun HomeHeader(onSettingsClick: () -> Unit, modifier: Modifier = Modifier) {
         verticalAlignment = Alignment.CenterVertically
     ) {
         Box(modifier = Modifier.weight(1f)) {
-            if (BuildConfig.UPSTREAM_BRANDING) {
-                Text(
-                    text = it.palsoftware.pastiera.Branding.appName,
-                    style = MaterialTheme.typography.headlineSmall,
-                    fontWeight = FontWeight.SemiBold
-                )
-            } else {
-                NumenWordmark(name = it.palsoftware.pastiera.Branding.appName, pixel = 3.dp)
-            }
+            NumenWordmark(name = it.palsoftware.pastiera.Branding.appName, pixel = 3.dp)
+        
         }
         IconButton(onClick = onSettingsClick) {
             Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.settings_title))

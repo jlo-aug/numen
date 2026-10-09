@@ -1,0 +1,13 @@
+# Hand-checked fixes for common run-together words in chat, which Wikipedia's list leaves
+# ambiguous or omits. Merged into en_misspellings.txt by build_misspellings.py.
+abit->a bit
+alittle->a little
+alot->a lot
+aswell->as well
+atleast->at least
+eachother->each other
+everytime->every time
+incase->in case
+infact->in fact
+inspite->in spite
+ofcourse->of course

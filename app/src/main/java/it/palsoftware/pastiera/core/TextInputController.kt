@@ -24,11 +24,6 @@ class TextInputController(
 
     private var lastSpacePressTime: Long = 0L
 
-    data class SmartQuotePair(
-        val opening: String,
-        val closing: String
-    )
-
     fun handleDoubleSpaceToPeriod(
         keyCode: Int,
         inputConnection: InputConnection?,
@@ -225,7 +220,6 @@ class TextInputController(
             return false
         }
 
-        val pair = smartQuotePair(SettingsManager.getSmartQuotesStyle(context))
         val before = inputConnection.getTextBeforeCursor(240, 0)?.toString().orEmpty()
         if (!before.endsWith("\"")) {
             return false
@@ -240,7 +234,7 @@ class TextInputController(
             return false
         }
 
-        val replacement = pair.opening + quotedText + pair.closing + typedText
+        val replacement = "“$quotedText”$typedText"
         inputConnection.deleteSurroundingText(before.length - openingIndex, 0)
         inputConnection.commitText(replacement, 1)
         return true
@@ -274,16 +268,6 @@ class TextInputController(
         val previous = text[quoteIndex - 1]
         return previous.isWhitespace() ||
             previous in setOf('(', '[', '{', '<', '«', '‹', '„', '“', '”', '»', '›', '-', '–', '—')
-    }
-
-    private fun smartQuotePair(style: String): SmartQuotePair {
-        return when (style) {
-            SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS -> SmartQuotePair("«", "»")
-            SettingsManager.SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED -> SmartQuotePair("« ", " »")
-            SettingsManager.SMART_QUOTES_STYLE_GERMAN_LOW_HIGH -> SmartQuotePair("„", "“")
-            SettingsManager.SMART_QUOTES_STYLE_ENGLISH_CURLY -> SmartQuotePair("“", "”")
-            else -> SmartQuotePair("»", "«")
-        }
     }
 
     fun handleAutoCapAfterEnter(

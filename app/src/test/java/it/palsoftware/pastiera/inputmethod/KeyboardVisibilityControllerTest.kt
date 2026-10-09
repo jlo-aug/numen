@@ -2,7 +2,6 @@ package it.palsoftware.pastiera.inputmethod
 
 import android.content.Context
 import android.view.inputmethod.InputConnection
-import it.palsoftware.pastiera.BuildConfig
 import it.palsoftware.pastiera.SettingsManager
 import it.palsoftware.pastiera.core.SymLayoutController
 import it.palsoftware.pastiera.inputmethod.KeyboardVisibilityController.RenderedSurface
@@ -10,8 +9,6 @@ import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
-import org.junit.Assume.assumeFalse
-import org.junit.Assume.assumeTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.runner.RunWith
@@ -92,7 +89,7 @@ class KeyboardVisibilityControllerTest {
         val h = Harness()
         assertTrue(h.controller.onEvaluateInputViewShown(false))
         // Numen always shows the on-screen keyboard; Pastiera follows the setting.
-        assertEquals(!BuildConfig.UPSTREAM_BRANDING, h.controller.shouldShowSurfaceOnInputStart(false))
+        assertEquals(true, h.controller.shouldShowSurfaceOnInputStart(false))
         assertTrue(h.controller.shouldShowSurfaceOnInputStart(true))
         h.controller.ensureImeSurfaceVisible()
         h.runNext()
@@ -104,26 +101,12 @@ class KeyboardVisibilityControllerTest {
     fun hardwareModeHonorsAutoShowOnInputStart() {
         val h = Harness()
         // Numen keeps the hardware bar hidden unless auto-show is on; Pastiera always shows it.
-        assertEquals(BuildConfig.UPSTREAM_BRANDING, h.controller.shouldShowSurfaceOnInputStart(false))
+        assertEquals(false, h.controller.shouldShowSurfaceOnInputStart(false))
         assertTrue(h.controller.shouldShowSurfaceOnInputStart(true))
-    }
-
-    /** Silent hardware typing is Numen-only; Pastiera never collapses its bar. */
-    private fun assumeNumen() = assumeFalse(BuildConfig.UPSTREAM_BRANDING)
-
-    @Test
-    fun pastieraNeverCollapsesTheBar() {
-        assumeTrue(BuildConfig.UPSTREAM_BRANDING)
-        val h = Harness()
-        assertTrue(h.controller.shouldAcceptShowRequest(autoShowKeyboardEnabled = false, configChange = false))
-        h.controller.onShowRequested(autoShowKeyboardEnabled = false)
-        assertTrue(h.collapsedStates.isEmpty())
-        assertFalse(h.controller.shouldSymRevealSurfaceOnly(autoShowKeyboardEnabled = false))
     }
 
     @Test
     fun silentModeShowsCollapsedWindowSoAppsSeeAKeyboard() {
-        assumeNumen()
         val h = Harness()
         // A field tap / typing key in silent mode opens the window, but collapsed.
         assertTrue(h.controller.shouldAcceptShowRequest(autoShowKeyboardEnabled = false, configChange = false))
@@ -144,7 +127,6 @@ class KeyboardVisibilityControllerTest {
 
     @Test
     fun silentModeDeclinesShowRequestsWithoutEditableTarget() {
-        assumeNumen()
         val h = Harness()
         h.active = false
         assertFalse(h.controller.shouldAcceptShowRequest(autoShowKeyboardEnabled = false, configChange = false))
@@ -154,7 +136,6 @@ class KeyboardVisibilityControllerTest {
 
     @Test
     fun switchToVirtualKeyboardWhileCollapsedComesBackVisible() {
-        assumeNumen()
         SettingsManager.setAutoShowKeyboard(context, false)
         try {
             val h = Harness()
@@ -175,7 +156,6 @@ class KeyboardVisibilityControllerTest {
 
     @Test
     fun expandedThenDismissedBarCollapsesAgainOnNextSilentShow() {
-        assumeNumen()
         val h = Harness()
         h.controller.onShowRequested(autoShowKeyboardEnabled = false)
         h.runNext()
@@ -198,7 +178,6 @@ class KeyboardVisibilityControllerTest {
 
     @Test
     fun silentModeWithCandidatesBackendStillDeclinesUnrequestedShows() {
-        assumeNumen()
         SettingsManager.setExperimentalCandidatesViewEnabled(context, true)
         val h = Harness()
         assertFalse(h.controller.shouldAcceptShowRequest(autoShowKeyboardEnabled = false, configChange = false))
@@ -208,7 +187,6 @@ class KeyboardVisibilityControllerTest {
 
     @Test
     fun silentModeKeepsHiddenBarHiddenOnKeyboardSurfaceChange() {
-        assumeNumen()
         val h = Harness()
         h.controller.onKeyboardSurfaceChanged(ensureInputViewShown = false)
         assertTrue(h.actions.isEmpty())
@@ -219,7 +197,6 @@ class KeyboardVisibilityControllerTest {
 
     @Test
     fun symOnHiddenSurfaceOnlyRevealsBarWhenAutoShowOff() {
-        assumeNumen()
         val h = Harness()
         assertTrue(h.controller.shouldSymRevealSurfaceOnly(autoShowKeyboardEnabled = false))
         assertFalse(h.controller.shouldSymRevealSurfaceOnly(autoShowKeyboardEnabled = true))
@@ -547,7 +524,6 @@ class KeyboardVisibilityControllerTest {
             candidatesBarController = CandidatesBarController(context),
             symLayoutController = SymLayoutController(context, prefs, alternate),
             isInputViewActive = { active },
-            hasActiveTextField = { active },
             isNavModeLatched = { false },
             currentInputConnection = { connection },
             isInputViewShown = { inputShown },

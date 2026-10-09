@@ -109,7 +109,7 @@ object TextSelectionHelper {
      */
     fun expandSelectionLeft(inputConnection: InputConnection): Boolean {
         try {
-            // Ottieni la selezione corrente usando ExtractedTextRequest
+            // Get the current selection using ExtractedTextRequest
             val extractedText = inputConnection.getExtractedText(
                 ExtractedTextRequest().apply {
                     flags = android.view.inputmethod.ExtractedText.FLAG_SELECTING
@@ -118,7 +118,7 @@ object TextSelectionHelper {
             )
             
             if (extractedText == null) {
-                // Fallback: usa getTextBeforeCursor e getTextAfterCursor per stimare la posizione
+                // Fallback: use getTextBeforeCursor and getTextAfterCursor to estimate position
                 val textBefore = inputConnection.getTextBeforeCursor(1000, 0)
                 val textAfter = inputConnection.getTextAfterCursor(1, 0)
                 
@@ -170,7 +170,7 @@ object TextSelectionHelper {
      */
     fun expandSelectionRight(inputConnection: InputConnection): Boolean {
         try {
-            // Ottieni la selezione corrente usando ExtractedTextRequest
+            // Get the current selection using ExtractedTextRequest
             val extractedText = inputConnection.getExtractedText(
                 ExtractedTextRequest().apply {
                     flags = android.view.inputmethod.ExtractedText.FLAG_SELECTING
@@ -179,7 +179,7 @@ object TextSelectionHelper {
             )
             
             if (extractedText == null) {
-                // Fallback: usa getTextBeforeCursor e getTextAfterCursor per stimare la posizione
+                // Fallback: use getTextBeforeCursor and getTextAfterCursor to estimate position
                 val textBefore = inputConnection.getTextBeforeCursor(1000, 0)
                 val textAfter = inputConnection.getTextAfterCursor(1000, 0)
                 

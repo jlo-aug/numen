@@ -1,41 +1,22 @@
 package it.palsoftware.pastiera.data.layout
 
-import android.content.Context
 import android.content.res.AssetManager
 import android.util.Log
 
 /**
- * Loads layout mappings from either bundled JSON assets or user-provided files.
+ * Loads layout mappings from the bundled JSON assets.
  */
 object JsonLayoutLoader {
     private const val TAG = "JsonLayoutLoader"
 
     fun loadLayout(
         assets: AssetManager,
-        layoutName: String,
-        context: Context? = null
-    ): Map<Int, LayoutMapping>? {
-        if (context != null) {
-            val customLayout = LayoutFileStore.loadLayoutFromFile(
-                LayoutFileStore.getLayoutFile(context, layoutName)
-            )
-            if (customLayout != null) {
-                Log.d(TAG, "Loaded custom layout: $layoutName with ${customLayout.size} mappings")
-                return customLayout
-            }
-        }
-
-        return loadLayoutFromAssets(assets, layoutName)
-    }
-
-    private fun loadLayoutFromAssets(
-        assets: AssetManager,
         layoutName: String
     ): Map<Int, LayoutMapping>? {
         return try {
             val inputStream = BundledLayoutAssets.openLayout(assets, layoutName) ?: return null
             inputStream.use {
-                LayoutFileStore.loadLayoutFromStream(it)
+                LayoutJsonParser.loadLayoutFromStream(it)
             }?.also {
                 Log.d(TAG, "Loaded layout from assets: $layoutName with ${it.size} mappings")
             }
@@ -45,24 +26,16 @@ object JsonLayoutLoader {
         }
     }
 
-    fun getAvailableLayouts(
-        assets: AssetManager,
-        context: Context? = null
-    ): List<String> {
-        val layouts = mutableSetOf<String>()
-        context?.let { layouts.addAll(LayoutFileStore.getCustomLayoutNames(it)) }
-
+    fun getAvailableLayouts(assets: AssetManager): List<String> {
         return try {
-            val layoutFiles = assets.list("common/layouts")
-            layoutFiles?.forEach { fileName ->
-                if (fileName.endsWith(".json")) {
-                    layouts.add(fileName.removeSuffix(".json"))
-                }
-            }
-            layouts.sorted()
+            assets.list("common/layouts")
+                .orEmpty()
+                .filter { it.endsWith(".json") }
+                .map { it.removeSuffix(".json") }
+                .sorted()
         } catch (e: Exception) {
             Log.e(TAG, "Error getting available layouts from assets", e)
-            layouts.sorted()
+            emptyList()
         }
     }
 }

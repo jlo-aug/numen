@@ -32,17 +32,6 @@ data class SymSpellMeta(
 )
 
 /**
- * Converts DictionaryEntry to SerializableDictionaryEntry.
- */
-fun DictionaryEntry.toSerializable(): SerializableDictionaryEntry {
-    return SerializableDictionaryEntry(
-        word = this.word,
-        frequency = this.frequency,
-        source = this.source.ordinal
-    )
-}
-
-/**
  * Converts SerializableDictionaryEntry to DictionaryEntry.
  */
 fun SerializableDictionaryEntry.toDictionaryEntry(): DictionaryEntry {

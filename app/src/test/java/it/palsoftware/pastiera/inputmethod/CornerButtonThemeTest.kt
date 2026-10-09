@@ -153,39 +153,4 @@ class CornerButtonThemeTest {
         SettingsManager.setTitan2EliteTopCornerMultiplier(activity, 2)
         org.junit.Assert.assertArrayEquals(beforePadding, pixels())
     }
-
-    @Test
-    fun languagePaddingAndSizeStayStableAndRestoreWhenMovedInward() {
-        val activity = org.robolectric.Robolectric.buildActivity(android.app.Activity::class.java).setup().get()
-        SettingsManager.setTitan2EliteRoundedCornerInsetsEnabled(activity, true)
-        val chrome = StatusBarController.ImeChromeLayout(activity).apply {
-            orientation = android.widget.LinearLayout.HORIZONTAL
-            bottomCornerRadiiPx = 100 to 100
-        }
-        activity.setContentView(chrome)
-        val host = StatusBarButtonHost(activity, StatusBarButtonRegistry())
-        host.themeOverride = StatusBarButtonStyles.ThemeOverride(Color.GRAY, Color.BLUE, Color.WHITE)
-        val hosted = requireNotNull(host.getOrCreateButton(StatusBarButtonId.Language, 80, StatusBarCallbacks(), 94, 80))
-        val button = hosted.button as android.widget.TextView
-        button.text = "DE"
-        val originalSize = button.textSize
-        host.setOuterEdge(StatusBarButtonId.Language, StatusBarButtonPosition.LEFT)
-        chrome.addView(hosted.container, android.widget.LinearLayout.LayoutParams(94, 80))
-        fun draw(): List<Float> {
-            chrome.measure(android.view.View.MeasureSpec.makeMeasureSpec(1000, android.view.View.MeasureSpec.EXACTLY),
-                android.view.View.MeasureSpec.makeMeasureSpec(80, android.view.View.MeasureSpec.EXACTLY))
-            chrome.layout(0, 0, 1000, 80)
-            chrome.viewTreeObserver.dispatchOnPreDraw()
-            return listOf(button.paddingLeft.toFloat(), button.paddingBottom.toFloat(), button.textSize)
-        }
-        val initial = draw()
-        org.junit.Assert.assertTrue(initial[0] > 0)
-        repeat(4) { assertEquals(initial, draw()) }
-        host.setOuterEdge(StatusBarButtonId.Language, null)
-        draw()
-        assertEquals(0, button.paddingLeft)
-        assertEquals(0, button.paddingBottom)
-        assertEquals(originalSize, button.textSize)
-    }
-
 }

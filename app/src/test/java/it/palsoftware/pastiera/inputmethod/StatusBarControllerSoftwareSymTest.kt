@@ -1,10 +1,11 @@
 package it.palsoftware.pastiera.inputmethod
 
 import android.view.KeyEvent
+import it.palsoftware.pastiera.inputmethod.aospkeyboard.AospKeyboardView
+import it.palsoftware.pastiera.inputmethod.aospkeyboard.SoftwareKeyboardLayoutTemplates
 import it.palsoftware.pastiera.inputmethod.aospkeyboard.SoftwareKeyboardSymLabels
 import org.junit.Assert.assertEquals
-import org.junit.Assert.assertNotEquals
-import org.junit.Assert.assertTrue
+import org.junit.Assert.assertFalse
 import org.junit.Test
 import org.junit.runner.RunWith
 import org.robolectric.RobolectricTestRunner
@@ -15,49 +16,7 @@ import org.robolectric.annotation.Config
 class StatusBarControllerSoftwareSymTest {
 
     @Test
-    fun softwareSymExtraLettersExposeOwnEmojiDefaults() {
-        val rows = listOf("qwertzuiopü", "asdfghjklöä", "yxcvbnm")
-        val mappings = mapOf(
-            KeyEvent.KEYCODE_A to "😢",
-            KeyEvent.KEYCODE_O to "😡",
-            KeyEvent.KEYCODE_U to "❤️"
-        )
-        val content = SoftwareKeyboardSymLabels.buildContentByChar(
-            page = 1,
-            rows = rows,
-            symMappings = mappings,
-            layoutName = "qwertz"
-        )
-
-        assertEquals("🙃", content['ü'])
-        assertEquals("🧐", content['ö'])
-        assertEquals("🍎", content['ä'])
-        assertNotEquals(mappings[KeyEvent.KEYCODE_U], content['ü'])
-        assertNotEquals(mappings[KeyEvent.KEYCODE_O], content['ö'])
-        assertNotEquals(mappings[KeyEvent.KEYCODE_A], content['ä'])
-        assertTrue(listOf(content['ü'], content['ö'], content['ä']).distinct().size == 3)
-    }
-
-    @Test
-    fun softwareSymExtraLettersExposeOwnSymbolDefaults() {
-        val rows = listOf("qwertzuiopü+", "asdfghjklöä#", "<yxcvbnm,.-")
-        val content = SoftwareKeyboardSymLabels.buildContentByChar(
-            page = 2,
-            rows = rows,
-            symMappings = emptyMap(),
-            layoutName = "qwertz"
-        )
-
-        assertEquals("€", content['ü'])
-        assertEquals("@", content['ö'])
-        assertEquals("#", content['ä'])
-        assertEquals("+", content['+'])
-        assertEquals("<", content['<'])
-    }
-
-    @Test
-    fun qwertzSoftwareSymLayerKeepsHardwareKeyPositions() {
-        val rows = listOf("qwertzuiop", "asdfghjkl", "yxcvbnm")
+    fun softwareSymLayerKeepsHardwareKeyPositions() {
         val mappings = mapOf(
             KeyEvent.KEYCODE_T to "[",
             KeyEvent.KEYCODE_Y to "]",
@@ -66,15 +25,27 @@ class StatusBarControllerSoftwareSymTest {
         )
 
         val content = SoftwareKeyboardSymLabels.buildContentByChar(
-            page = 2,
-            rows = rows,
-            symMappings = mappings,
-            layoutName = "qwertz"
+            rows = SoftwareKeyboardLayoutTemplates.rowTemplateFor(AospKeyboardView.SoftwareLayoutStyle.COMPACT),
+            symMappings = mappings
         )
 
         assertEquals("[", content['t'])
-        assertEquals("]", content['z'])
-        assertEquals("»", content['y'])
+        assertEquals("]", content['y'])
+        assertEquals("»", content['z'])
         assertEquals("«", content['x'])
+        assertFalse(content.containsKey('q'))
+    }
+
+    @Test
+    fun softwareSymPunctuationKeysFallBackToTheirOwnSymbol() {
+        val content = SoftwareKeyboardSymLabels.buildContentByChar(
+            rows = SoftwareKeyboardLayoutTemplates.rowTemplateFor(AospKeyboardView.SoftwareLayoutStyle.FULL_ISO),
+            symMappings = mapOf(KeyEvent.KEYCODE_COMMA to "…")
+        )
+
+        assertEquals("…", content[','])
+        assertEquals("[", content['['])
+        assertEquals("#", content['#'])
+        assertEquals("\\", content['\\'])
     }
 }

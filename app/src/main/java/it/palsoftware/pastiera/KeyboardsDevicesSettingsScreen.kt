@@ -1,9 +1,7 @@
 package it.palsoftware.pastiera
 
 import android.hardware.input.InputManager
-import android.view.InputDevice
 import android.view.KeyEvent
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,10 +16,8 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.Bluetooth
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.PhoneAndroid
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +42,7 @@ import it.palsoftware.pastiera.data.mappings.KeyMappingLoader
 import it.palsoftware.pastiera.inputmethod.DeviceSpecific
 import it.palsoftware.pastiera.inputmethod.SoftwareKeyboardAutoDetector
 
-enum class KeyboardsDevicesDestination { Main, OnScreen, BuiltIn, PowerKeyboard }
+enum class KeyboardsDevicesDestination { Main, OnScreen, BuiltIn }
 
 @Composable
 fun KeyboardsDevicesSettingsScreen(
@@ -63,7 +59,6 @@ fun KeyboardsDevicesSettingsScreen(
             onBack = onBack,
             onOnScreen = { onDestinationChange(KeyboardsDevicesDestination.OnScreen) },
             onBuiltIn = { onDestinationChange(KeyboardsDevicesDestination.BuiltIn) },
-            onPowerKeyboard = { onDestinationChange(KeyboardsDevicesDestination.PowerKeyboard) },
             onNavModeSettingsClick = onNavModeSettingsClick
         )
         KeyboardsDevicesDestination.OnScreen -> VirtualKeyboardBehaviorSettingsScreen(
@@ -72,10 +67,6 @@ fun KeyboardsDevicesSettingsScreen(
             onOpenKeyboardTheme = onOpenKeyboardTheme
         )
         KeyboardsDevicesDestination.BuiltIn -> HardwareKeyboardSettingsScreen(
-            modifier = modifier,
-            onBack = { onDestinationChange(KeyboardsDevicesDestination.Main) }
-        )
-        KeyboardsDevicesDestination.PowerKeyboard -> ClicksPowerKeyboardSettingsScreen(
             modifier = modifier,
             onBack = { onDestinationChange(KeyboardsDevicesDestination.Main) }
         )
@@ -88,7 +79,6 @@ private fun KeyboardsDevicesMainScreen(
     onBack: () -> Unit,
     onOnScreen: () -> Unit,
     onBuiltIn: () -> Unit,
-    onPowerKeyboard: () -> Unit,
     onNavModeSettingsClick: (Int?) -> Unit
 ) {
     val context = LocalContext.current
@@ -133,14 +123,6 @@ private fun KeyboardsDevicesMainScreen(
     val autoEnabled = configuredMode == SettingsManager.SoftwareKeyboardMode.AUTO
     val isVirtual = effectiveMode == SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL
     val runtimeOverride = SettingsManager.getSoftwareKeyboardModeRuntimeOverride(context)
-    val clicksDevice = remember(inputDeviceRevision) {
-        InputDevice.getDeviceIds().asSequence()
-            .mapNotNull(InputDevice::getDevice)
-            .firstOrNull(DeviceSpecific::isClicksPowerKeyboard)
-    }
-    val showAccessories = clicksDevice != null || BuildConfig.UPSTREAM_BRANDING ||
-        SettingsManager.hasExplainedClicksBluetoothPermission(context) ||
-        !(DeviceSpecific.isTitan2Device() || DeviceSpecific.isTitan2EliteDevice())
     val builtInDetected = remember(inputDeviceRevision) {
         DeviceSpecific.detectedInputProfiles().any {
             it.kind == DeviceSpecific.InputDeviceKind.BUILT_IN
@@ -163,19 +145,18 @@ private fun KeyboardsDevicesMainScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
-            if (!BuildConfig.UPSTREAM_BRANDING) {
-                // Numen lists the silent keyboard setting first.
-                SwitchRow(
-                    title = stringResource(R.string.auto_show_keyboard_title),
-                    description = stringResource(R.string.home_auto_show_description),
-                    checked = autoShowKeyboard,
-                    linkId = SettingLinkIds.TEXT_INPUT_AUTO_SHOW_KEYBOARD,
-                    onCheckedChange = { enabled ->
-                        autoShowKeyboard = enabled
-                        SettingsManager.setAutoShowKeyboard(context, enabled)
-                    }
-                )
-            }
+            // Numen lists the silent keyboard setting first.
+            SwitchRow(
+                title = stringResource(R.string.auto_show_keyboard_title),
+                description = stringResource(R.string.home_auto_show_description),
+                checked = autoShowKeyboard,
+                linkId = SettingLinkIds.TEXT_INPUT_AUTO_SHOW_KEYBOARD,
+                onCheckedChange = { enabled ->
+                    autoShowKeyboard = enabled
+                    SettingsManager.setAutoShowKeyboard(context, enabled)
+                }
+            )
+        
 
             SectionDivider(stringResource(R.string.keyboard_switching_section_title))
             SwitchRow(
@@ -203,7 +184,6 @@ private fun KeyboardsDevicesMainScreen(
                         stringResource(R.string.keyboard_switching_status_override_hardware)
                     isVirtual && !DeviceSpecific.hasConnectedHardwareKeyboard() -> stringResource(R.string.keyboard_switching_status_no_physical)
                     isVirtual -> stringResource(R.string.keyboard_switching_status_virtual)
-                    clicksDevice != null -> stringResource(R.string.keyboard_switching_status_clicks)
                     else -> stringResource(R.string.keyboard_switching_status_built_in)
                 },
                 value = if (isVirtual) stringResource(R.string.keyboard_source_on_screen) else stringResource(R.string.keyboard_source_physical)
@@ -242,32 +222,7 @@ private fun KeyboardsDevicesMainScreen(
                 linkId = SettingLinkIds.KEYBOARDS_DEVICES_BUILT_IN_KEYBOARDS,
                 onClick = onBuiltIn
             )
-            if (showAccessories) { // Clicks keyboard: connected now, set up before, or a phone it fits.
-                NavigationRow(
-                    icon = Icons.Filled.Bluetooth,
-                    title = stringResource(R.string.keyboard_accessories_title),
-                    description = if (clicksDevice != null) {
-                        val slot = clicksDevice.name.substringAfterLast('-', missingDelimiterValue = "?")
-                        stringResource(R.string.keyboard_accessory_clicks_connected, slot)
-                    } else {
-                        stringResource(R.string.keyboard_accessory_clicks_disconnected)
-                    },
-                    linkId = SettingLinkIds.KEYBOARDS_DEVICES_KEYBOARD_ACCESSORIES,
-                    onClick = onPowerKeyboard
-                )
-            }
 
-            if (BuildConfig.UPSTREAM_BRANDING) { // Empty section: no custom profiles exist yet.
-                SectionDivider(stringResource(R.string.hardware_keyboard_custom_profiles_title))
-            }
-            if (BuildConfig.UPSTREAM_BRANDING) {
-                Text(
-                    text = stringResource(R.string.keyboard_custom_profiles_binding_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)
-                )
-            }
         }
     }
 }

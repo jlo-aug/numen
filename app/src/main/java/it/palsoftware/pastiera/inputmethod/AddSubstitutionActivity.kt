@@ -40,11 +40,11 @@ import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import it.palsoftware.pastiera.AppBroadcastActions
 import it.palsoftware.pastiera.AutoCorrectionSubstitutionStore
-import it.palsoftware.pastiera.LocalizedComponentActivity
+import androidx.activity.ComponentActivity
 import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.core.suggestions.UserDictionaryStore
 
-class AddSubstitutionActivity : LocalizedComponentActivity() {
+class AddSubstitutionActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         disableActivityAnimations()
@@ -56,8 +56,7 @@ class AddSubstitutionActivity : LocalizedComponentActivity() {
         window.setBackgroundDrawableResource(android.R.color.transparent)
 
         val replacement = intent.getStringExtra(EXTRA_REPLACEMENT)?.trim().orEmpty()
-        val languageCode = intent.getStringExtra(EXTRA_LANGUAGE_CODE)?.trim().orEmpty()
-        if (replacement.isBlank() || languageCode.isBlank()) {
+        if (replacement.isBlank()) {
             finish()
             return
         }
@@ -75,7 +74,6 @@ class AddSubstitutionActivity : LocalizedComponentActivity() {
                         onSave = { trigger, addToDictionary ->
                             val saved = AutoCorrectionSubstitutionStore.addCustomSubstitution(
                                 this@AddSubstitutionActivity,
-                                languageCode,
                                 trigger,
                                 replacement
                             )
@@ -120,7 +118,6 @@ class AddSubstitutionActivity : LocalizedComponentActivity() {
 
     companion object {
         const val EXTRA_REPLACEMENT = "replacement"
-        const val EXTRA_LANGUAGE_CODE = "language_code"
     }
 }
 

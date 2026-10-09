@@ -25,8 +25,8 @@ Patrick Zauner and contributors. It is not an official Pastiera release.
 - **Typing stats** on the home screen: words, typos fixed, speed and favourite word.
 - **Simpler settings** and a short setup.
 
-The extra autocorrect is English only. Other languages work as they do in Pastiera, after you
-download their dictionary in Settings. Numen is only tested on the Titan 2 Elite.
+Numen is English only: its autocorrect is built and tested on English typing. It is made and
+tested for the Titan 2 Elite; other Unihertz Titans may work.
 
 ## Compared with Pastiera
 
@@ -56,9 +56,8 @@ and install new releases.
 - No analytics, accounts or update checks.
 - Typing stats and learned words stay on the phone. They're left out of Android backups and
   phone-to-phone transfers.
-- Numen only goes online when you download a dictionary or layout from Pastiera's repository.
-- Permissions: internet, microphone (voice input), Bluetooth (Clicks keyboard cases), vibration,
-  wake lock, and display over other apps (a trackpad debug overlay).
+- Numen never goes online: it has no internet permission.
+- Permissions: microphone (voice input), notifications, vibration and wake lock.
 
 ## Build
 
@@ -69,11 +68,14 @@ Requires JDK 21 and the Android SDK.
 ./gradlew :app:assembleNightlyRelease      # release APK
 ```
 
-Numen is the `nightly` flavor. Release signing reads `PASTIERA_NIGHTLY_KEYSTORE_PATH`,
-`PASTIERA_NIGHTLY_KEYSTORE_PASSWORD`, `PASTIERA_NIGHTLY_KEY_ALIAS` and
-`PASTIERA_NIGHTLY_KEY_PASSWORD`. After merging Pastiera changes, run
-`python3 tools/numen_branding.py` to regenerate Numen's strings. The scripts that build and
+The app is the `nightly` flavor, the only one. Release signing reads
+`PASTIERA_NIGHTLY_KEYSTORE_PATH`, `PASTIERA_NIGHTLY_KEYSTORE_PASSWORD`,
+`PASTIERA_NIGHTLY_KEY_ALIAS` and `PASTIERA_NIGHTLY_KEY_PASSWORD`. The scripts that build and
 evaluate the autocorrect data are in `tools/`.
+
+Numen no longer follows Pastiera: other languages, support for other hardware (Clicks cases, Q25,
+Key2, Minimal Phone, trackpad gestures), online downloads and update checks were removed to keep
+the code small.
 
 ## The name
 

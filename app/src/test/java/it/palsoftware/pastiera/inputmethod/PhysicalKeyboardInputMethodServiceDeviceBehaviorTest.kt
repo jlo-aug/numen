@@ -75,44 +75,6 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
     }
 
     @Test
-    fun mp01DedicatedEmojiKey_isIgnoredWhenMp01IsNotActive() {
-        DeviceSpecific.setBuildFingerprintForTests(
-            brand = "unihertz",
-            manufacturer = "unihertz",
-            model = "Titan 2",
-            device = "titan2",
-            product = "titan2"
-        )
-        setField(service, "physicalKeyboardProfileOverride", "auto")
-
-        val handled = service.onKeyDown(
-            666,
-            keyEvent(KeyEvent.ACTION_DOWN, 666, 6_000L, 6_000L)
-        )
-
-        assertFalse(handled)
-    }
-
-    @Test
-    fun mp01DedicatedEmojiKey_isHandledWhenManualMp01OverrideIsActive() {
-        DeviceSpecific.setBuildFingerprintForTests(
-            brand = "unihertz",
-            manufacturer = "unihertz",
-            model = "Titan 2",
-            device = "titan2",
-            product = "titan2"
-        )
-        setField(service, "physicalKeyboardProfileOverride", "mp01")
-
-        val handled = service.onKeyDown(
-            666,
-            keyEvent(KeyEvent.ACTION_DOWN, 666, 6_100L, 6_100L)
-        )
-
-        assertTrue(handled)
-    }
-
-    @Test
     fun ctrlHoldShortcutRelease_doesNotLeaveCtrlActive() {
         val t0 = 1_000L
 
@@ -205,59 +167,25 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
     }
 
     @Test
+    fun doubleTappedAltIsANumberLockThatSurvivesSpace() {
+        tapAlt(3_000L)
+        tapAlt(3_120L)
+        assertTrue(modifierController().altLatchActive)
+
+        service.onKeyDown(KeyEvent.KEYCODE_SPACE, keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SPACE, 3_500L, 3_500L))
+        service.onKeyUp(KeyEvent.KEYCODE_SPACE, keyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_SPACE, 3_500L, 3_530L))
+        assertTrue(modifierController().altLatchActive)
+
+        tapAlt(4_000L)
+        assertFalse(modifierController().altLatchActive)
+    }
+
+    @Test
     fun dismissingTheKeyboardStillTurnsCapsLockOff() {
         tapShift(2_500L)
         tapShift(2_620L)
         service.onWindowHidden()
         assertFalse(modifierController().capsLockEnabled)
-    }
-
-    @Test
-    fun clicksPower_bouncedShiftTapDoesNotEnableCapsLock() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setPhysicalKeyboardProfileOverride(context, "clicks_power")
-        setField(service, "physicalKeyboardProfileOverride", "clicks_power")
-        val t0 = 2_600L
-
-        tapShift(t0)
-        tapShift(t0 + 60L)
-
-        val modifier = modifierController()
-        assertTrue(modifier.shiftOneShot)
-        assertFalse(modifier.capsLockEnabled)
-        assertFalse(getField<Boolean>(service, "shiftLayerLatched"))
-    }
-
-    @Test
-    fun clicksPower_intentionalShiftDoubleTapStillEnablesCapsLock() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setPhysicalKeyboardProfileOverride(context, "clicks_power")
-        setField(service, "physicalKeyboardProfileOverride", "clicks_power")
-        val t0 = 2_700L
-
-        tapShift(t0)
-        tapShift(t0 + 120L)
-
-        val modifier = modifierController()
-        assertFalse(modifier.shiftOneShot)
-        assertTrue(modifier.capsLockEnabled)
-        assertTrue(getField<Boolean>(service, "shiftLayerLatched"))
-    }
-
-    @Test
-    fun clicksPower_sameFrameShiftMacroDoesNotToggleLogicalShift() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setPhysicalKeyboardProfileOverride(context, "clicks_power")
-        setField(service, "physicalKeyboardProfileOverride", "clicks_power")
-
-        repeat(4) { index ->
-            typeClicksSyntheticAtMacro(3_000L + index * 400L)
-            val modifier = modifierController()
-            assertFalse(modifier.shiftOneShot)
-            assertFalse(modifier.capsLockEnabled)
-            assertFalse(modifier.shiftPressed)
-            assertFalse(modifier.shiftPhysicallyPressed)
-        }
     }
 
     @Test
@@ -400,48 +328,6 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
         assertEquals(listOf(EditorInfo.IME_ACTION_SEND), recorder.editorActions)
         assertTrue(recorder.sentKeyEvents.isEmpty())
         assertFalse(recorder.committedTexts.contains("\n"))
-    }
-
-    @Test
-    fun capWords_allAutoCapDisabled_clicksPowerAltPThenAStaysLowercase() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAutoCapitalizeFirstLetter(context, false)
-        SettingsManager.setAutoCapitalizeAfterPeriod(context, false)
-        SettingsManager.setPhysicalKeyboardProfileOverride(context, "clicks_power")
-        setField(service, "physicalKeyboardProfileOverride", "clicks_power")
-        getField<AlternateCharacterManager>(service, "alternateCharacterManager")
-            .reloadModifierAndDeviceSymMappings()
-        focusNewField(
-            newRecorder = RecordingInputConnection(),
-            inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_FLAG_CAP_WORDS
-        )
-
-        assertFalse(modifierController().shiftOneShot)
-
-        val t0 = 2_800L
-        tapAlt(t0)
-        service.onKeyDown(
-            KeyEvent.KEYCODE_P,
-            keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_P, t0 + 40L, t0 + 40L)
-        )
-        service.onKeyUp(
-            KeyEvent.KEYCODE_P,
-            keyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_P, t0 + 40L, t0 + 60L)
-        )
-        service.onKeyDown(
-            KeyEvent.KEYCODE_A,
-            keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A, t0 + 80L, t0 + 80L)
-        )
-
-        assertEquals("@a", recorder.textBeforeCursor)
-        assertFalse(
-            AutoCapitalizeHelper.shouldCapitalizeAfterBoundary(
-                context = context,
-                state = InputContextState.fromEditorInfo(editorInfo),
-                inputConnection = inputConnection,
-                keyCode = KeyEvent.KEYCODE_SPACE
-            )
-        )
     }
 
     @Test
@@ -605,43 +491,7 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
     }
 
     @Test
-    fun altShiftLayoutSwitch_consumesShortcutAndClearsModifiers_whenEnabled() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAltShiftLayoutSwitchEnabled(context, true)
-        val t0 = 3_900L
-
-        service.onKeyDown(
-            KeyEvent.KEYCODE_ALT_LEFT,
-            keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ALT_LEFT, t0, t0)
-        )
-        assertTrue(modifierController().altPressed)
-
-        val handled = service.onKeyDown(
-            KeyEvent.KEYCODE_SHIFT_LEFT,
-            keyEvent(
-                action = KeyEvent.ACTION_DOWN,
-                keyCode = KeyEvent.KEYCODE_SHIFT_LEFT,
-                downTime = t0,
-                eventTime = t0 + 80L,
-                metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
-            )
-        )
-
-        val modifier = modifierController()
-        assertTrue(handled)
-        assertFalse(modifier.altPressed)
-        assertFalse(modifier.altPhysicallyPressed)
-        assertFalse(modifier.altOneShot)
-        assertFalse(modifier.altLatchActive)
-        assertFalse(modifier.shiftPressed)
-        assertFalse(modifier.shiftOneShot)
-        assertFalse(modifier.capsLockEnabled)
-    }
-
-    @Test
-    fun altShiftLayoutSwitch_ignoresAltOneShot_whenShiftPressedLater() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAltShiftLayoutSwitchEnabled(context, true)
+    fun altOneShotThenShift_keepsBothOneShotModifiers() {
         val t0 = 3_950L
 
         service.onKeyDown(
@@ -667,52 +517,7 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
     }
 
     @Test
-    fun altEnterLayoutSwitch_consumesShortcutAndClearsModifiers_whenEnabled() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAltEnterLayoutSwitchEnabled(context, true)
-        val t0 = 3_900L
-
-        service.onKeyDown(
-            KeyEvent.KEYCODE_ALT_LEFT,
-            keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ALT_LEFT, t0, t0)
-        )
-        assertTrue(modifierController().altPressed)
-
-        val handled = service.onKeyDown(
-            KeyEvent.KEYCODE_ENTER,
-            keyEvent(
-                action = KeyEvent.ACTION_DOWN,
-                keyCode = KeyEvent.KEYCODE_ENTER,
-                downTime = t0,
-                eventTime = t0 + 80L,
-                metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
-            )
-        )
-
-        val modifier = modifierController()
-        assertTrue(handled)
-        assertFalse(modifier.altPressed)
-        assertFalse(modifier.altPhysicallyPressed)
-        assertFalse(modifier.altOneShot)
-        assertFalse(modifier.altLatchActive)
-
-        val keyUpHandled = service.onKeyUp(
-            KeyEvent.KEYCODE_ENTER,
-            keyEvent(
-                action = KeyEvent.ACTION_UP,
-                keyCode = KeyEvent.KEYCODE_ENTER,
-                downTime = t0,
-                eventTime = t0 + 100L,
-                metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
-            )
-        )
-        assertTrue(keyUpHandled)
-    }
-
-    @Test
-    fun altEnterLayoutSwitch_doesNotConsumeWhenDisabled() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAltEnterLayoutSwitchEnabled(context, false)
+    fun altEnter_isNotConsumedAsShortcut() {
         setField(service, "clearAltOnSpaceEnabled", false)
         val t0 = 3_920L
 
@@ -731,68 +536,6 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
             )
         )
 
-        assertTrue(modifierController().altPhysicallyPressed)
-    }
-
-    @Test
-    fun altEnterLayoutSwitch_consumesKeyRepeatsUntilKeyUp() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAltEnterLayoutSwitchEnabled(context, true)
-        val t0 = 3_940L
-
-        service.onKeyDown(
-            KeyEvent.KEYCODE_ALT_LEFT,
-            keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ALT_LEFT, t0, t0)
-        )
-        service.onKeyDown(
-            KeyEvent.KEYCODE_ENTER,
-            keyEvent(
-                action = KeyEvent.ACTION_DOWN,
-                keyCode = KeyEvent.KEYCODE_ENTER,
-                downTime = t0,
-                eventTime = t0 + 80L,
-                metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON
-            )
-        )
-
-        val repeatedHandled = service.onKeyDown(
-            KeyEvent.KEYCODE_ENTER,
-            keyEvent(
-                action = KeyEvent.ACTION_DOWN,
-                keyCode = KeyEvent.KEYCODE_ENTER,
-                downTime = t0,
-                eventTime = t0 + 160L,
-                metaState = KeyEvent.META_ALT_ON or KeyEvent.META_ALT_LEFT_ON,
-                repeatCount = 1
-            )
-        )
-
-        assertTrue(repeatedHandled)
-        assertFalse(recorder.committedTexts.contains("\n"))
-        assertTrue(recorder.sentKeyEvents.isEmpty())
-    }
-
-    @Test
-    fun altEnterLayoutSwitch_doesNotTriggerWhenEnterIsPressedFirst() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAltEnterLayoutSwitchEnabled(context, true)
-        val t0 = 3_960L
-
-        service.onKeyDown(
-            KeyEvent.KEYCODE_ENTER,
-            keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_ENTER, t0, t0)
-        )
-        service.onKeyDown(
-            KeyEvent.KEYCODE_ALT_LEFT,
-            keyEvent(
-                action = KeyEvent.ACTION_DOWN,
-                keyCode = KeyEvent.KEYCODE_ALT_LEFT,
-                downTime = t0 + 80L,
-                eventTime = t0 + 80L
-            )
-        )
-
-        assertTrue(modifierController().altPressed)
         assertTrue(modifierController().altPhysicallyPressed)
     }
 
@@ -875,25 +618,8 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
     }
 
     @Test
-    fun vietnameseTelexLayout_rewritesThroughImePath() {
-        LayoutMappingRepository.loadLayout(service.assets, "vietnamese_telex_qwerty", service)
-        setField(service, "activeKeyboardLayoutName", "vietnamese_telex_qwerty")
-        recorder.textBeforeCursor = "ca"
-
-        val handled = service.onKeyDown(
-            KeyEvent.KEYCODE_A,
-            keyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_A, 5_000L, 5_000L)
-        )
-
-        assertTrue(handled)
-        assertTrue(recorder.deleteSurroundingTextCalls.contains(2 to 0))
-        assertTrue("commits=${recorder.committedTexts}", recorder.committedTexts.contains("câ"))
-    }
-
-    @Test
-    fun vietnameseTelexLayout_ctrlA_shortcutWinsOverTelexRewrite_midWord() {
-        LayoutMappingRepository.loadLayout(service.assets, "vietnamese_telex_qwerty", service)
-        setField(service, "activeKeyboardLayoutName", "vietnamese_telex_qwerty")
+    fun ctrlA_midWord_takesShortcutPathInsteadOfTyping() {
+        LayoutMappingRepository.loadLayout(service.assets, "qwerty")
         recorder.textBeforeCursor = "ca"
 
         tapCtrl(5_200L) // ctrl one-shot
@@ -906,14 +632,13 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
             "Expected shortcut path, commits=${recorder.committedTexts}, deleteCalls=${recorder.deleteSurroundingTextCalls}",
             recorder.contextMenuActions.contains(android.R.id.selectAll) || recorder.sentKeyEvents.isNotEmpty()
         )
-        assertTrue("Telex rewrite should not delete text", recorder.deleteSurroundingTextCalls.isEmpty())
-        assertFalse("Telex rewrite should not commit transformed text", recorder.committedTexts.contains("câ"))
+        assertTrue("Shortcut should not delete text", recorder.deleteSurroundingTextCalls.isEmpty())
+        assertFalse("Shortcut should not type the letter", recorder.committedTexts.contains("a"))
     }
 
     @Test
-    fun vietnameseTelexLayout_physicalCtrlHold_shortcutWinsWhenEventCtrlMetaMissing() {
-        LayoutMappingRepository.loadLayout(service.assets, "vietnamese_telex_qwerty", service)
-        setField(service, "activeKeyboardLayoutName", "vietnamese_telex_qwerty")
+    fun physicalCtrlHold_midWord_shortcutWinsWhenEventCtrlMetaMissing() {
+        LayoutMappingRepository.loadLayout(service.assets, "qwerty")
         recorder.textBeforeCursor = "ca"
 
         val t0 = 5_400L
@@ -936,8 +661,8 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
             "Expected shortcut path with physical Ctrl fallback, commits=${recorder.committedTexts}, deleteCalls=${recorder.deleteSurroundingTextCalls}",
             recorder.contextMenuActions.contains(android.R.id.selectAll) || recorder.sentKeyEvents.isNotEmpty()
         )
-        assertTrue("Telex rewrite should not delete text", recorder.deleteSurroundingTextCalls.isEmpty())
-        assertFalse("Telex rewrite should not commit transformed text", recorder.committedTexts.contains("câ"))
+        assertTrue("Shortcut should not delete text", recorder.deleteSurroundingTextCalls.isEmpty())
+        assertFalse("Shortcut should not type the letter", recorder.committedTexts.contains("a"))
     }
 
     private fun tapAlt(start: Long) {
@@ -970,49 +695,6 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
         service.onKeyUp(
             KeyEvent.KEYCODE_CTRL_LEFT,
             keyEvent(KeyEvent.ACTION_UP, KeyEvent.KEYCODE_CTRL_LEFT, start, start + 30L)
-        )
-    }
-
-    private fun typeClicksSyntheticAtMacro(start: Long) {
-        val shiftMeta = KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
-        service.onKeyDown(
-            KeyEvent.KEYCODE_SHIFT_LEFT,
-            keyEvent(
-                action = KeyEvent.ACTION_DOWN,
-                keyCode = KeyEvent.KEYCODE_SHIFT_LEFT,
-                downTime = start,
-                eventTime = start,
-                metaState = shiftMeta
-            )
-        )
-        service.onKeyDown(
-            KeyEvent.KEYCODE_2,
-            keyEvent(
-                action = KeyEvent.ACTION_DOWN,
-                keyCode = KeyEvent.KEYCODE_2,
-                downTime = start,
-                eventTime = start,
-                metaState = shiftMeta
-            )
-        )
-        service.onKeyUp(
-            KeyEvent.KEYCODE_2,
-            keyEvent(
-                action = KeyEvent.ACTION_UP,
-                keyCode = KeyEvent.KEYCODE_2,
-                downTime = start,
-                eventTime = start + 90L,
-                metaState = shiftMeta
-            )
-        )
-        service.onKeyUp(
-            KeyEvent.KEYCODE_SHIFT_LEFT,
-            keyEvent(
-                action = KeyEvent.ACTION_UP,
-                keyCode = KeyEvent.KEYCODE_SHIFT_LEFT,
-                downTime = start,
-                eventTime = start + 120L
-            )
         )
     }
 

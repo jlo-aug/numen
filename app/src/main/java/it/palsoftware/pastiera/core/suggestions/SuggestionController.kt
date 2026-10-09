@@ -16,7 +16,6 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
-import it.palsoftware.pastiera.BuildConfig
 import it.palsoftware.pastiera.inputmethod.AutoCorrector
 import it.palsoftware.pastiera.inputmethod.DebugCaptureStore
 import it.palsoftware.pastiera.inputmethod.NotificationHelper
@@ -28,8 +27,7 @@ class SuggestionController(
     private val isEnabled: () -> Boolean = { true },
     debugLogging: Boolean = false,
     private val onSuggestionsUpdated: (List<SuggestionResult>) -> Unit,
-    private var currentLocale: Locale = Locale.ITALIAN,
-    private val keyboardLayoutProvider: () -> String = { "qwerty" },
+    private val currentLocale: Locale = Locale.US,
     private val dictionaryRepositoryFactory: ((
         Context,
         AssetManager,
@@ -38,7 +36,6 @@ class SuggestionController(
         Boolean
     ) -> DictionaryRepository)? = null,
     nextWordPredictorOverride: NextWordPredictor? = null,
-    private val activeSuggestionLocalesProvider: (() -> List<Locale>)? = null,
     /** Home-screen typing stats; null in tests. */
     private val typingStats: TypingStats? = null,
     /** False for passwords, emails, addresses and incognito fields. */
@@ -52,9 +49,7 @@ class SuggestionController(
     private val userDictionaryStore = UserDictionaryStore()
     private val dictionaryRepositoryCache = mutableMapOf<String, DictionaryRepository>()
     private var dictionaryRepository: DictionaryRepository = createDictionaryRepository(currentLocale)
-    private var suggestionEngine = SuggestionEngine(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging).apply {
-        setKeyboardLayout(keyboardLayoutProvider())
-    }
+    private var suggestionEngine = SuggestionEngine(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging)
     private var tracker = CurrentWordTracker(
         onWordChanged = { word ->
             updateSuggestionsForWord(word)
@@ -69,15 +64,29 @@ class SuggestionController(
     )
     /** Words written in this conversation; never saved. Declared before the controller that reads it. */
     private val recentWords = RecentWords()
+    /** Context x Titan 2 Elite error model; reads the current language's dictionary and word data. */
+    private val noisyChannel: NoisyChannel by lazy {
+        NoisyChannel(
+            candidatesOf = { typed ->
+                // Words written in lowercase; names and places ("Friday") are left to the older fixes.
+                dictionaryRepository.symSpellLookup(typed, NOISY_CHANNEL_CANDIDATES)
+                    .mapNotNull { dictionaryRepository.bestEntryForNormalized(it.term)?.word }
+                    .filter { word ->
+                        (word.all { it in 'a'..'z' } || NoisyChannel.isUnambiguousContraction(word)) &&
+                            dictionaryRepository.getExactWordFrequency(word) >= NOISY_CHANNEL_MIN_FREQUENCY
+                    }
+            },
+            isNeighborKey = { a, b -> suggestionEngine.isNeighborKey(a, b) },
+            pairCount = { first, second ->
+                contextState.get()?.takeIf { it.language == currentLocale.language }?.pairs?.count(first, second) ?: 0
+            },
+            tripleCount = { first, second, third ->
+                contextState.get()?.takeIf { it.language == currentLocale.language }?.triples?.count(first, second, third) ?: 0
+            }
+        )
+    }
     private var autoReplaceController = createAutoReplaceController()
     private val nextWordPredictor = nextWordPredictorOverride ?: NextWordPredictor(UserNGramStore(appContext))
-    private val extraSuggestionEngines = mutableMapOf<String, SuggestionLanguageEngine>()
-
-    private data class SuggestionLanguageEngine(
-        val locale: Locale,
-        val repository: DictionaryRepository,
-        val engine: SuggestionEngine
-    )
 
     private fun createDictionaryRepository(locale: Locale): DictionaryRepository {
         val cacheKey = dictionaryCacheKey(locale)
@@ -108,12 +117,7 @@ class SuggestionController(
             knownWordProvider = { word -> isKnownWordInActiveDictionaries(word) },
             exactReplacementProvider = { word, boundaryChar ->
                 val boundary = boundaryChar ?: ' '
-                AutoCorrector.processText(
-                    textBeforeCursor = word + boundary,
-                    locale = currentLocale.language,
-                    context = appContext,
-                    isKnownWord = { candidate -> isKnownWordInActiveDictionaries(candidate) }
-                )?.takeIf { (original, replacement) ->
+                AutoCorrector.processText(word + boundary)?.takeIf { (original, replacement) ->
                     original == word && replacement != word
                 }?.second
             },
@@ -129,64 +133,12 @@ class SuggestionController(
             recentWords = recentWords,
             tripleCount = { first, second, third ->
                 contextState.get()?.takeIf { it.language == currentLocale.language }?.triples?.count(first, second, third) ?: 0
-            }
+            },
+            pairsReady = { contextState.get()?.takeIf { it.language == currentLocale.language }?.pairs != null },
+            noisyChannel = noisyChannel
         )
     }
     
-    /**
-     * Updates the locale and reloads the dictionary for the new language.
-     */
-    fun updateLocale(newLocale: Locale) {
-        if (newLocale == currentLocale) return
-        
-        // Cancel previous load job if still running to prevent conflicts
-        currentLoadJob?.cancel()
-        currentLoadJob = null
-        cancelPendingWordSuggestions()
-        pendingInitialContextConnection = null
-        pendingPrimaryRefreshAfterLoad = false
-        pendingExtraRefreshAfterLoad = false
-        
-        currentLocale = newLocale
-        dictionaryRepository = createDictionaryRepository(currentLocale)
-        suggestionEngine = SuggestionEngine(dictionaryRepository, locale = currentLocale, debugLogging = debugLogging).apply {
-            setKeyboardLayout(keyboardLayoutProvider())
-        }
-        autoReplaceController = createAutoReplaceController()
-        extraSuggestionEngines.clear()
-        
-        // Recreate tracker to use new engine (tracker captures suggestionEngine in closure)
-        tracker = CurrentWordTracker(
-            onWordChanged = { word ->
-                updateSuggestionsForWord(word)
-            },
-            onWordReset = {
-                cancelPendingWordSuggestions()
-                latestSuggestions.set(emptyList())
-                pendingAddUserWord = null
-                suggestionsListener?.invoke(emptyList())
-            },
-            autoSpacePunctuationProvider = { settingsProvider().autoSpacePunctuation }
-        )
-        
-        // Reload dictionary in background and refresh the current word when ready.
-        schedulePrimaryDictionaryLoad(refreshAfterLoad = true)
-        
-        // Reset tracker and clear suggestions
-        previousCompletedWord = null
-        sentenceStartPending = true
-        tracker.reset()
-        suggestionsListener?.invoke(emptyList())
-    }
-
-    /**
-     * Updates the keyboard layout for proximity-based ranking.
-     */
-    fun updateKeyboardLayout(layout: String) {
-        suggestionEngine.setKeyboardLayout(layout)
-        extraSuggestionEngines.values.forEach { it.engine.setKeyboardLayout(layout) }
-    }
-
     private val latestSuggestions: AtomicReference<List<SuggestionResult>> = AtomicReference(emptyList())
     // Dedicated IO scope so dictionary preload never blocks the main thread.
     private val loadScope = CoroutineScope(Dispatchers.IO)
@@ -229,20 +181,11 @@ class SuggestionController(
 
         val wordSnapshot = word
         val localeSnapshot = currentLocale
-        val layoutSnapshot = keyboardLayoutProvider()
         val primaryRepository = dictionaryRepository
-        val extraRepositories = activeExtraSuggestionEngines().mapNotNull { extra ->
-            if (!extra.repository.isReady) {
-                scheduleRepositoryLoad(extra.repository, refreshAfterLoad = true)
-                null
-            } else {
-                extra.locale to extra.repository
-            }
-        }
 
         suggestionJob = suggestionScope.launch {
             try {
-                computeSuggestions(wordSnapshot, settings, localeSnapshot, layoutSnapshot, primaryRepository, extraRepositories, generation)
+                computeSuggestions(wordSnapshot, settings, localeSnapshot, primaryRepository, generation)
             } catch (e: CancellationException) {
                 throw e
             } catch (e: RuntimeException) {
@@ -256,15 +199,11 @@ class SuggestionController(
         wordSnapshot: String,
         settings: SuggestionSettings,
         localeSnapshot: Locale,
-        layoutSnapshot: String,
         primaryRepository: DictionaryRepository,
-        extraRepositories: List<Pair<Locale, DictionaryRepository>>,
         generation: Int
     ) {
         val primary = if (primaryRepository.isReady) {
-            SuggestionEngine(primaryRepository, locale = localeSnapshot, debugLogging = debugLogging).apply {
-                setKeyboardLayout(layoutSnapshot)
-            }.suggest(
+            SuggestionEngine(primaryRepository, locale = localeSnapshot, debugLogging = debugLogging).suggest(
                 wordSnapshot,
                 settings.maxSuggestions,
                 settings.accentMatching,
@@ -275,19 +214,7 @@ class SuggestionController(
             emptyList()
         }
 
-        val extraSuggestions = extraRepositories.flatMap { (locale, repository) ->
-            SuggestionEngine(repository, locale = locale, debugLogging = debugLogging).apply {
-                setKeyboardLayout(layoutSnapshot)
-            }.suggest(
-                wordSnapshot,
-                settings.maxSuggestions,
-                settings.accentMatching,
-                settings.useKeyboardProximity,
-                settings.useEditTypeRanking
-            )
-        }
-
-        val next = mergeSuggestionResults(primary, extraSuggestions, settings.maxSuggestions, localeSnapshot)
+        val next = mergeSuggestionResults(primary, emptyList(), settings.maxSuggestions, localeSnapshot)
         val pendingCandidate = addWordCandidateFor(wordSnapshot, primaryRepository)
 
         cursorHandler.post {
@@ -387,7 +314,7 @@ class SuggestionController(
         val contextAware = settings.contextAwareCorrection
         // Word pairs back sentence-aware review and the English contraction check of text
         // replacements; release them when neither is on.
-        if (contextAware || !BuildConfig.UPSTREAM_BRANDING && settings.textReplacementsEnabled && currentLocale.language == "en") {
+        if (contextAware || settings.textReplacementsEnabled && currentLocale.language == "en") {
             contextCorrectorForLocale()
         } else {
             releaseContextCorrector()
@@ -412,6 +339,8 @@ class SuggestionController(
             }
         }
         lastBoundaryWord = completedWord
+        lastAutoFix = result.replacement?.takeIf { result.replaced && ' ' !in it.trim() }
+            ?.let { replacement -> wordBeforeBoundary?.let { it to replacement.trim() } }
         if (isLearningAllowed()) completedWord?.let(recentWords::record)
         if (typingStats != null && isStatsAllowed()) {
             completedWord?.let(typingStats::onWord)
@@ -438,6 +367,8 @@ class SuggestionController(
     private var lastContextFix: ContextFix? = null
     /** The word finished at the previous boundary. */
     private var lastBoundaryWord: String? = null
+    /** The last word autocorrect replaced, as (typed, replacement), until the next word ends. */
+    private var lastAutoFix: Pair<String, String>? = null
     /** Words whose fix the user undid; kept across language switches. */
     private val contextRejected = mutableSetOf<String>()
 
@@ -477,12 +408,51 @@ class SuggestionController(
                 Log.w("PastieraIME", "No memory for word pairs; sentence-aware review off", error)
                 null
             } ?: return@launch
+            // Optional: real words often typed for another one ("he" for "the").
+            val confusions = try {
+                appContext.assets.open("common/dictionaries/${language}_confusions.txt")
+                    .bufferedReader().useLines { lines -> ConfusionTable.parse(lines) }
+            } catch (_: java.io.IOException) {
+                null
+            } catch (error: RuntimeException) {
+                if (error is CancellationException) throw error
+                Log.w("PastieraIME", "Word confusions for $language unreadable", error)
+                null
+            }
+            // Optional: common short words, for a lone letter or two-letter slip ("o tired").
+            val shortWords = try {
+                appContext.assets.open("common/dictionaries/${language}_short_words.txt")
+                    .bufferedReader().useLines { lines ->
+                        lines.filterNot { it.isBlank() || it.startsWith("#") }
+                            .mapNotNull { line ->
+                                val cells = line.split('\t')
+                                cells.getOrNull(1)?.toIntOrNull()?.let { cells[0] to it }
+                            }
+                            .toMap()
+                    }
+            } catch (_: java.io.IOException) {
+                emptyMap()
+            }
             val corrector = ContextCorrector(
                 frequencyOf = { word -> dictionaryRepository.getExactWordFrequency(word) },
                 isNeighborKey = { a, b -> suggestionEngine.isNeighborKey(a, b) },
                 pairCount = pairs::count,
-                isProtected = { word -> dictionaryRepository.isUserOrSlangWord(word) },
-                rejected = contextRejected
+                isProtected = { word ->
+                    dictionaryRepository.isUserOrSlangWord(word) ||
+                        word.first().isUpperCase() && dictionaryRepository.isFirstName(word) // "Amy", not "May"
+                },
+                // Recognised real words ("ewe") outside the main dictionary.
+                isRecognized = { word -> dictionaryRepository.isRecognizedWord(word) },
+                rejected = contextRejected,
+                noisyChannel = noisyChannel,
+                confusions = confusions,
+                shortWords = shortWords,
+                isNameOrAcronym = { word ->
+                    dictionaryRepository.topByNormalized(word, limit = 4).any { it.word != it.word.lowercase() }
+                },
+                tripleCount = { first, second, third ->
+                    contextState.get()?.takeIf { it.language == language }?.triples?.count(first, second, third) ?: 0
+                }
             )
             // Optional: ranks autocorrect fixes by the two words before.
             val triples = try {
@@ -509,7 +479,7 @@ class SuggestionController(
      */
     private fun allowsRealWordReplacement(previous: String?, word: String, replacement: String): Boolean {
         // Only English contractions are checked; other replacements keep Pastiera's behaviour.
-        if (BuildConfig.UPSTREAM_BRANDING || currentLocale.language != "en" || !isApostropheContraction(word, replacement)) return true
+        if (currentLocale.language != "en" || !isApostropheContraction(word, replacement)) return true
         val pairs = contextState.get()?.pairs?.takeIf { contextState.get()?.language == currentLocale.language }
         if (previous != null && pairs != null) {
             val forReplacement = pairs.count(previous, replacement.lowercase())
@@ -550,7 +520,10 @@ class SuggestionController(
                 if (!same(trailing.word, previousWord) || !same(trailing.next, completedWord)) {
                     return null
                 }
-                val fix = corrector.review(trailing.before, trailing.word, trailing.next)?.let { fixed ->
+                // A fix made at the last space, seen again with the word after it.
+                val autoFix = lastAutoFix?.takeIf { (_, replacement) -> same(replacement, trailing.word) }
+                val fix = (autoFix?.let { (typed, _) -> corrector.reconsiderFix(trailing.before, typed, trailing.word, trailing.next) }
+                    ?: corrector.review(trailing.before, trailing.word, trailing.next, trailing.beforePrevious, typedAsIs = autoFix == null))?.let { fixed ->
                     ContextFix(
                         word = trailing.word,
                         fix = fixed,
@@ -623,6 +596,7 @@ class SuggestionController(
         pendingAddUserWord = null
         previousCompletedWord = null
         lastBoundaryWord = null
+        lastAutoFix = null
         return true
     }
 
@@ -703,6 +677,7 @@ class SuggestionController(
         autoReplaceController.clearPendingLearning()
         lastContextFix = null
         lastBoundaryWord = null
+        lastAutoFix = null
         tracker.onContextChanged()
         pendingAddUserWord = null
         previousCompletedWord = null
@@ -749,17 +724,7 @@ class SuggestionController(
             return true
         }
 
-        return activeExtraSuggestionEngines().any { extra ->
-            if (!extra.repository.isReady) {
-                scheduleRepositoryLoad(extra.repository, refreshAfterLoad = false)
-                // Defer legacy auto-substitution while an explicitly active
-                // extra dictionary is still loading; wrong replacements are
-                // worse than skipping one boundary.
-                true
-            } else {
-                extra.repository.isKnownWord(candidate)
-            }
-        }
+        return false
     }
 
     fun currentSuggestions(): List<SuggestionResult> = latestSuggestions.get()
@@ -778,11 +743,6 @@ class SuggestionController(
         }
         if (hardDeleteUserWord) {
             removeUserWord(trimmed)
-            activeExtraSuggestionEngines().forEach { extra ->
-                if (extra.repository.isReady) {
-                    extra.repository.removeUserEntry(trimmed)
-                }
-            }
         }
 
         val next = fillWithStarterSuggestions(
@@ -795,7 +755,7 @@ class SuggestionController(
     }
 
     private fun forgetNextWordSuggestion(candidate: String, hardDeleteEverywhere: Boolean) {
-        val locales = listOf(currentLocale) + activeExtraLocales()
+        val locales = listOf(currentLocale)
         locales.forEach { locale ->
             if (hardDeleteEverywhere) {
                 nextWordPredictor.forgetNextWordEverywhere(locale, candidate)
@@ -849,11 +809,6 @@ class SuggestionController(
     fun pendingAddWord(): String? = pendingAddUserWord
     fun clearPendingAddWord() {
         pendingAddUserWord = null
-    }
-
-    internal fun clearLearnedNextWordsForTests() {
-        nextWordPredictor.clearAll()
-        previousCompletedWord = null
     }
 
     internal fun flushNextWordLearningForTests() {
@@ -920,10 +875,7 @@ class SuggestionController(
             previousWord,
             settings.maxSuggestions
         )
-        val extras = activeExtraLocales().flatMap { locale ->
-            nextWordPredictor.predict(locale, previousWord, settings.maxSuggestions)
-        }
-        val predictions = mergeSuggestionResults(primary, extras, settings.maxSuggestions)
+        val predictions = mergeSuggestionResults(primary, emptyList(), settings.maxSuggestions)
         val suggestions = fillWithStarterSuggestions(predictions, settings)
         if (suggestions.isNotEmpty()) {
             latestSuggestions.set(suggestions)
@@ -936,10 +888,7 @@ class SuggestionController(
     private fun publishSentenceStartPredictionsOrStarter() {
         val settings = settingsProvider()
         val primary = nextWordPredictor.predictSentenceStart(currentLocale, settings.maxSuggestions)
-        val extras = activeExtraLocales().flatMap { locale ->
-            nextWordPredictor.predictSentenceStart(locale, settings.maxSuggestions)
-        }
-        val predictions = mergeSuggestionResults(primary, extras, settings.maxSuggestions)
+        val predictions = mergeSuggestionResults(primary, emptyList(), settings.maxSuggestions)
         val suggestions = fillWithStarterSuggestions(predictions, settings)
         if (suggestions.isNotEmpty()) {
             latestSuggestions.set(suggestions)
@@ -964,15 +913,7 @@ class SuggestionController(
 
     private fun starterSuggestions(settings: SuggestionSettings): List<SuggestionResult> {
         val primary = starterSuggestionsFor(dictionaryRepository, PRIMARY_SUGGESTION_BOOST, settings.maxSuggestions)
-        val extras = activeExtraSuggestionEngines().flatMap { extra ->
-            if (!extra.repository.isReady) {
-                scheduleRepositoryLoad(extra.repository, refreshAfterLoad = true)
-                emptyList()
-            } else {
-                starterSuggestionsFor(extra.repository, 0.0, settings.maxSuggestions)
-            }
-        }
-        return mergeSuggestionResults(primary, extras, settings.maxSuggestions)
+        return mergeSuggestionResults(primary, emptyList(), settings.maxSuggestions)
     }
 
     private fun fillWithStarterSuggestions(
@@ -1041,61 +982,6 @@ class SuggestionController(
             .map { it.first }
             .filter { result -> seen.add(result.candidate.lowercase(locale)) }
             .take(limit)
-    }
-
-    private fun activeExtraLocales(): List<Locale> {
-        val primaryLanguage = currentLocale.language.lowercase(Locale.ROOT)
-        return activeSuggestionLocalesProvider?.invoke().orEmpty()
-            .filter { it.language.isNotBlank() }
-            .filter { it.language.lowercase(Locale.ROOT) != primaryLanguage }
-            .distinctBy { it.toLanguageTag().lowercase(Locale.ROOT) }
-    }
-
-    private fun activeExtraSuggestionEngines(): List<SuggestionLanguageEngine> {
-        val activeLocales = activeExtraLocales()
-        val activeTags = activeLocales.map { it.toLanguageTag() }.toSet()
-        extraSuggestionEngines.keys
-            .filterNot { it in activeTags }
-            .forEach { extraSuggestionEngines.remove(it) }
-        return activeLocales.map { locale ->
-            val tag = locale.toLanguageTag()
-            extraSuggestionEngines.getOrPut(tag) {
-                val repository = createDictionaryRepository(locale)
-                val engine = SuggestionEngine(repository, locale = locale, debugLogging = debugLogging).apply {
-                    setKeyboardLayout(keyboardLayoutProvider())
-                }
-                SuggestionLanguageEngine(locale, repository, engine)
-            }
-        }
-    }
-
-    private fun scheduleRepositoryLoad(repository: DictionaryRepository, refreshAfterLoad: Boolean) {
-        if (refreshAfterLoad) {
-            pendingExtraRefreshAfterLoad = true
-        }
-        if (!repository.isReady && !repository.isLoadStarted) {
-            loadScope.launch {
-                try {
-                    repository.loadIfNeeded()
-                    val shouldRefresh = refreshAfterLoad || pendingExtraRefreshAfterLoad
-                    if (shouldRefresh && repository.isReady) {
-                        pendingExtraRefreshAfterLoad = false
-                        cursorHandler.post {
-                            val word = tracker.currentWord
-                            if (word.isNotBlank()) {
-                                updateSuggestionsForWord(word)
-                            } else if (previousCompletedWord == null) {
-                                publishSentenceStartPredictionsOrStarter()
-                            }
-                        }
-                    }
-                } catch (_: CancellationException) {
-                    // Cancelled due to rapid switches; safe to ignore.
-                } catch (e: Exception) {
-                    Log.e("PastieraIME", "Failed to load extra dictionary", e)
-                }
-            }
-        }
     }
 
     private fun isSoftPredictionBoundary(boundaryChar: Char?): Boolean {
@@ -1191,7 +1077,13 @@ class SuggestionController(
      */
     fun preloadDictionary() {
         schedulePrimaryDictionaryLoad(refreshAfterLoad = false)
-        activeExtraSuggestionEngines().forEach { scheduleRepositoryLoad(it.repository, refreshAfterLoad = false) }
+        // Word pairs too, so the first words typed already get context-aware fixes.
+        val settings = settingsProvider()
+        if (settings.contextAwareCorrection ||
+            settings.textReplacementsEnabled && currentLocale.language == "en"
+        ) {
+            contextCorrectorForLocale()
+        }
     }
 
     private fun ensureDictionaryLoaded(refreshAfterLoad: Boolean = false) {
@@ -1255,6 +1147,8 @@ class SuggestionController(
     }
 
     companion object {
+        private const val NOISY_CHANNEL_CANDIDATES = 64
+        private const val NOISY_CHANNEL_MIN_FREQUENCY = 20
         private const val CONTEXT_WINDOW = 96
         // A contraction must follow the previous word clearly more often than the typed word.
         private const val MIN_REPLACEMENT_EVIDENCE = 10

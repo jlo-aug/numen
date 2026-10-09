@@ -32,7 +32,6 @@ internal fun Intent.settingsPage(): SettingsPage {
         SettingsDestination.entries.firstOrNull { it.name == value }
     } ?: when (getStringExtra(SettingsActivity.EXTRA_DESTINATION)) {
         SettingsActivity.DESTINATION_CUSTOMIZATION -> SettingsDestination.Customization
-        SettingsActivity.DESTINATION_DEVICE_SYM_LAYER_EDITOR -> SettingsDestination.DeviceSymLayerEditor
         SettingsActivity.DESTINATION_MODIFIERS -> SettingsDestination.Modifiers
         else -> SettingsDestination.Main
     }

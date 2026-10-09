@@ -132,19 +132,9 @@ class RestoreManagerAndBackupContractTest {
     }
 
     @Test
-    fun layoutSwitchPreferences_areRecognizedForRestore() {
-        assertEquals(
-            PreferenceValueType.BOOLEAN,
-            PreferenceSchemas.expectedType("pastiera_prefs", "alt_shift_layout_switch")
-        )
-        assertEquals(
-            PreferenceValueType.BOOLEAN,
-            PreferenceSchemas.expectedType("pastiera_prefs", "alt_enter_layout_switch")
-        )
-        assertEquals(
-            PreferenceValueType.BOOLEAN,
-            PreferenceSchemas.expectedType("pastiera_prefs", "toast_on_layout_switch")
-        )
+    fun keyboardModePreferences_areRecognizedForRestore() {
+        // Layout switching was removed with other languages: old backups' keys are not restored.
+        assertEquals(null, PreferenceSchemas.expectedType("pastiera_prefs", "alt_shift_layout_switch"))
         assertEquals(
             PreferenceValueType.BOOLEAN,
             PreferenceSchemas.expectedType("pastiera_prefs", "software_keyboard_mode_toggle_toasts")
@@ -152,14 +142,6 @@ class RestoreManagerAndBackupContractTest {
         assertEquals(
             PreferenceValueType.STRING,
             PreferenceSchemas.expectedType("pastiera_prefs", "software_keyboard_mode")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "input_style_suggestion_locales")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "hidden_system_input_styles")
         )
     }
 
@@ -189,96 +171,20 @@ class RestoreManagerAndBackupContractTest {
             PreferenceValueType.BOOLEAN,
             PreferenceSchemas.expectedType("pastiera_prefs", "overlapping_keys_enabled")
         )
-        assertEquals(
-            PreferenceValueType.BOOLEAN,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_overlapping_keys_enabled")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_overlapping_keys_mode")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_number_row_input_mode")
-        )
-        assertEquals(
-            PreferenceValueType.BOOLEAN,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_number_row_repeat_enabled")
-        )
     }
 
     @Test
-    fun clicksButtonModes_areRecognizedForRestore() {
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_button_mode")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_meta_button_mode")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_alt_button_mode")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_microphone_button_mode")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_red_button_binding_choice")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_red_button_binding_output")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_keyboard_button_binding_choice")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_keyboard_button_binding_output")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_microphone_button_binding_choice")
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType("pastiera_prefs", "clicks_microphone_button_binding_output")
-        )
-    }
-
-    @Test
-    fun clicksPowerStateAndSocCalibrationAreRecognizedOnFreshInstall() {
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType(
-                "pastiera_prefs",
-                "clicks_power_keyboard_snapshots_v1"
-            )
-        )
-        assertEquals(
-            PreferenceValueType.STRING,
-            PreferenceSchemas.expectedType(
-                "pastiera_prefs",
-                "clicks_power_soc_calibration_PK-42"
-            )
-        )
-        assertTrue(
-            PreferenceSchemas.isRecognized(
-                prefName = "pastiera_prefs",
-                key = "clicks_power_keyboard_snapshots_v1"
-            )
-        )
-        assertTrue(
-            PreferenceSchemas.isRecognized(
-                prefName = "pastiera_prefs",
-                key = "clicks_power_soc_calibration_PK-42"
-            )
-        )
+    fun removedFeaturePreferences_areNotRecognizedForRestore() {
+        listOf(
+            "keyboard_layout",
+            "additional_ime_subtypes",
+            "french_punctuation_spacing",
+            "clicks_button_mode",
+            "clicks_power_soc_calibration_PK-42",
+            "trackpad_gestures_enabled"
+        ).forEach { key ->
+            assertFalse(key, PreferenceSchemas.isRecognized(prefName = "pastiera_prefs", key = key))
+        }
     }
 
     @Test
@@ -415,28 +321,9 @@ class RestoreManagerAndBackupContractTest {
     }
 
     @Test
-    fun collectTriggeredPostRestoreActions_registersRestoredCustomInputStyles() {
-        val prefs = PreferencesRestoreSummary(
-            appliedKeys = listOf("pastiera_prefs:custom_input_styles"),
-            skippedKeys = emptyList()
-        )
-        val files = FileRestoreSummary(
-            restoredFiles = listOf("keyboard_layouts/custom-layout.json"),
-            skippedFiles = emptyList()
-        )
-
-        val actions = RestoreManager.collectTriggeredPostRestoreActions(prefs, files)
-
-        assertEquals(
-            setOf(RestoreManager.PostRestoreAction.REGISTER_CUSTOM_INPUT_STYLES),
-            actions
-        )
-    }
-
-    @Test
     fun shouldNotifyUserDictionaryRefresh_falseForUnrelatedRestore() {
         val prefs = PreferencesRestoreSummary(
-            appliedKeys = listOf("pastiera_prefs:keyboard_layout"),
+            appliedKeys = listOf("pastiera_prefs:modifier_indicator_mode"),
             skippedKeys = emptyList()
         )
         val files = FileRestoreSummary(

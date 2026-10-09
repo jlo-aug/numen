@@ -1,8 +1,6 @@
 package it.palsoftware.pastiera.inputmethod
 
 import android.content.Context
-import android.os.Handler
-import android.os.Looper
 import android.view.KeyEvent
 import android.view.inputmethod.ExtractedText
 import android.view.inputmethod.InputConnection
@@ -13,8 +11,6 @@ import it.palsoftware.pastiera.core.TextInputController
 import it.palsoftware.pastiera.core.AutoSpaceTracker
 import it.palsoftware.pastiera.SettingsManager
 import it.palsoftware.pastiera.SymPagesConfig
-import it.palsoftware.pastiera.data.layout.LayoutMapping
-import it.palsoftware.pastiera.data.layout.TapMapping
 import it.palsoftware.pastiera.data.mappings.KeyMappingLoader
 import it.palsoftware.pastiera.data.mappings.DeviceSymProfileResolver
 import org.junit.Assert.assertEquals
@@ -57,7 +53,6 @@ class InputEventRouterModifierE2ETest {
         SettingsManager.setLongPressModifier(context, "alt")
         SettingsManager.setPhysicalKeyboardCurrencySymbol(context, "€")
         SettingsManager.setAltLatchStaysOnSpace(context, false)
-        SettingsManager.setFrenchPunctuationSpacing(context, false)
         AutoSpaceTracker.clear()
         prefs = context.getSharedPreferences("router_e2e_modifier_tests", Context.MODE_PRIVATE)
         prefs.edit().clear().commit()
@@ -86,7 +81,6 @@ class InputEventRouterModifierE2ETest {
         SettingsManager.setAltLatchStaysOnSpace(context, false)
         SettingsManager.setMidWordQuoteToApostrophe(context, false)
         SettingsManager.setAutoSpacePunctuation(context, "")
-        SettingsManager.setFrenchPunctuationSpacing(context, false)
         AutoSpaceTracker.clear()
     }
 
@@ -382,33 +376,6 @@ class InputEventRouterModifierE2ETest {
     }
 
     @Test
-    fun titan2AltQuestion_addsFrenchPunctuationSpacing() {
-        DeviceSpecific.setBuildFingerprintForTests(
-            brand = "unihertz",
-            manufacturer = "unihertz",
-            model = "Titan 2",
-            device = "titan2",
-            product = "titan2"
-        )
-        SettingsManager.setFrenchPunctuationSpacing(context, true)
-        alternateCharacterManager.reloadModifierAndDeviceSymMappings()
-        inputConnectionRecorder.textBeforeCursor = "bonjour"
-        val callbacks = TestCallbacks(modifierStateController)
-        modifierStateController.altOneShot = true
-
-        val result = routeKeyDown(
-            keyCode = KeyEvent.KEYCODE_M,
-            event = keyDown(KeyEvent.KEYCODE_M),
-            callbacks = callbacks
-        )
-
-        assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-        assertEquals(listOf(" ?"), inputConnectionRecorder.committedTexts)
-        assertEquals("bonjour ?", inputConnectionRecorder.textBeforeCursor)
-        assertEquals(1, callbacks.clearAltOneShotCalls)
-    }
-
-    @Test
     fun symDevicePage_newDefault_mapsA_andConsumes() {
         val callbacks = TestCallbacks(modifierStateController)
         symLayoutController.toggleSymPage() // opens Device SYM in the new default config
@@ -512,117 +479,6 @@ class InputEventRouterModifierE2ETest {
     }
 
     @Test
-    fun altMapping_q25Profile_usesQ25AssetAndCommitsMappedChar() {
-        DeviceSpecific.setBuildFingerprintForTests(
-            brand = "zinwa",
-            manufacturer = "zinwa",
-            model = "Q25",
-            device = "Q25",
-            product = "q25"
-        )
-        rebuildAltSymControllers()
-        assertEquals("Q25", DeviceSymProfileResolver.resolve(context))
-
-        val callbacks = TestCallbacks(modifierStateController)
-        primeAltOneShot(callbacks)
-
-        val result = routeKeyDown(
-            keyCode = KeyEvent.KEYCODE_K,
-            event = keyDown(KeyEvent.KEYCODE_K),
-            callbacks = callbacks
-        )
-
-        assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-        assertEquals("'", inputConnectionRecorder.committedTexts.last())
-    }
-
-    @Test
-    fun altMapping_q25Profile_mapsReportedZeroAndCurrencyKeys() {
-        DeviceSpecific.setBuildFingerprintForTests(
-            brand = "zinwa",
-            manufacturer = "zinwa",
-            model = "Q25",
-            device = "Q25",
-            product = "q25"
-        )
-        rebuildAltSymControllers()
-        assertEquals("Q25", DeviceSymProfileResolver.resolve(context))
-
-        val callbacks = TestCallbacks(modifierStateController)
-        primeAltOneShot(callbacks)
-
-        val zeroResult = routeKeyDown(
-            keyCode = KeyEvent.KEYCODE_0,
-            event = keyDown(KeyEvent.KEYCODE_0),
-            callbacks = callbacks
-        )
-
-        assertTrue(zeroResult is InputEventRouter.EditableFieldRoutingResult.Consume)
-        assertEquals("0", inputConnectionRecorder.committedTexts.last())
-
-        primeAltOneShot(callbacks)
-
-        val currencyResult = routeKeyDown(
-            keyCode = KeyEvent.KEYCODE_GRAVE,
-            event = keyDown(KeyEvent.KEYCODE_GRAVE),
-            callbacks = callbacks
-        )
-
-        assertTrue(currencyResult is InputEventRouter.EditableFieldRoutingResult.Consume)
-        assertEquals("€", inputConnectionRecorder.committedTexts.last())
-    }
-
-    @Test
-    fun altMapping_q25Profile_usesConfiguredCurrencySymbol() {
-        DeviceSpecific.setBuildFingerprintForTests(
-            brand = "zinwa",
-            manufacturer = "zinwa",
-            model = "Q25",
-            device = "Q25",
-            product = "q25"
-        )
-        SettingsManager.setPhysicalKeyboardCurrencySymbol(context, "$")
-        rebuildAltSymControllers()
-
-        val callbacks = TestCallbacks(modifierStateController)
-        primeAltOneShot(callbacks)
-
-        val result = routeKeyDown(
-            keyCode = KeyEvent.KEYCODE_GRAVE,
-            event = keyDown(KeyEvent.KEYCODE_GRAVE),
-            callbacks = callbacks
-        )
-
-        assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-        assertEquals("$", inputConnectionRecorder.committedTexts.last())
-    }
-
-    @Test
-    fun altMapping_key2Profile_usesKey2AssetAndCommitsMappedChar() {
-        DeviceSpecific.setBuildFingerprintForTests(
-            brand = "blackberry",
-            manufacturer = "blackberry",
-            model = "bbf100-1",
-            device = "athena",
-            product = "lineage_athena"
-        )
-        rebuildAltSymControllers()
-        assertEquals("key2", DeviceSymProfileResolver.resolve(context))
-
-        val callbacks = TestCallbacks(modifierStateController)
-        primeAltOneShot(callbacks)
-
-        val result = routeKeyDown(
-            keyCode = KeyEvent.KEYCODE_K,
-            event = keyDown(KeyEvent.KEYCODE_K),
-            callbacks = callbacks
-        )
-
-        assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-        assertEquals("'", inputConnectionRecorder.committedTexts.last())
-    }
-
-    @Test
     fun altMapping_titan2EliteQwertyOverride_usesEliteAssetAndCommitsMappedChar() {
         DeviceSpecific.setBuildFingerprintForTests(
             brand = "unihertz",
@@ -674,31 +530,7 @@ class InputEventRouterModifierE2ETest {
     }
 
     @Test
-    fun swipeToDelete_handlesBothKnownSwipeKeyCodes() {
-        SettingsManager.setSwipeToDelete(context, true)
-        SettingsManager.setSwipeToDeleteProvider(
-            context,
-            SettingsManager.SWIPE_TO_DELETE_PROVIDER_TITAN2_KEYCODE
-        )
-        inputConnectionRecorder.textBeforeCursor = "hello world"
-        val callbacks = TestCallbacks(modifierStateController)
-
-        listOf(322, 404).forEach { keyCode ->
-            inputConnectionRecorder.deleteSurroundingTextCalls = 0
-            val result = routeKeyDown(
-                keyCode = keyCode,
-                event = keyDown(keyCode),
-                callbacks = callbacks
-            )
-
-            assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-            assertTrue(inputConnectionRecorder.deleteSurroundingTextCalls > 0)
-        }
-    }
-
-    @Test
-    fun swipeToDelete_disabledStillConsumesBothKnownSwipeKeyCodes() {
-        SettingsManager.setSwipeToDelete(context, false)
+    fun sidewaysSwipeKeyCodesAreConsumedWithoutDeleting() {
         inputConnectionRecorder.textBeforeCursor = "hello world"
         val callbacks = TestCallbacks(modifierStateController)
 
@@ -716,130 +548,13 @@ class InputEventRouterModifierE2ETest {
     }
 
     @Test
-    fun shiftOnGermanMultiTapQwertz_commitsUppercaseWithoutCyclingVariants() {
+    fun shiftOnQwerty_commitsUppercaseOncePerPress() {
         it.palsoftware.pastiera.data.layout.LayoutMappingRepository.loadLayout(
             context.assets,
-            "german_multitap_qwertz",
-            context
+            "qwerty"
         )
         SettingsManager.setLongPressModifier(context, "variations")
-        val multiTapController = MultiTapController(
-            handler = Handler(Looper.getMainLooper()),
-            timeoutMs = 400L
-        )
-        val callbacks = callbacksWithCurrentLayout(
-            multiTapCommitHandler = { code, mapping, uppercase, inputConnection, _ ->
-                inputConnection != null &&
-                    multiTapController.handleTap(code, mapping, uppercase, inputConnection).handled
-            }
-        )
-
-        repeat(2) {
-            val result = routeKeyDown(
-                keyCode = KeyEvent.KEYCODE_S,
-                event = keyDown(
-                    KeyEvent.KEYCODE_S,
-                    metaState = KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
-                ),
-                callbacks = callbacks
-            )
-
-            assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-            symLayoutController.handleKeyUp(KeyEvent.KEYCODE_S, shiftPressed = true)
-        }
-
-        assertEquals(listOf("S", "S"), inputConnectionRecorder.committedTexts)
-        assertEquals(0, inputConnectionRecorder.deleteSurroundingTextCalls)
-    }
-
-    @Test
-    fun shiftedRealMultiTapLayout_cyclesUppercaseAccentVariants() {
-        val italianStyleMapping = LayoutMapping(
-            lowercase = "e",
-            uppercase = "E",
-            multiTapEnabled = true,
-            taps = listOf(
-                TapMapping(lowercase = "e", uppercase = "E"),
-                TapMapping(lowercase = "è", uppercase = "È"),
-                TapMapping(lowercase = "é", uppercase = "É")
-            )
-        )
-        val multiTapController = MultiTapController(
-            handler = Handler(Looper.getMainLooper()),
-            timeoutMs = 400L
-        )
-        val callbacks = TestCallbacks(
-            modifierStateController = modifierStateController,
-            mappingProvider = { key ->
-                if (key == KeyEvent.KEYCODE_E) italianStyleMapping else null
-            },
-            multiTapCommitHandler = { code, mapping, uppercase, inputConnection, _ ->
-                inputConnection != null &&
-                    multiTapController.handleTap(code, mapping, uppercase, inputConnection).handled
-            }
-        )
-
-        repeat(3) {
-            val result = routeKeyDown(
-                keyCode = KeyEvent.KEYCODE_E,
-                event = keyDown(
-                    KeyEvent.KEYCODE_E,
-                    metaState = KeyEvent.META_SHIFT_ON or KeyEvent.META_SHIFT_LEFT_ON
-                ),
-                callbacks = callbacks
-            )
-
-            assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-        }
-
-        assertEquals(listOf("E", "È", "É"), inputConnectionRecorder.committedTexts)
-        assertEquals(2, inputConnectionRecorder.deleteSurroundingTextCalls)
-    }
-
-    @Test
-    fun latchedShiftOnGermanMultiTapQwertz_keepsDoubleSInWords() {
-        it.palsoftware.pastiera.data.layout.LayoutMappingRepository.loadLayout(
-            context.assets,
-            "german_multitap_qwertz",
-            context
-        )
-        inputConnectionRecorder.textBeforeCursor = "foo"
-        shiftLayerLatchedForTest = true
-        val multiTapController = MultiTapController(
-            handler = Handler(Looper.getMainLooper()),
-            timeoutMs = 400L
-        )
-        val callbacks = callbacksWithCurrentLayout(
-            multiTapCommitHandler = { code, mapping, uppercase, inputConnection, _ ->
-                inputConnection != null &&
-                    multiTapController.handleTap(code, mapping, uppercase, inputConnection).handled
-            }
-        )
-
-        repeat(2) {
-            val result = routeKeyDown(
-                keyCode = KeyEvent.KEYCODE_S,
-                event = keyDown(KeyEvent.KEYCODE_S),
-                callbacks = callbacks
-            )
-
-            assertTrue(result is InputEventRouter.EditableFieldRoutingResult.Consume)
-            symLayoutController.handleKeyUp(KeyEvent.KEYCODE_S, shiftPressed = false)
-        }
-
-        assertEquals(listOf("S", "S"), inputConnectionRecorder.committedTexts)
-        assertEquals(0, inputConnectionRecorder.deleteSurroundingTextCalls)
-    }
-
-    @Test
-    fun shiftOnPlainQwertz_commitsUppercaseWithoutMultitapSideEffects() {
-        it.palsoftware.pastiera.data.layout.LayoutMappingRepository.loadLayout(
-            context.assets,
-            "qwertz",
-            context
-        )
-        SettingsManager.setLongPressModifier(context, "variations")
-        val callbacks = callbacksWithCurrentLayout()
+        val callbacks = TestCallbacks(modifierStateController)
 
         repeat(2) {
             val result = routeKeyDown(
@@ -917,18 +632,6 @@ class InputEventRouterModifierE2ETest {
         )
     }
 
-    private fun callbacksWithCurrentLayout(
-        multiTapCommitHandler: (Int, it.palsoftware.pastiera.data.layout.LayoutMapping, Boolean, InputConnection?, Boolean) -> Boolean = { _, _, _, _, _ -> false }
-    ): TestCallbacks {
-        return TestCallbacks(
-            modifierStateController,
-            mappingProvider = { key ->
-                it.palsoftware.pastiera.data.layout.LayoutMappingRepository.getMapping(key)
-            },
-            multiTapCommitHandler = multiTapCommitHandler
-        )
-    }
-
     private fun rebuildAltSymControllers() {
         alternateCharacterManager = AlternateCharacterManager(context.assets, prefs, context)
         alternateCharacterManager.reloadSymMappings()
@@ -949,8 +652,6 @@ class InputEventRouterModifierE2ETest {
 
     private class TestCallbacks(
         private val modifierStateController: ModifierStateController,
-        private val mappingProvider: (Int) -> it.palsoftware.pastiera.data.layout.LayoutMapping? = { null },
-        private val multiTapCommitHandler: (Int, it.palsoftware.pastiera.data.layout.LayoutMapping, Boolean, InputConnection?, Boolean) -> Boolean = { _, _, _, _, _ -> false },
         private val boundaryTextHandler: (String, InputConnection?) -> Boolean = { _, _ -> false }
     ) {
         var updateStatusBarCalls = 0
@@ -976,9 +677,6 @@ class InputEventRouterModifierE2ETest {
                 callSuper = { false },
                 callSuperWithKey = { _, _ -> false },
                 startSpeechRecognition = { },
-                getMapping = mappingProvider,
-                handleMultiTapCommit = multiTapCommitHandler,
-                isLongPressSuppressed = { false },
                 toggleMinimalUi = { },
                 handleBoundaryText = boundaryTextHandler
             )

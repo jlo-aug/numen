@@ -2,7 +2,6 @@ package it.palsoftware.pastiera.inputmethod
 
 import android.view.KeyEvent
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.mutableStateOf
 
 /**
  * Global tracker for keyboard events.

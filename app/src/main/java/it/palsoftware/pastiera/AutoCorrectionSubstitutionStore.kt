@@ -8,7 +8,6 @@ import java.util.Locale
 object AutoCorrectionSubstitutionStore {
     fun addCustomSubstitution(
         context: Context,
-        languageCode: String,
         trigger: String,
         replacement: String
     ): Boolean {
@@ -17,7 +16,7 @@ object AutoCorrectionSubstitutionStore {
         if (normalizedTrigger.isBlank() || normalizedReplacement.isBlank()) return false
         if (normalizedTrigger == "__name") return false
 
-        val existing = SettingsManager.getCustomAutoCorrections(context, languageCode)
+        val existing = SettingsManager.getCustomAutoCorrections(context)
         val updated = LinkedHashMap<String, String>()
         updated[normalizedTrigger] = normalizedReplacement
         existing.forEach { (key, value) ->
@@ -25,23 +24,9 @@ object AutoCorrectionSubstitutionStore {
                 updated[key] = value
             }
         }
-        SettingsManager.saveCustomAutoCorrections(context, languageCode, updated)
-        enableSubstitutionLanguage(context, languageCode)
+        SettingsManager.saveCustomAutoCorrections(context, updated)
         reloadAutoCorrector(context)
         return true
-    }
-
-    private fun enableSubstitutionLanguage(context: Context, languageCode: String) {
-        val normalizedLanguage = languageCode.trim().lowercase(Locale.ROOT)
-        if (normalizedLanguage.isBlank()) return
-
-        val enabled = SettingsManager.getAutoCorrectEnabledLanguages(context)
-        if (enabled.contains(normalizedLanguage)) return
-
-        SettingsManager.setAutoCorrectEnabledLanguages(
-            context,
-            enabled + normalizedLanguage
-        )
     }
 
     private fun reloadAutoCorrector(context: Context) {

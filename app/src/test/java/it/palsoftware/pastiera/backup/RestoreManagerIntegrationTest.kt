@@ -44,10 +44,7 @@ class RestoreManagerIntegrationTest {
         context.getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
             .edit()
             .remove("user_dictionary_entries")
-            .remove("keyboard_layout")
-            .remove("custom_input_styles")
-            .remove("clicks_power_keyboard_snapshots_v1")
-            .remove("clicks_power_soc_calibration_PK-42")
+            .remove("modifier_indicator_mode")
             .remove("physical_keyboard_profile_override")
             .remove("titan2_layout_enabled")
             .remove("titan2_elite_rounded_corner_insets")
@@ -64,10 +61,7 @@ class RestoreManagerIntegrationTest {
         context.getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
             .edit()
             .remove("user_dictionary_entries")
-            .remove("keyboard_layout")
-            .remove("custom_input_styles")
-            .remove("clicks_power_keyboard_snapshots_v1")
-            .remove("clicks_power_soc_calibration_PK-42")
+            .remove("modifier_indicator_mode")
             .remove("physical_keyboard_profile_override")
             .remove("titan2_layout_enabled")
             .remove("titan2_elite_rounded_corner_insets")
@@ -126,7 +120,7 @@ class RestoreManagerIntegrationTest {
                 "pastiera_prefs.json" to prefsBackupJson(
                     prefName = "pastiera_prefs",
                     entries = mapOf(
-                        "keyboard_layout" to PreferenceValue(PreferenceValueType.STRING, "qwerty")
+                        "modifier_indicator_mode" to PreferenceValue(PreferenceValueType.STRING, "qwerty")
                     )
                 )
             ),
@@ -148,7 +142,7 @@ class RestoreManagerIntegrationTest {
             assertEquals(
                 "qwerty",
                 context.getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
-                    .getString("keyboard_layout", null)
+                    .getString("modifier_indicator_mode", null)
             )
         }
 
@@ -163,7 +157,7 @@ class RestoreManagerIntegrationTest {
                 "pastiera_prefs.json" to prefsBackupJson(
                     prefName = "pastiera_prefs",
                     entries = mapOf(
-                        "keyboard_layout" to PreferenceValue(PreferenceValueType.STRING, "colemak")
+                        "modifier_indicator_mode" to PreferenceValue(PreferenceValueType.STRING, "colemak")
                     )
                 )
             ),
@@ -176,79 +170,13 @@ class RestoreManagerIntegrationTest {
             assertEquals(
                 "colemak",
                 context.getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
-                    .getString("keyboard_layout", null)
+                    .getString("modifier_indicator_mode", null)
             )
             assertTrue(success.postActionsTriggered.isEmpty())
             assertTrue(success.fileSummary.restoredFiles.none { it.endsWith("user_defaults.json") })
         }
 
         assertEquals(0, broadcastCount)
-    }
-
-    @Test
-    fun restore_customInputStyles_triggersRuntimeRegistration() = runBlocking {
-        val backupZip = createBackupZip(
-            includeMetadata = true,
-            prefsFiles = mapOf(
-                "pastiera_prefs.json" to prefsBackupJson(
-                    prefName = "pastiera_prefs",
-                    entries = mapOf(
-                        "custom_input_styles" to PreferenceValue(
-                            PreferenceValueType.STRING,
-                            "de:qwertz;ru:custom-russian"
-                        )
-                    )
-                )
-            ),
-            fileEntries = emptyMap()
-        )
-
-        val result = RestoreManager.restore(context, Uri.fromFile(backupZip))
-        val success = result as RestoreResult.Success
-
-        assertEquals(
-            setOf(RestoreManager.PostRestoreAction.REGISTER_CUSTOM_INPUT_STYLES),
-            success.postActionsTriggered
-        )
-        assertEquals(
-            "de:qwertz;ru:custom-russian",
-            context.getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
-                .getString("custom_input_styles", null)
-        )
-    }
-
-    @Test
-    fun restore_clicksPowerStateAndCalibration_onFreshInstall() {
-        val snapshot = "[{\"deviceName\":\"Power Keyboard\"}]"
-        val calibration = "3:8,4:9"
-
-        val summary = PreferencesBackupHelper.restorePreferences(
-            context,
-            mapOf(
-                "pastiera_prefs" to mapOf(
-                    "clicks_power_keyboard_snapshots_v1" to PreferenceValue(
-                        PreferenceValueType.STRING,
-                        snapshot
-                    ),
-                    "clicks_power_soc_calibration_PK-42" to PreferenceValue(
-                        PreferenceValueType.STRING,
-                        calibration
-                    )
-                )
-            )
-        )
-
-        assertTrue(summary.skippedKeys.isEmpty())
-        assertEquals(
-            setOf(
-                "pastiera_prefs:clicks_power_keyboard_snapshots_v1",
-                "pastiera_prefs:clicks_power_soc_calibration_PK-42"
-            ),
-            summary.appliedKeys.toSet()
-        )
-        val preferences = context.getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
-        assertEquals(snapshot, preferences.getString("clicks_power_keyboard_snapshots_v1", null))
-        assertEquals(calibration, preferences.getString("clicks_power_soc_calibration_PK-42", null))
     }
 
     @Test
@@ -284,14 +212,14 @@ class RestoreManagerIntegrationTest {
     @Test
     fun inspect_doesNotApplyPreferences() = runBlocking {
         val preferences = context.getSharedPreferences("pastiera_prefs", Context.MODE_PRIVATE)
-        preferences.edit().putString("keyboard_layout", "qwertz").commit()
+        preferences.edit().putString("modifier_indicator_mode", "qwertz").commit()
         val backupZip = createBackupZip(
             includeMetadata = true,
             prefsFiles = mapOf(
                 "pastiera_prefs.json" to prefsBackupJson(
                     prefName = "pastiera_prefs",
                     entries = mapOf(
-                        "keyboard_layout" to PreferenceValue(PreferenceValueType.STRING, "azerty")
+                        "modifier_indicator_mode" to PreferenceValue(PreferenceValueType.STRING, "azerty")
                     )
                 )
             ),
@@ -301,7 +229,7 @@ class RestoreManagerIntegrationTest {
         val result = RestoreManager.inspect(context, Uri.fromFile(backupZip))
 
         assertTrue(result is RestoreInspectionResult.Success)
-        assertEquals("qwertz", preferences.getString("keyboard_layout", null))
+        assertEquals("qwertz", preferences.getString("modifier_indicator_mode", null))
     }
 
     @Test
@@ -334,7 +262,7 @@ class RestoreManagerIntegrationTest {
                             PreferenceValueType.STRING,
                             "force_virtual"
                         ),
-                        "keyboard_layout" to PreferenceValue(PreferenceValueType.STRING, "azerty")
+                        "modifier_indicator_mode" to PreferenceValue(PreferenceValueType.STRING, "azerty")
                     )
                 )
             ),
@@ -355,7 +283,7 @@ class RestoreManagerIntegrationTest {
             "force_hardware",
             preferences.getString("software_keyboard_mode_runtime_override", null)
         )
-        assertEquals("azerty", preferences.getString("keyboard_layout", null))
+        assertEquals("azerty", preferences.getString("modifier_indicator_mode", null))
         assertTrue(
             result.preferencesSummary.skippedKeys.containsAll(
                 BackupPreferencePolicy.runtimeDerivedKeys + BackupPreferencePolicy.targetDeviceDerivedKeys

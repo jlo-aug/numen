@@ -13,7 +13,6 @@ class KeyboardVisibilityController(
     private val candidatesBarController: CandidatesBarController,
     private val symLayoutController: SymLayoutController,
     private val isInputViewActive: () -> Boolean,
-    private val hasActiveTextField: () -> Boolean,
     private val isNavModeLatched: () -> Boolean,
     private val currentInputConnection: () -> InputConnection?,
     private val isInputViewShown: () -> Boolean,
@@ -168,7 +167,7 @@ class KeyboardVisibilityController(
      * until a SYM tap or an explicit action asks for it.
      */
     private fun isSilentHardwareMode(autoShowKeyboardEnabled: Boolean): Boolean =
-        !it.palsoftware.pastiera.BuildConfig.UPSTREAM_BRANDING && // Numen only; Pastiera always shows its bar
+        // Numen only; Pastiera always shows its bar
             !autoShowKeyboardEnabled &&
             SettingsManager.resolveEffectiveSoftwareKeyboardMode(context) !=
             SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL
@@ -180,8 +179,6 @@ class KeyboardVisibilityController(
     fun shouldShowSurfaceOnInputStart(autoShowKeyboardEnabled: Boolean): Boolean {
         val virtual = SettingsManager.resolveEffectiveSoftwareKeyboardMode(context) ==
             SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL
-        // Pastiera's rule: the hardware bar always shows; the virtual keyboard only with auto-show.
-        if (it.palsoftware.pastiera.BuildConfig.UPSTREAM_BRANDING) return !virtual || autoShowKeyboardEnabled
         return autoShowKeyboardEnabled || virtual
     }
 
@@ -267,9 +264,8 @@ class KeyboardVisibilityController(
     fun onShowRequested(autoShowKeyboardEnabled: Boolean) =
         requestSurface(wantCollapsed = isSilentHardwareMode(autoShowKeyboardEnabled))
 
-    fun onKeyboardSurfaceChanged(ensureInputViewShown: Boolean, requireActiveTextField: Boolean = false) {
+    fun onKeyboardSurfaceChanged(ensureInputViewShown: Boolean) {
         cancelPendingSurfaceTransition()
-        if (requireActiveTextField && !hasActiveTextField()) return
         if (windowShown) {
             // hideWindow() only hides the local window. The framework's hideSoftInput path
             // also resets mShowInputRequested and finishes the preceding input/candidates view.
@@ -287,7 +283,7 @@ class KeyboardVisibilityController(
         } else {
             setCandidatesSurfaceActive(false)
             setCandidatesViewShown(false)
-            if (ensureInputViewShown || it.palsoftware.pastiera.BuildConfig.UPSTREAM_BRANDING) ensureImeSurfaceVisible()
+            if (ensureInputViewShown) ensureImeSurfaceVisible()
         }
     }
 

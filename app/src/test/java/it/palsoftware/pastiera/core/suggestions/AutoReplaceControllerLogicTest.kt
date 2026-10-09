@@ -24,38 +24,38 @@ class AutoReplaceControllerLogicTest {
 
     @Test
     fun testSplitApostropheWord() {
-        // Italienische Elisionen
+        // Italian elisions
         // "l'amico" -> prefix="l'", root="amico"
         val split1 = AutoReplaceController.splitApostropheWord("l'amico")
-        assertNotNull("l'amico sollte gesplittet werden", split1)
+        assertNotNull("l'amico should be split", split1)
         assertEquals("l'", split1!!.prefix)
         assertEquals("amico", split1.root)
 
-        // Zu kurz (root < 3)
+        // Too short (root < 3)
         val split2 = AutoReplaceController.splitApostropheWord("l'a")
-        assertNull("Root zu kurz, sollte null sein", split2)
+        assertNull("Root too short, should be null", split2)
 
-        // Kein Apostroph
+        // No apostrophe
         val split3 = AutoReplaceController.splitApostropheWord("hallo")
         assertNull(split3)
         
-        // Typographischer Apostroph
+        // Typographic apostrophe
         val split4 = AutoReplaceController.splitApostropheWord("l’amico")
-        assertNotNull("l’amico sollte gesplittet werden", split4)
+        assertNotNull("l’amico should be split", split4)
         assertEquals("l'", split4!!.prefix)
 
         val split5 = AutoReplaceController.splitApostropheWord("dell'amico")
-        assertNotNull("dell'amico sollte gesplittet werden", split5)
+        assertNotNull("dell'amico should be split", split5)
         assertEquals("dell'", split5!!.prefix)
         assertEquals("amico", split5.root)
 
         val split6 = AutoReplaceController.splitApostropheWord("nell'amico")
-        assertNotNull("nell'amico sollte gesplittet werden", split6)
+        assertNotNull("nell'amico should be split", split6)
         assertEquals("nell'", split6!!.prefix)
         assertEquals("amico", split6.root)
 
         val split7 = AutoReplaceController.splitApostropheWord("rock'nroll")
-        assertNull("Beliebige längere Präfixe sollten nicht als Elision behandelt werden", split7)
+        assertNull("Arbitrary longer prefixes should not be treated as elisions", split7)
     }
 
     @Test
@@ -68,11 +68,11 @@ class AutoReplaceControllerLogicTest {
         val resLigature = AutoReplaceController.isAccentOnlyVariant("oeil", "œil")
         assertEquals(true, resLigature)
 
-        // "hallo" vs "halle" -> false (anderer Buchstabe)
+        // "hallo" vs "halle" -> false (different letter)
         val res2 = AutoReplaceController.isAccentOnlyVariant("hallo", "halle")
         assertEquals(false, res2)
         
-        // Identisch -> false (laut Implementierung)
+        // Identical -> false (per the implementation)
         val res3 = AutoReplaceController.isAccentOnlyVariant("hallo", "hallo")
         assertEquals(false, res3)
     }
@@ -215,50 +215,25 @@ class AutoReplaceControllerLogicTest {
     }
 
     @Test
-    fun autoSubstitutionSkipsKnownWords() {
-        AutoCorrector.loadCustomCorrections("de", """{"agree":"are"}""")
-
-        val correction = AutoCorrector.processText(
-            textBeforeCursor = "agree ",
-            locale = "de",
-            isKnownWord = { it.equals("agree", ignoreCase = true) }
-        )
-
-        assertNull(correction)
-    }
-
-    @Test
-    fun customAutoSubstitutionOverridesKnownWordGuardAndPreservesCapitalization() {
+    fun customAutoSubstitutionAppliesToKnownWordAndPreservesCapitalization() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsManager.saveCustomAutoCorrections(context, "fr", mapOf("ca" to "ça"))
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("fr"))
+        SettingsManager.saveCustomAutoCorrections(context, mapOf("ur" to "your"))
         AutoCorrector.loadCorrections(context.assets, context)
 
-        val correction = AutoCorrector.processText(
-            textBeforeCursor = "Ca ",
-            locale = "fr",
-            context = context,
-            isKnownWord = { it.equals("ca", ignoreCase = true) }
-        )
+        val correction = AutoCorrector.processText("Ur ")
 
         assertNotNull(correction)
-        assertEquals("Ca", correction!!.first)
-        assertEquals("Ça", correction.second)
+        assertEquals("Ur", correction!!.first)
+        assertEquals("Your", correction.second)
     }
 
     @Test
-    fun customStandardLanguageCorrectionDoesNotRemoveBundledDefaults() {
+    fun customCorrectionDoesNotRemoveBundledDefaults() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsManager.saveCustomAutoCorrections(context, "en", mapOf("teh" to "the"))
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("en"))
+        SettingsManager.saveCustomAutoCorrections(context, mapOf("teh" to "the"))
         AutoCorrector.loadCorrections(context.assets, context)
 
-        val correction = AutoCorrector.processText(
-            textBeforeCursor = "Dont ",
-            locale = "en",
-            context = context,
-            isKnownWord = { false }
-        )
+        val correction = AutoCorrector.processText("Dont ")
 
         assertNotNull(correction)
         assertEquals("Dont", correction!!.first)
@@ -266,80 +241,19 @@ class AutoReplaceControllerLogicTest {
     }
 
     @Test
-    fun bundledAutoSubstitutionOverridesKnownWordGuard() {
+    fun bundledAutoSubstitutionAppliesToKnownWords() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("en", "fr"))
         AutoCorrector.loadCorrections(context.assets, context)
 
-        val dontCorrection = AutoCorrector.processText(
-            textBeforeCursor = "Dont ",
-            locale = "de",
-            context = context,
-            isKnownWord = { true }
-        )
-        val caCorrection = AutoCorrector.processText(
-            textBeforeCursor = "ca ",
-            locale = "de",
-            context = context,
-            isKnownWord = { true }
-        )
+        val dontCorrection = AutoCorrector.processText("Dont ")
+        val imCorrection = AutoCorrector.processText("im ")
 
         assertNotNull(dontCorrection)
         assertEquals("Dont", dontCorrection!!.first)
         assertEquals("Don't", dontCorrection.second)
-        assertNotNull(caCorrection)
-        assertEquals("ca", caCorrection!!.first)
-        assertEquals("ça", caCorrection.second)
-    }
-
-    @Test
-    fun bundledFrenchAccentSubstitutionsCoverApostropheKnownWordsAndCommonAccents() {
-        val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("fr"))
-        AutoCorrector.loadCorrections(context.assets, context)
-
-        val examples = mapOf(
-            "jespere" to "j'espère",
-            "paraitre" to "paraître",
-            "epee" to "épée",
-            "etre" to "être",
-            "tres" to "très",
-            "francais" to "français",
-            "ecole" to "école",
-            "probleme" to "problème",
-            "Noel" to "Noël",
-            "jai" to "j'ai",
-            "daccord" to "d'accord",
-            "quon" to "qu'on",
-            "quelquun" to "quelqu'un",
-            "aujourdhui" to "aujourd'hui",
-            "quil" to "qu'il",
-            "jusqua" to "jusqu'à",
-            "lequipe" to "l'équipe",
-            "premiere" to "première",
-            "pres" to "près",
-            "lhistoire" to "l'histoire",
-            "detre" to "d'être",
-            "sagit" to "s'agit",
-            "cestadire" to "c'est-à-dire",
-            "luimeme" to "lui-même",
-            "recoit" to "reçoit",
-            "theatre" to "théâtre",
-            "leau" to "l'eau"
-        )
-
-        examples.forEach { (input, expected) ->
-            val correction = AutoCorrector.processText(
-                textBeforeCursor = "$input ",
-                locale = "fr",
-                context = context,
-                isKnownWord = { it.equals(input, ignoreCase = true) }
-            )
-
-            assertNotNull("$input should be corrected", correction)
-            assertEquals(input, correction!!.first)
-            assertEquals(expected, correction.second)
-        }
+        assertNotNull(imCorrection)
+        assertEquals("im", imCorrection!!.first)
+        assertEquals("I'm", imCorrection.second)
     }
 
     @Test
@@ -522,39 +436,6 @@ class AutoReplaceControllerLogicTest {
     }
 
     @Test
-    fun boundaryCommitAddsFrenchSpacingWhenNoReplacementHappens() {
-        val context = RuntimeEnvironment.getApplication()
-        val repository = FakeDictionaryRepository().apply {
-            isReady = true
-            addTestEntry("bonjour", 100)
-        }
-        val controller = AutoReplaceController(
-            repository = repository,
-            suggestionEngine = SuggestionEngine(repository),
-            settingsProvider = {
-                SuggestionSettings(
-                    autoReplaceOnSpaceEnter = false,
-                    frenchPunctuationSpacing = true
-                )
-            }
-        )
-        val tracker = CurrentWordTracker(onWordChanged = {}, onWordReset = {})
-        tracker.setWord("bonjour")
-        val inputConnection = FakeInputConnection(context, "bonjour")
-
-        val result = controller.handleBoundary(
-            keyCode = KeyEvent.KEYCODE_SEMICOLON,
-            event = KeyEvent(KeyEvent.ACTION_DOWN, KeyEvent.KEYCODE_SEMICOLON),
-            tracker = tracker,
-            inputConnection = inputConnection
-        )
-
-        assertFalse(result.replaced)
-        assertTrue(result.committed)
-        assertEquals("bonjour ;", inputConnection.text)
-    }
-
-    @Test
     fun boundaryCommitAddsCommaSpaceWhenNoReplacementHappens() {
         val context = RuntimeEnvironment.getApplication()
         val repository = FakeDictionaryRepository().apply {
@@ -622,8 +503,7 @@ class AutoReplaceControllerLogicTest {
     @Test
     fun exactReplacementAllowsTwoLetterCustomSubstitutionWithApostropheBeforeDictionaryCaseCandidate() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsManager.saveCustomAutoCorrections(context, "fr", mapOf("ct" to "c'était"))
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("fr"))
+        SettingsManager.saveCustomAutoCorrections(context, mapOf("ct" to "can't"))
         AutoCorrector.loadCorrections(context.assets, context)
         val repository = FakeDictionaryRepository().apply {
             isReady = true
@@ -640,12 +520,7 @@ class AutoReplaceControllerLogicTest {
             },
             knownWordProvider = { word -> word.equals("ct", ignoreCase = true) },
             exactReplacementProvider = { word, boundaryChar ->
-                AutoCorrector.processText(
-                    textBeforeCursor = word + (boundaryChar ?: ' '),
-                    locale = "fr",
-                    context = context,
-                    isKnownWord = { candidate -> candidate.equals("ct", ignoreCase = true) }
-                )?.takeIf { (original, replacement) ->
+                AutoCorrector.processText(word + (boundaryChar ?: ' '))?.takeIf { (original, replacement) ->
                     original == word && replacement != word
                 }?.second
             }
@@ -662,8 +537,8 @@ class AutoReplaceControllerLogicTest {
         )
 
         assertTrue(result.replaced)
-        assertEquals("C'était ", inputConnection.text)
-        assertEquals("C'était", result.replacement)
+        assertEquals("Can't ", inputConnection.text)
+        assertEquals("Can't", result.replacement)
     }
 
     @Test
@@ -1171,6 +1046,60 @@ class AutoReplaceControllerLogicTest {
         inputConnection.commitText("bathe", 1)
         assertFalse(controller.handleBackspaceUndo(KeyEvent.KEYCODE_DEL, inputConnection))
         assertEquals("the bathe", inputConnection.text)
+    }
+
+    @Test
+    fun backspaceUndoesAFixEndedByPunctuationAndKeepsThePunctuation() {
+        val context = RuntimeEnvironment.getApplication()
+        val repository = FakeDictionaryRepository().apply {
+            isReady = true
+            addTestEntry("world", 300)
+        }
+        val keptOnce = KeptOnceStore.inMemory()
+        val learned = mutableListOf<String>()
+        fun session() = AutoReplaceController(
+            repository = repository,
+            suggestionEngine = SuggestionEngine(repository, locale = Locale.ENGLISH),
+            settingsProvider = { SuggestionSettings(autoReplaceOnSpaceEnter = true, aggressiveAutoReplace = true) },
+            keptOnceStore = keptOnce,
+            learnWord = { learned += it }
+        )
+        fun AutoReplaceController.type(word: String, mark: Char): FakeInputConnection =
+            FakeInputConnection(context, "hello $word").also { field ->
+                handleBoundary(
+                    keyCode = KeyEvent.KEYCODE_UNKNOWN,
+                    event = null,
+                    tracker = CurrentWordTracker(onWordChanged = {}, onWordReset = {}).apply { setWord(word) },
+                    inputConnection = field,
+                    boundaryCharOverride = mark
+                )
+            }
+        // A user report: "backplate!" and "autocorrects," could not be undone.
+        for (mark in listOf('!', ',', '?', ':')) {
+            val controller = session()
+            val field = controller.type("wrld", mark)
+            assertEquals("hello world$mark", field.text)
+            assertTrue(controller.handleBackspaceUndo(KeyEvent.KEYCODE_DEL, field))
+            assertEquals("hello wrld$mark", field.text)
+        }
+        // Undoing ends the word as it stands, so it is learned like any word kept twice (here
+        // the fake dictionary never learns it, so four undos learn it twice).
+        assertEquals(listOf("wrld", "wrld"), learned)
+    }
+
+    @Test
+    fun aKnownWordPlusSIsMeantButNotAfterSOrAConsonantY() {
+        val known = setOf("autocorrect", "keycap", "word", "story", "again")
+        val frequency = mapOf("again" to 156, "word" to 150)
+        fun plural(word: String) = AutoReplaceController.isPluralOfKnownWord(word, { it in known }, { frequency[it] ?: 0 })
+        // A user report: "autocorrects" became "autocorrect".
+        assertTrue(plural("autocorrects"))
+        assertTrue(plural("keycaps"))
+        assertFalse(plural("wordss"))
+        assertFalse(plural("storys"))
+        // Plurals of very common words are in the dictionary already: "agains" is a slip.
+        assertFalse(plural("agains"))
+        assertFalse(plural("cats"))
     }
 
     @Test

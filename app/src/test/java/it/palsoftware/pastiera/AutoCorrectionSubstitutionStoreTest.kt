@@ -26,17 +26,16 @@ class AutoCorrectionSubstitutionStoreTest {
     @Test
     fun addCustomSubstitution_savesTriggerAtFront() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsManager.saveCustomAutoCorrections(context, "en", mapOf("brb" to "be right back"))
+        SettingsManager.saveCustomAutoCorrections(context, mapOf("brb" to "be right back"))
 
         val saved = AutoCorrectionSubstitutionStore.addCustomSubstitution(
             context = context,
-            languageCode = "en",
             trigger = "  OMW ",
             replacement = "on my way"
         )
 
         assertTrue(saved)
-        val corrections = SettingsManager.getCustomAutoCorrections(context, "en")
+        val corrections = SettingsManager.getCustomAutoCorrections(context)
         assertEquals(listOf("omw", "brb"), corrections.keys.toList())
         assertEquals("on my way", corrections["omw"])
     }
@@ -48,16 +47,14 @@ class AutoCorrectionSubstitutionStoreTest {
         assertFalse(
             AutoCorrectionSubstitutionStore.addCustomSubstitution(
                 context = context,
-                languageCode = "en",
-                trigger = "",
+                    trigger = "",
                 replacement = "replacement"
             )
         )
         assertFalse(
             AutoCorrectionSubstitutionStore.addCustomSubstitution(
                 context = context,
-                languageCode = "en",
-                trigger = "abbr",
+                    trigger = "abbr",
                 replacement = " "
             )
         )
@@ -66,45 +63,30 @@ class AutoCorrectionSubstitutionStoreTest {
     @Test
     fun addCustomSubstitution_isAvailableImmediatelyToAutoCorrector() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("en"))
 
         AutoCorrectionSubstitutionStore.addCustomSubstitution(
             context = context,
-            languageCode = "fr",
-            trigger = "svp",
-            replacement = "s'il vous plaît"
+            trigger = "omw",
+            replacement = "on my way"
         )
 
-        val correction = AutoCorrector.processText(
-            textBeforeCursor = "svp",
-            locale = "fr",
-            context = context
-        )
-        assertEquals("s'il vous plaît", correction?.second)
-        assertTrue(SettingsManager.getAutoCorrectEnabledLanguages(context).contains("fr"))
+        val correction = AutoCorrector.processText("omw")
+        assertEquals("on my way", correction?.second)
     }
 
     @Test
     fun addCustomSubstitution_replacesTssstWithTotallynewsubstitution() {
         val context = RuntimeEnvironment.getApplication()
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("en"))
 
         AutoCorrectionSubstitutionStore.addCustomSubstitution(
             context = context,
-            languageCode = "de",
             trigger = "tssst",
             replacement = "totallynewsubstitution"
         )
 
-        val correction = AutoCorrector.processText(
-            textBeforeCursor = "tssst ",
-            locale = "de",
-            context = context,
-            isKnownWord = { false }
-        )
+        val correction = AutoCorrector.processText("tssst ")
 
         assertEquals("tssst", correction?.first)
         assertEquals("totallynewsubstitution", correction?.second)
-        assertTrue(SettingsManager.getAutoCorrectEnabledLanguages(context).contains("de"))
     }
 }

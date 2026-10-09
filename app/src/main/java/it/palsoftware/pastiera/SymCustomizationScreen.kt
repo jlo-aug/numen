@@ -1,6 +1,5 @@
 package it.palsoftware.pastiera
 
-import android.content.Context
 import android.content.Intent
 import android.view.KeyEvent
 import androidx.activity.compose.BackHandler
@@ -38,7 +37,6 @@ import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.animation.*
-import androidx.compose.animation.core.tween
 import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.inputmethod.StatusBarController
 import kotlinx.coroutines.launch
@@ -431,25 +429,9 @@ fun SymCustomizationScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
-                            if (pageId == SymPagesConfig.PAGE_DEVICE) {
-                                FeatureStatusIcon(FeatureStatus.Construction)
-                            }
-                            if (pageId == SymPagesConfig.PAGE_DEVICE ||
-                                pageId == SymPagesConfig.PAGE_EMOJI ||
-                                pageId == SymPagesConfig.PAGE_SYMBOLS
-                            ) {
+                            if (pageId == SymPagesConfig.PAGE_EMOJI || pageId == SymPagesConfig.PAGE_SYMBOLS) {
                                 IconButton(onClick = {
                                     when (pageId) {
-                                        SymPagesConfig.PAGE_DEVICE -> context.startActivity(
-                                            Intent(context, SettingsActivity::class.java).apply {
-                                                flags = Intent.FLAG_ACTIVITY_NEW_TASK or
-                                                    Intent.FLAG_ACTIVITY_CLEAR_TOP
-                                                putExtra(
-                                                    SettingsActivity.EXTRA_DESTINATION,
-                                                    SettingsActivity.DESTINATION_DEVICE_SYM_LAYER_EDITOR
-                                                )
-                                            }
-                                        )
                                         SymPagesConfig.PAGE_EMOJI -> {
                                             selectedTab = 0
                                             openSettingsChild(context, "sym_editor", "1")
@@ -660,7 +642,7 @@ fun SymCustomizationScreen(
 
         Spacer(modifier = Modifier.height(8.dp))
 
-        // Reset button (ripristina predefiniti)
+        // Reset button (restore defaults)
         Button(
             onClick = {
                 resetPage = editingLayerPage ?: 1

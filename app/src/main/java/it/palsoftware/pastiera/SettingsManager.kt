@@ -7,17 +7,13 @@ import android.net.Uri
 import android.provider.OpenableColumns
 import android.util.Log
 import android.view.KeyEvent
-import android.view.inputmethod.InputMethodManager
 import it.palsoftware.pastiera.commands.CommandJson
 import it.palsoftware.pastiera.commands.CommandLaunchSpec
 import it.palsoftware.pastiera.commands.CommandSourceId
 import it.palsoftware.pastiera.commands.CommandSurface
 import it.palsoftware.pastiera.commands.PastieraCommandSource
 import it.palsoftware.pastiera.core.Punctuation
-import it.palsoftware.pastiera.data.layout.BundledLayoutAssets
 import it.palsoftware.pastiera.inputmethod.DeviceSpecific
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils
-import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils.localeString
 import it.palsoftware.pastiera.inputmethod.ui.KeyboardThemeColors
 import it.palsoftware.pastiera.inputmethod.expansion.ExpansionActivationPolicy
 import it.palsoftware.pastiera.inputmethod.expansion.ExpansionPresentation
@@ -56,23 +52,16 @@ object SettingsManager {
     private const val KEY_SPACED_HYPHEN_TO_EN_DASH = "spaced_hyphen_to_en_dash"
     private const val KEY_SPACED_HYPHEN_DASH_STYLE = "spaced_hyphen_dash_style"
     private const val KEY_MID_WORD_QUOTE_TO_APOSTROPHE = "mid_word_quote_to_apostrophe"
-    private const val KEY_FRENCH_PUNCTUATION_SPACING = "french_punctuation_spacing"
-    private const val KEY_FRENCH_PUNCTUATION_ONLY_FRENCH = "french_punctuation_only_french"
     private const val KEY_COMMA_SPACE = "comma_space"
     private const val KEY_AUTO_SPACE_PUNCTUATION = "auto_space_punctuation"
     private const val KEY_SPACE_AFTER_PUNCTUATION = "space_after_punctuation"
     private const val KEY_SMART_QUOTES = "smart_quotes"
-    private const val KEY_SMART_QUOTES_STYLE = "smart_quotes_style"
-    private const val KEY_SWIPE_TO_DELETE = "swipe_to_delete"
-    private const val KEY_SWIPE_TO_DELETE_PROVIDER = "swipe_to_delete_provider"
     private const val KEY_AUTO_SHOW_KEYBOARD = "auto_show_keyboard"
     private const val KEY_CLEAR_ALT_ON_SPACE = "clear_alt_on_space"
     private const val KEY_ALT_CTRL_SPEECH_SHORTCUT = "alt_ctrl_speech_shortcut"
-    private const val KEY_LAYOUT_AWARE_CTRL_SHORTCUTS = "layout_aware_ctrl_shortcuts"
     private const val KEY_SYM_MAPPINGS_CUSTOM = "sym_mappings_custom"
     private const val KEY_SYM_MAPPINGS_PAGE2_CUSTOM = "sym_mappings_page2_custom"
     private const val KEY_AUTO_CORRECT_ENABLED = "auto_correct_enabled"
-    private const val KEY_AUTO_CORRECT_ENABLED_LANGUAGES = "auto_correct_enabled_languages"
     private const val KEY_SUGGESTIONS_ENABLED = "suggestions_enabled"
     private const val KEY_SNIPPETS_ENABLED = "snippets_enabled"
     private const val KEY_SNIPPETS_PREFIX = "snippets_prefix"
@@ -95,40 +84,10 @@ object SettingsManager {
     private const val KEY_MAX_AUTO_REPLACE_DISTANCE = "max_auto_replace_distance"
     private const val KEY_AUTO_CAPITALIZE_AFTER_PERIOD = "auto_capitalize_after_period"
     private const val KEY_LONG_PRESS_MODIFIER = "long_press_modifier" // "alt", "shift", "variations", or "sym"
-    private const val KEY_KEYBOARD_LAYOUT = "keyboard_layout" // "qwerty", "azerty", etc.
-    private const val KEY_KEYBOARD_LAYOUT_AUTO_BY_LOCALE = "keyboard_layout_auto_by_locale" // If true, resolve layout from subtype/locale mapping
-    const val KEY_KEYBOARD_LAYOUT_AUTO_MAPPING_UPDATED = "keyboard_layout_auto_mapping_updated"
-    private const val KEY_KEYBOARD_LAYOUT_LIST = "keyboard_layout_list" // JSON array of layout ids for cycling
-    private const val KEY_ALT_SHIFT_LAYOUT_SWITCH = "alt_shift_layout_switch" // Enable Alt+Shift shortcut for layout cycling
-    private const val KEY_ALT_SHIFT_DEFAULT_INITIALIZED = "alt_shift_default_initialized"
     private const val KEY_TITAN2_ELITE_ROUNDED_CORNERS_ENFORCED_V1 =
         "titan2_elite_rounded_corners_enforced_v1"
-    private const val KEY_ALT_ENTER_LAYOUT_SWITCH = "alt_enter_layout_switch" // Enable Alt+Enter shortcut for layout cycling
-    private const val KEY_CTRL_SPACE_LAYOUT_SWITCH = "ctrl_space_layout_switch" // Enable Ctrl+Space shortcut for layout cycling
-    private const val KEY_PHYSICAL_KEYBOARD_PROFILE_OVERRIDE = "physical_keyboard_profile_override" // auto | key2 | Q25 | titan | titan2 | titan2elite_qwerty | mp01 | clicks_razr | clicks_pixel | clicks_power
+    private const val KEY_PHYSICAL_KEYBOARD_PROFILE_OVERRIDE = "physical_keyboard_profile_override" // auto | titan | titan2 | titan2elite_qwerty
     private const val KEY_PHYSICAL_KEYBOARD_CURRENCY_SYMBOL = "physical_keyboard_currency_symbol" // Currency symbol for dedicated hardware keys
-    private const val KEY_CLICKS_CLOSE_INPUT_ON_DISCONNECT = "clicks_close_input_on_disconnect"
-    private const val KEY_CLICKS_SHOW_KEYBOARD_ONLY_WITH_TEXT_FOCUS = "clicks_show_keyboard_only_with_text_focus"
-    private const val KEY_CLICKS_BLUETOOTH_PERMISSION_EXPLAINED = "clicks_bluetooth_permission_explained"
-    private const val KEY_CLICKS_CHARGING_AUTOMATION = "clicks_charging_automation"
-    private const val KEY_CLICKS_CHARGING_START_PERCENT = "clicks_charging_start_percent"
-    private const val KEY_CLICKS_CHARGING_STOP_PERCENT = "clicks_charging_stop_percent"
-    private const val KEY_CLICKS_MANUAL_CHARGING_UNTIL = "clicks_manual_charging_until"
-    private const val KEY_CLICKS_OVERLAPPING_KEYS_ENABLED = "clicks_overlapping_keys_enabled"
-    private const val KEY_CLICKS_OVERLAPPING_KEYS_MODE = "clicks_overlapping_keys_mode"
-    private const val KEY_CLICKS_NUMBER_ROW_INPUT_MODE = "clicks_number_row_input_mode"
-    private const val KEY_CLICKS_NUMBER_ROW_REPEAT_ENABLED = "clicks_number_row_repeat_enabled"
-    private const val KEY_CLICKS_POWER_KEYBOARD_SNAPSHOTS = "clicks_power_keyboard_snapshots_v1"
-    private const val KEY_CLICKS_BUTTON_MODE = "clicks_button_mode"
-    private const val KEY_CLICKS_META_BUTTON_MODE = "clicks_meta_button_mode"
-    private const val KEY_CLICKS_ALT_BUTTON_MODE = "clicks_alt_button_mode"
-    private const val KEY_CLICKS_MICROPHONE_BUTTON_MODE = "clicks_microphone_button_mode"
-    private const val KEY_CLICKS_RED_BUTTON_BINDING_CHOICE = "clicks_red_button_binding_choice"
-    private const val KEY_CLICKS_RED_BUTTON_BINDING_OUTPUT = "clicks_red_button_binding_output"
-    private const val KEY_CLICKS_KEYBOARD_BUTTON_BINDING_CHOICE = "clicks_keyboard_button_binding_choice"
-    private const val KEY_CLICKS_KEYBOARD_BUTTON_BINDING_OUTPUT = "clicks_keyboard_button_binding_output"
-    private const val KEY_CLICKS_MICROPHONE_BUTTON_BINDING_CHOICE = "clicks_microphone_button_binding_choice"
-    private const val KEY_CLICKS_MICROPHONE_BUTTON_BINDING_OUTPUT = "clicks_microphone_button_binding_output"
     private const val KEY_RESTORE_SYM_PAGE = "restore_sym_page" // SYM page to restore when returning from settings
     private const val KEY_PENDING_RESTORE_SYM_PAGE = "pending_restore_sym_page" // Temporary SYM page state saved when opening settings
     private const val KEY_SYM_PAGES_CONFIG = "sym_pages_config" // Order/enabled pages for SYM
@@ -142,26 +101,15 @@ object SettingsManager {
     private const val KEY_ALT_LATCH_STAYS_ON_SPACE = "alt_latch_stays_on_space"
     private const val KEY_CTRL_LATCH_STAYS_ON_SPACE = "ctrl_latch_stays_on_space"
     private const val KEY_EMOJI_PICKER_EXPANDED_HEIGHT = "emoji_picker_expanded_height"
-    private const val KEY_DISMISSED_RELEASES = "dismissed_releases" // Set of release tag_names that were dismissed
     private const val KEY_TUTORIAL_COMPLETED = "tutorial_completed" // Whether the first-run tutorial has been completed
-    private const val KEY_LAST_SEEN_WHATS_NEW_VERSION = "last_seen_whats_new_version"
     private const val KEY_SWIPE_INCREMENTAL_THRESHOLD = "swipe_incremental_threshold" // Distance in DIP for cursor movement
     private const val KEY_STATIC_VARIATION_BAR_MODE = "static_variation_bar_mode" // Use static variation bar instead of dynamic cursor-based variations
     private const val KEY_STATIC_VARIATION_BAR_PRESET = "static_variation_bar_preset"
     private const val KEY_STATIC_VARIATION_BAR_BASE_LAYER_ENABLED = "static_variation_bar_base_layer_enabled" // Toggle top-row preset
     private const val KEY_STATIC_VARIATION_BAR_MODIFIER_HOLD_RESTORATION = "static_variation_bar_modifier_hold_restoration"
     private const val KEY_VARIATIONS_UPDATED = "variations_updated" // Trigger for reloading variations in input method service
-    private const val KEY_ADDITIONAL_IME_SUBTYPES = "additional_ime_subtypes" // Comma-separated list of language codes for additional IME subtypes
     private const val KEY_CLIPBOARD_HISTORY_ENABLED = "clipboard_history_enabled" // Whether clipboard history is enabled
     private const val KEY_CLIPBOARD_RETENTION_TIME = "clipboard_retention_time" // How long to keep clipboard entries (in minutes)
-    private const val KEY_TRACKPAD_GESTURES_ENABLED = "trackpad_gestures_enabled" // Whether trackpad gesture suggestions are enabled
-    private const val KEY_TRACKPAD_GESTURE_ADD_WORD_ENABLED = "trackpad_gesture_add_word_enabled" // Whether suggestion gestures can trigger add-word
-    private const val KEY_TRACKPAD_GESTURE_ADD_WORD_FULL_WIDTH_ENABLED = "trackpad_gesture_add_word_full_width_enabled"
-    private const val KEY_TRACKPAD_SWIPE_THRESHOLD = "trackpad_swipe_threshold" // Threshold for swipe detection on trackpad
-    private const val KEY_TRACKPAD_SUGGESTION_SWIPE_THRESHOLD = "trackpad_suggestion_swipe_threshold"
-    private const val KEY_TRACKPAD_DELETE_SWIPE_THRESHOLD = "trackpad_delete_swipe_threshold"
-    private const val KEY_TRACKPAD_PROVIDER = "trackpad_provider" // shizuku | native_ime
-    private const val KEY_TRACKPAD_SHIZUKU_DEVICE = "trackpad_shizuku_device"
     private const val KEY_SHIFT_BACKSPACE_DELETE = "shift_backspace_delete" // Shift + Backspace performs forward delete
     private const val KEY_ALT_BACKSPACE_DELETE = "alt_backspace_delete" // Alt + Backspace performs forward delete
     private const val KEY_BACKSPACE_AT_START_DELETE = "backspace_at_start_delete" // Backspace at line start performs forward delete
@@ -192,8 +140,6 @@ object SettingsManager {
     private const val KEY_BOUNCE_KEYS_ENTER_ENABLED = "bounce_keys_enter_enabled"
     private const val KEY_BOUNCE_KEYS_BACKSPACE_ENABLED = "bounce_keys_backspace_enabled"
     private const val KEY_OVERLAPPING_KEYS_ENABLED = "overlapping_keys_enabled"
-    private const val KEY_GLOBAL_VARIATION_LAYOUT_OVERRIDE = "global_variation_layout_override" // Optional layout id used for variation ordering across all layouts
-    private const val KEY_APP_LANGUAGE_TAG = "app_language_tag" // BCP-47 language tag for app UI (null/blank = system)
     private const val KEY_APP_ENTER_BEHAVIOR_ENABLED = "app_enter_behavior_enabled"
     private const val KEY_APP_ENTER_BEHAVIOR_PRESET = "app_enter_behavior_preset"
     private const val KEY_APP_ENTER_BEHAVIOR_OVERRIDES = "app_enter_behavior_overrides"
@@ -205,8 +151,9 @@ object SettingsManager {
     private const val KEY_KEYBOARD_THEME_LIGHT_SOFTWARE = "keyboard_theme_light_software"
     private const val KEY_KEYBOARD_THEME_DARK_HARDWARE = "keyboard_theme_dark_hardware"
     private const val KEY_KEYBOARD_THEME_DARK_SOFTWARE = "keyboard_theme_dark_software"
-    private const val KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_HARDWARE = "keyboard_theme_layout_overrides_hardware"
-    private const val KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_SOFTWARE = "keyboard_theme_layout_overrides_software"
+    // Written by 1.0.1 and earlier; read once by migrateKeyboardThemeLayoutOverrides, then removed.
+    private const val LEGACY_KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_HARDWARE = "keyboard_theme_layout_overrides_hardware"
+    private const val LEGACY_KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_SOFTWARE = "keyboard_theme_layout_overrides_software"
     const val KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED = "fixed"
     const val KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM = "follow_system"
     const val KEYBOARD_THEME_PREVIEW_VIEWPORT_SCALE_MIN = 1f
@@ -235,7 +182,8 @@ object SettingsManager {
     const val STATUS_BAR_BUTTON_CLIPBOARD = "clipboard"
     const val STATUS_BAR_BUTTON_MICROPHONE = "microphone"
     const val STATUS_BAR_BUTTON_EMOJI = "emoji"
-    const val STATUS_BAR_BUTTON_LANGUAGE = "language"
+    // Removed with other languages; a saved "language" button becomes the emoji button.
+    private const val LEGACY_STATUS_BAR_BUTTON_LANGUAGE = "language"
     const val STATUS_BAR_BUTTON_HAMBURGER = "hamburger"
     const val STATUS_BAR_BUTTON_MINIMAL_UI = "minimal_ui"
     const val STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE = "software_keyboard_mode"
@@ -279,7 +227,7 @@ object SettingsManager {
     private const val DEFAULT_SLOT_LEFT = STATUS_BAR_BUTTON_HAMBURGER
     private const val DEFAULT_SLOT_RIGHT_1 = STATUS_BAR_BUTTON_EMOJI
     private const val DEFAULT_SLOT_RIGHT_2 = STATUS_BAR_BUTTON_MICROPHONE
-    private const val DEFAULT_PASTIERINA_SLOT_LEFT = STATUS_BAR_BUTTON_LANGUAGE
+    private const val DEFAULT_PASTIERINA_SLOT_LEFT = STATUS_BAR_BUTTON_EMOJI
     private const val DEFAULT_PASTIERINA_SLOT_RIGHT = STATUS_BAR_BUTTON_HAMBURGER
     private const val DEFAULT_STATUS_BAR_VARIATIONS_VISIBLE = true
     private const val DEFAULT_DYNAMIC_VARIATION_BAR_SLOT_COUNT = 7
@@ -326,51 +274,31 @@ object SettingsManager {
     const val DASH_STYLE_EM = "em_dash"
     private const val DEFAULT_SPACED_HYPHEN_DASH_STYLE = DASH_STYLE_EN
     private const val DEFAULT_MID_WORD_QUOTE_TO_APOSTROPHE = false
-    private const val DEFAULT_FRENCH_PUNCTUATION_SPACING = false
-    private const val DEFAULT_FRENCH_PUNCTUATION_ONLY_FRENCH = false
     private const val DEFAULT_COMMA_SPACE = false
     private const val DEFAULT_AUTO_SPACE_PUNCTUATION = Punctuation.DEFAULT_AUTO_SPACE
     private const val DEFAULT_SPACE_AFTER_PUNCTUATION = ""
     private const val DEFAULT_SMART_QUOTES = false
-    const val SMART_QUOTES_STYLE_GERMAN_GUILLEMETS = "german_guillemets"
-    const val SMART_QUOTES_STYLE_FRENCH_GUILLEMETS = "french_guillemets"
-    const val SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED = "french_guillemets_narrow_spaced"
-    const val SMART_QUOTES_STYLE_GERMAN_LOW_HIGH = "german_low_high"
-    const val SMART_QUOTES_STYLE_ENGLISH_CURLY = "english_curly"
-    private const val DEFAULT_SMART_QUOTES_STYLE = SMART_QUOTES_STYLE_GERMAN_GUILLEMETS
-    private const val DEFAULT_SWIPE_TO_DELETE = false
     // Numen stays silent by default: the hardware keyboard needs no on-screen bar until SYM.
-    private val DEFAULT_AUTO_SHOW_KEYBOARD = BuildConfig.UPSTREAM_BRANDING
+    private val DEFAULT_AUTO_SHOW_KEYBOARD = false
     private const val DEFAULT_CLEAR_ALT_ON_SPACE = true
     private const val DEFAULT_ALT_CTRL_SPEECH_SHORTCUT = true
-    private const val DEFAULT_LAYOUT_AWARE_CTRL_SHORTCUTS = false
     private const val DEFAULT_AUTO_CORRECT_ENABLED = true
     private const val DEFAULT_SUGGESTIONS_ENABLED = true
     private const val DEFAULT_SNIPPETS_ENABLED = false
     private const val DEFAULT_SNIPPETS_PREFIX = "!"
     private const val DEFAULT_ACCENT_MATCHING_ENABLED = true
     // Autocorrect starts on in Numen and off in Pastiera.
-    private val DEFAULT_AUTO_REPLACE_ON_SPACE_ENTER = !BuildConfig.UPSTREAM_BRANDING
+    private val DEFAULT_AUTO_REPLACE_ON_SPACE_ENTER = true
     private const val DEFAULT_MAX_AUTO_REPLACE_DISTANCE = 1
     private const val DEFAULT_AUTO_CAPITALIZE_AFTER_PERIOD = true
     private const val DEFAULT_LONG_PRESS_MODIFIER = "alt"
     private const val DEFAULT_KEYBOARD_LAYOUT = "qwerty"
-    private const val DEFAULT_KEYBOARD_LAYOUT_AUTO_BY_LOCALE = true
-    private const val DEFAULT_ALT_SHIFT_LAYOUT_SWITCH = false
-    private const val DEFAULT_ALT_ENTER_LAYOUT_SWITCH = false
-    private const val DEFAULT_CTRL_SPACE_LAYOUT_SWITCH = true
-    private const val KEY_TOAST_ON_LAYOUT_SWITCH = "toast_on_layout_switch"
-    private const val DEFAULT_TOAST_ON_LAYOUT_SWITCH = true
     private const val KEY_SOFTWARE_KEYBOARD_MODE_TOGGLE_TOASTS = "software_keyboard_mode_toggle_toasts"
     private const val DEFAULT_SOFTWARE_KEYBOARD_MODE_TOGGLE_TOASTS = true
     private const val DEFAULT_SOFTWARE_KEYBOARD_LONG_PRESS_LAYER_POPUP_ENABLED = true
     private const val DEFAULT_SOFTWARE_KEYBOARD_LONG_PRESS_LAYER_POPUP_BELOW_KEY = true
     private const val DEFAULT_PHYSICAL_KEYBOARD_PROFILE_OVERRIDE = "auto"
     private const val DEFAULT_PHYSICAL_KEYBOARD_CURRENCY_SYMBOL = "€"
-    private const val DEFAULT_CLICKS_CLOSE_INPUT_ON_DISCONNECT = false
-    private const val DEFAULT_CLICKS_SHOW_KEYBOARD_ONLY_WITH_TEXT_FOCUS = true
-    private const val DEFAULT_CLICKS_CHARGING_START_PERCENT = 50
-    private const val DEFAULT_CLICKS_CHARGING_STOP_PERCENT = 55
     private const val DEFAULT_SYM_AUTO_CLOSE = true
     private const val DEFAULT_SYM_AUTO_CLOSE_ON_TOUCH = true
     private const val DEFAULT_MODIFIER_TAP_LATCHES = false
@@ -403,42 +331,18 @@ object SettingsManager {
 
     private const val DEFAULT_USE_KEYBOARD_PROXIMITY = false
     private const val DEFAULT_USE_EDIT_TYPE_RANKING = false
-    private val DEFAULT_AGGRESSIVE_AUTO_REPLACE = !BuildConfig.UPSTREAM_BRANDING
+    private val DEFAULT_AGGRESSIVE_AUTO_REPLACE = true
     // Sentence-aware fixes start on in Numen and off in Pastiera.
-    private val DEFAULT_CONTEXT_AWARE_CORRECTION = !BuildConfig.UPSTREAM_BRANDING
+    private val DEFAULT_CONTEXT_AWARE_CORRECTION = true
     private const val DEFAULT_IME_OVERLAY_DEBUG_LOGGING = false
     private const val DEFAULT_CLIPBOARD_HISTORY_ENABLED = true
     private const val DEFAULT_CLIPBOARD_RETENTION_TIME = 120L // 2 hours in minutes
-    private const val DEFAULT_TRACKPAD_GESTURES_ENABLED = false
-    private const val DEFAULT_TRACKPAD_GESTURE_ADD_WORD_ENABLED = true
-    private const val DEFAULT_TRACKPAD_GESTURE_ADD_WORD_FULL_WIDTH_ENABLED = true
-    private const val DEFAULT_TRACKPAD_SWIPE_THRESHOLD = 500f
-    private const val DEFAULT_TRACKPAD_SUGGESTION_SWIPE_THRESHOLD = DEFAULT_TRACKPAD_SWIPE_THRESHOLD
-    private const val DEFAULT_TRACKPAD_DELETE_SWIPE_THRESHOLD = DEFAULT_TRACKPAD_SWIPE_THRESHOLD
-    private const val MIN_TRACKPAD_SWIPE_THRESHOLD = 120f
-    private const val MAX_TRACKPAD_SWIPE_THRESHOLD = 750f
-    const val TRACKPAD_PROVIDER_SHIZUKU = "shizuku"
-    const val TRACKPAD_PROVIDER_NATIVE_IME = "native_ime"
-    const val TRACKPAD_SHIZUKU_DEVICE_AUTO = "auto"
-    private const val DEFAULT_TRACKPAD_PROVIDER = TRACKPAD_PROVIDER_NATIVE_IME
-    private val TRACKPAD_PROVIDER_VALUES = setOf(
-        TRACKPAD_PROVIDER_SHIZUKU,
-        TRACKPAD_PROVIDER_NATIVE_IME
-    )
-    const val SWIPE_TO_DELETE_PROVIDER_TITAN2_KEYCODE = "titan2_keycode"
-    const val SWIPE_TO_DELETE_PROVIDER_NATIVE_IME = "native_ime"
-    private const val DEFAULT_SWIPE_TO_DELETE_PROVIDER = SWIPE_TO_DELETE_PROVIDER_NATIVE_IME
-    private val SWIPE_TO_DELETE_PROVIDER_VALUES = setOf(
-        SWIPE_TO_DELETE_PROVIDER_TITAN2_KEYCODE,
-        SWIPE_TO_DELETE_PROVIDER_NATIVE_IME
-    )
     private const val DEFAULT_SHIFT_BACKSPACE_DELETE = false
     private const val DEFAULT_ALT_BACKSPACE_DELETE = false
     private const val DEFAULT_BACKSPACE_AT_START_DELETE = false
     private const val DEFAULT_ACCESSIBILITY_LIVE_ANNOUNCEMENTS_ENABLED = false
     private const val DEFAULT_ACCESSIBILITY_READ_SECOND_ROW_ENABLED = false
     private const val DEFAULT_ACCESSIBILITY_SUGGESTIONS_ANNOUNCEMENT_DELAY_MS = 500L
-    private const val DEFAULT_GLOBAL_VARIATION_LAYOUT_OVERRIDE = ""
     private const val MIN_ACCESSIBILITY_SUGGESTIONS_ANNOUNCEMENT_DELAY_MS = 100L
     private const val MAX_ACCESSIBILITY_SUGGESTIONS_ANNOUNCEMENT_DELAY_MS = 2000L
     private val STATIC_VARIATION_BASE_PRESET_DEFAULT = listOf("@", "\"", ":", "!", "?", ",", ".")
@@ -542,27 +446,11 @@ object SettingsManager {
         val populatedFields: Set<String> = emptySet()
     )
 
-    data class KeyboardThemeLayoutOverride(
-        val locale: String?,
-        val layout: String?,
-        val theme: KeyboardThemeSettings
-    )
-
     /**
      * Returns the SharedPreferences instance for Pastiera.
      */
     fun getPreferences(context: Context): SharedPreferences {
         return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
-    }
-
-    fun getAppLanguageTag(context: Context): String? {
-        return getPreferences(context).getString(KEY_APP_LANGUAGE_TAG, null)?.takeIf { it.isNotBlank() }
-    }
-
-    fun setAppLanguageTag(context: Context, languageTag: String?) {
-        getPreferences(context).edit()
-            .putString(KEY_APP_LANGUAGE_TAG, languageTag?.takeIf { it.isNotBlank() })
-            .apply()
     }
 
     fun getStatusBarPresentationMode(context: Context): StatusBarPresentationMode {
@@ -851,10 +739,10 @@ object SettingsManager {
             KeyboardThemeTarget.SOFTWARE -> KEY_KEYBOARD_THEME_DARK_SOFTWARE
         }
 
-    private fun keyboardThemeLayoutOverridesKeyForTarget(target: KeyboardThemeTarget): String =
+    private fun legacyKeyboardThemeLayoutOverridesKeyForTarget(target: KeyboardThemeTarget): String =
         when (target) {
-            KeyboardThemeTarget.HARDWARE -> KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_HARDWARE
-            KeyboardThemeTarget.SOFTWARE -> KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_SOFTWARE
+            KeyboardThemeTarget.HARDWARE -> LEGACY_KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_HARDWARE
+            KeyboardThemeTarget.SOFTWARE -> LEGACY_KEY_KEYBOARD_THEME_LAYOUT_OVERRIDES_SOFTWARE
         }
 
     fun isKeyboardThemePreferenceKey(key: String?): Boolean {
@@ -921,7 +809,7 @@ object SettingsManager {
                 keyAlternatesPopupEnabled = json.optBoolean("key_alternates_popup_enabled", defaults.keyAlternatesPopupEnabled)
             )
         } catch (error: Exception) {
-            Log.e(TAG, "Fehler beim Laden des Keyboard-Themes", error)
+            Log.e(TAG, "Error loading keyboard theme", error)
             defaults
         }
     }
@@ -960,7 +848,7 @@ object SettingsManager {
         return try {
             keyboardThemeFromJson(JSONObject(stored), defaults)
         } catch (error: Exception) {
-            Log.e(TAG, "Fehler beim Laden des System-Keyboard-Themes", error)
+            Log.e(TAG, "Error loading system keyboard theme", error)
             defaults
         }
     }
@@ -983,16 +871,6 @@ object SettingsManager {
     }
 
     fun getEffectiveKeyboardTheme(context: Context, target: KeyboardThemeTarget): KeyboardThemeSettings {
-        return getEffectiveKeyboardTheme(context, target, locale = null, layout = null)
-    }
-
-    fun getEffectiveKeyboardTheme(
-        context: Context,
-        target: KeyboardThemeTarget,
-        locale: String?,
-        layout: String?
-    ): KeyboardThemeSettings {
-        findKeyboardThemeLayoutOverride(context, target, locale, layout)?.let { return it.theme }
         return if (getKeyboardThemeAssignmentMode(context, target) == KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
             getKeyboardThemeSystemSlot(context, target, dark = isSystemDarkTheme(context))
         } else {
@@ -1000,140 +878,62 @@ object SettingsManager {
         }
     }
 
-    fun getKeyboardThemeLayoutOverrides(
-        context: Context,
-        target: KeyboardThemeTarget
-    ): List<KeyboardThemeLayoutOverride> {
-        val stored = getPreferences(context).getString(keyboardThemeLayoutOverridesKeyForTarget(target), null)
-            ?: return emptyList()
-        return try {
-            val array = JSONArray(stored)
-            buildList {
-                for (index in 0 until array.length()) {
-                    val item = array.optJSONObject(index) ?: continue
-                    val locale = item.optString("locale", "").trim().takeIf { it.isNotBlank() }
-                    val layout = item.optString("layout", "").trim().takeIf { it.isNotBlank() }
-                    if (locale == null && layout == null) continue
-                    val themeObject = item.optJSONObject("theme") ?: continue
-                    add(
-                        KeyboardThemeLayoutOverride(
-                            locale = locale?.let(::normalizeKeyboardThemeOverrideLocale),
-                            layout = layout,
-                            theme = keyboardThemeFromJson(themeObject, defaultKeyboardTheme(target))
-                        )
-                    )
+    /**
+     * 1.0.1 and earlier could give a theme override to a language or layout. Numen has one input
+     * style (en-US, qwerty), so the override that matched it becomes the fixed theme, keeping what
+     * the user sees, and the rest are dropped. Does nothing once the old keys are gone.
+     */
+    fun migrateKeyboardThemeLayoutOverrides(context: Context) {
+        val prefs = getPreferences(context)
+        KeyboardThemeTarget.entries.forEach { target ->
+            val legacyKey = legacyKeyboardThemeLayoutOverridesKeyForTarget(target)
+            if (!prefs.contains(legacyKey)) return@forEach
+            val theme = prefs.getString(legacyKey, null)
+                ?.let { legacyThemeOverrideForInputStyle(it, defaultKeyboardTheme(target)) }
+            prefs.edit().apply {
+                if (theme != null) {
+                    putString(keyboardThemeKeyForTarget(target), keyboardThemeToJson(theme).toString())
+                    putString(keyboardThemeAssignmentModeKeyForTarget(target), KEYBOARD_THEME_ASSIGNMENT_MODE_FIXED)
                 }
-            }
-        } catch (error: Exception) {
-            Log.e(TAG, "Fehler beim Laden der Keyboard-Theme-Overrides", error)
-            emptyList()
+                remove(legacyKey)
+            }.apply()
         }
     }
 
-    fun setKeyboardThemeLayoutOverrides(
-        context: Context,
-        target: KeyboardThemeTarget,
-        overrides: List<KeyboardThemeLayoutOverride>
-    ) {
-        val array = JSONArray()
-        overrides
-            .mapNotNull { override ->
-                val locale = override.locale?.let(::normalizeKeyboardThemeOverrideLocale)?.takeIf { it.isNotBlank() }
-                val layout = override.layout?.trim()?.takeIf { it.isNotBlank() }
-                if (locale == null && layout == null) {
-                    null
-                } else {
-                    JSONObject().apply {
-                        if (locale != null) put("locale", locale)
-                        if (layout != null) put("layout", layout)
-                        put("theme", keyboardThemeToJson(override.theme))
-                    }
-                }
+    /** The old override that applied to en-US / qwerty: exact locale beats language, both beat layout only. */
+    private fun legacyThemeOverrideForInputStyle(
+        stored: String,
+        defaults: KeyboardThemeSettings
+    ): KeyboardThemeSettings? = try {
+        val overrides = JSONArray(stored)
+        var best: JSONObject? = null
+        var bestScore = 0
+        for (index in 0 until overrides.length()) {
+            val item = overrides.optJSONObject(index) ?: continue
+            val themeObject = item.optJSONObject("theme") ?: continue
+            val locale = item.optString("locale", "").trim().replace('_', '-')
+            val layout = item.optString("layout", "").trim()
+            val localeScore = when {
+                locale.isEmpty() -> 0
+                locale.equals("en-US", ignoreCase = true) -> 16
+                locale.substringBefore('-').equals("en", ignoreCase = true) -> 8
+                else -> continue
             }
-            .forEach { array.put(it) }
-
-        getPreferences(context).edit()
-            .putString(keyboardThemeLayoutOverridesKeyForTarget(target), array.toString())
-            .apply()
-    }
-
-    fun upsertKeyboardThemeLayoutOverride(
-        context: Context,
-        target: KeyboardThemeTarget,
-        locale: String?,
-        layout: String?,
-        theme: KeyboardThemeSettings
-    ) {
-        val normalizedLocale = locale?.let(::normalizeKeyboardThemeOverrideLocale)?.takeIf { it.isNotBlank() }
-        val normalizedLayout = layout?.trim()?.takeIf { it.isNotBlank() }
-        if (normalizedLocale == null && normalizedLayout == null) return
-        val updated = getKeyboardThemeLayoutOverrides(context, target)
-            .filterNot { it.locale == normalizedLocale && it.layout == normalizedLayout }
-            .toMutableList()
-        updated += KeyboardThemeLayoutOverride(normalizedLocale, normalizedLayout, theme)
-        setKeyboardThemeLayoutOverrides(context, target, updated)
-    }
-
-    fun removeKeyboardThemeLayoutOverride(
-        context: Context,
-        target: KeyboardThemeTarget,
-        locale: String?,
-        layout: String?
-    ) {
-        val normalizedLocale = locale?.let(::normalizeKeyboardThemeOverrideLocale)?.takeIf { it.isNotBlank() }
-        val normalizedLayout = layout?.trim()?.takeIf { it.isNotBlank() }
-        val updated = getKeyboardThemeLayoutOverrides(context, target)
-            .filterNot { it.locale == normalizedLocale && it.layout == normalizedLayout }
-        setKeyboardThemeLayoutOverrides(context, target, updated)
-    }
-
-    private fun findKeyboardThemeLayoutOverride(
-        context: Context,
-        target: KeyboardThemeTarget,
-        locale: String?,
-        layout: String?
-    ): KeyboardThemeLayoutOverride? {
-        val normalizedLocale = locale?.let(::normalizeKeyboardThemeOverrideLocale)?.takeIf { it.isNotBlank() }
-        val normalizedLanguage = normalizedLocale?.substringBefore('-')
-        val normalizedLayout = layout?.trim()?.takeIf { it.isNotBlank() }
-        return getKeyboardThemeLayoutOverrides(context, target)
-            .mapNotNull { override ->
-                val score = keyboardThemeOverrideMatchScore(
-                    override = override,
-                    locale = normalizedLocale,
-                    language = normalizedLanguage,
-                    layout = normalizedLayout
-                )
-                score?.let { override to it }
+            val layoutScore = when {
+                layout.isEmpty() -> 0
+                layout.equals(DEFAULT_KEYBOARD_LAYOUT, ignoreCase = true) -> 4
+                else -> continue
             }
-            .maxByOrNull { it.second }
-            ?.first
-    }
-
-    private fun keyboardThemeOverrideMatchScore(
-        override: KeyboardThemeLayoutOverride,
-        locale: String?,
-        language: String?,
-        layout: String?
-    ): Int? {
-        var score = 0
-        override.locale?.let { overrideLocale ->
-            val overrideLanguage = overrideLocale.substringBefore('-')
-            score += when {
-                locale != null && overrideLocale.equals(locale, ignoreCase = true) -> 16
-                language != null && overrideLanguage.equals(language, ignoreCase = true) -> 8
-                else -> return null
+            if (localeScore + layoutScore > bestScore) {
+                bestScore = localeScore + layoutScore
+                best = themeObject
             }
         }
-        override.layout?.let { overrideLayout ->
-            if (layout == null || !overrideLayout.equals(layout, ignoreCase = true)) return null
-            score += 4
-        }
-        return if (score > 0) score else null
+        best?.let { keyboardThemeFromJson(it, defaults) }
+    } catch (error: Exception) {
+        Log.e(TAG, "Error migrating keyboard theme overrides", error)
+        null
     }
-
-    private fun normalizeKeyboardThemeOverrideLocale(locale: String): String =
-        locale.trim().replace('_', '-')
 
     fun setKeyboardTheme(
         context: Context,
@@ -1155,7 +955,7 @@ object SettingsManager {
             if (!hasSupportedKeyboardThemeSchema(json)) return null
             keyboardThemeFromJson(json, defaultKeyboardTheme())
         } catch (error: Exception) {
-            Log.e(TAG, "Fehler beim Importieren des Keyboard-Themes", error)
+            Log.e(TAG, "Error importing keyboard theme", error)
             null
         }
     }
@@ -1240,7 +1040,7 @@ object SettingsManager {
                 }
             }
         } catch (error: Exception) {
-            Log.e(TAG, "Fehler beim Laden gespeicherter Keyboard-Themes", error)
+            Log.e(TAG, "Error loading saved keyboard themes", error)
             emptyList()
         }
     }
@@ -1296,7 +1096,7 @@ object SettingsManager {
                 }
             }
         } catch (error: Exception) {
-            Log.e(TAG, "Fehler beim Laden gespeicherter Keyboard-Theme-Entwürfe", error)
+            Log.e(TAG, "Error loading saved keyboard theme drafts", error)
             emptyList()
         }
     }
@@ -1502,28 +1302,6 @@ object SettingsManager {
         }.apply()
     }
 
-    /**
-     * Returns the additional IME subtypes saved in preferences.
-     */
-    fun getAdditionalImeSubtypes(context: Context): Set<String> {
-        return getPreferences(context)
-            .getStringSet(KEY_ADDITIONAL_IME_SUBTYPES, emptySet())
-            ?: emptySet()
-    }
-
-    /**
-     * Persists the additional IME subtypes collection into preferences.
-     */
-    fun setAdditionalImeSubtypes(context: Context, subtypes: Collection<String>) {
-        val normalized = subtypes
-            .map { it.trim() }
-            .filter { it.isNotEmpty() }
-            .toSet()
-
-        getPreferences(context).edit()
-            .putStringSet(KEY_ADDITIONAL_IME_SUBTYPES, normalized)
-            .apply()
-    }
     
     /**
      * Returns the long-press threshold in milliseconds.
@@ -1585,7 +1363,8 @@ object SettingsManager {
     fun getAltLatchStaysOnSpace(context: Context): Boolean {
         return getPreferences(context).getBoolean(
             KEY_ALT_LATCH_STAYS_ON_SPACE,
-            DEFAULT_MODIFIER_LATCH_STAYS_ON_SPACE
+            // Numen: a double-tapped Alt is a number lock, so "555 1234" keeps it on, like Caps Lock.
+            true
         )
     }
 
@@ -1618,10 +1397,6 @@ object SettingsManager {
      */
     fun getMaxLongPressThreshold(): Long = MAX_LONG_PRESS_THRESHOLD
     
-    /**
-     * Returns the default value for the long-press threshold.
-     */
-    fun getDefaultLongPressThreshold(): Long = DEFAULT_LONG_PRESS_THRESHOLD
 
     fun getTypingSoundMode(context: Context): String {
         val mode = getPreferences(context).getString(KEY_TYPING_SOUND_MODE, DEFAULT_TYPING_SOUND_MODE)
@@ -1870,10 +1645,6 @@ object SettingsManager {
      */
     fun getMaxSwipeIncrementalThreshold(): Float = MAX_SWIPE_INCREMENTAL_THRESHOLD
     
-    /**
-     * Returns the default value for the swipe incremental threshold.
-     */
-    fun getDefaultSwipeIncrementalThreshold(): Float = DEFAULT_SWIPE_INCREMENTAL_THRESHOLD
     
     /**
      * Returns the state of auto-capitalization for the first letter.
@@ -2000,56 +1771,6 @@ object SettingsManager {
             .apply()
     }
 
-    fun getFrenchPunctuationSpacing(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_FRENCH_PUNCTUATION_SPACING,
-            DEFAULT_FRENCH_PUNCTUATION_SPACING
-        )
-    }
-
-    fun setFrenchPunctuationSpacing(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_FRENCH_PUNCTUATION_SPACING, enabled)
-            .apply()
-    }
-
-    fun getFrenchPunctuationOnlyFrenchLayouts(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_FRENCH_PUNCTUATION_ONLY_FRENCH,
-            DEFAULT_FRENCH_PUNCTUATION_ONLY_FRENCH
-        )
-    }
-
-    fun setFrenchPunctuationOnlyFrenchLayouts(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_FRENCH_PUNCTUATION_ONLY_FRENCH, enabled)
-            .apply()
-    }
-
-    fun shouldApplyFrenchPunctuationSpacing(context: Context): Boolean {
-        if (!getFrenchPunctuationSpacing(context)) return false
-        if (!getFrenchPunctuationOnlyFrenchLayouts(context)) return true
-        return currentImeLanguage(context) == "fr"
-    }
-
-    private fun currentImeLanguage(context: Context): String? {
-        val imm = context.getSystemService(InputMethodManager::class.java) ?: return null
-        val localeString = imm.currentInputMethodSubtype?.localeString() ?: return null
-        return try {
-            AdditionalSubtypeUtils.localeFromSubtypeString(localeString)
-                .language
-                .lowercase()
-                .takeIf { it.isNotBlank() }
-        } catch (e: Exception) {
-            Log.w(TAG, "Failed to parse current IME locale: $localeString", e)
-            localeString
-                .replace('_', '-')
-                .substringBefore('-')
-                .lowercase()
-                .takeIf { it.isNotBlank() }
-        }
-    }
-
     fun getCommaSpace(context: Context): Boolean {
         return getPreferences(context).getBoolean(
             KEY_COMMA_SPACE,
@@ -2107,72 +1828,8 @@ object SettingsManager {
             .apply()
     }
 
-    fun getSmartQuotesStyle(context: Context): String {
-        val stored = getPreferences(context).getString(KEY_SMART_QUOTES_STYLE, DEFAULT_SMART_QUOTES_STYLE)
-        return when (stored) {
-            SMART_QUOTES_STYLE_GERMAN_GUILLEMETS,
-            SMART_QUOTES_STYLE_FRENCH_GUILLEMETS,
-            SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED,
-            SMART_QUOTES_STYLE_GERMAN_LOW_HIGH,
-            SMART_QUOTES_STYLE_ENGLISH_CURLY -> stored
-            else -> DEFAULT_SMART_QUOTES_STYLE
-        }
-    }
-
-    fun setSmartQuotesStyle(context: Context, style: String) {
-        getPreferences(context).edit()
-            .putString(
-                KEY_SMART_QUOTES_STYLE,
-                when (style) {
-                    SMART_QUOTES_STYLE_GERMAN_GUILLEMETS,
-                    SMART_QUOTES_STYLE_FRENCH_GUILLEMETS,
-                    SMART_QUOTES_STYLE_FRENCH_GUILLEMETS_NARROW_SPACED,
-                    SMART_QUOTES_STYLE_GERMAN_LOW_HIGH,
-                    SMART_QUOTES_STYLE_ENGLISH_CURLY -> style
-                    else -> DEFAULT_SMART_QUOTES_STYLE
-                }
-            )
-            .apply()
-    }
     
-    /**
-     * Returns the state of swipe-to-delete.
-     */
-    fun getSwipeToDelete(context: Context): Boolean {
-        return getPreferences(context).getBoolean(KEY_SWIPE_TO_DELETE, DEFAULT_SWIPE_TO_DELETE)
-    }
-    
-    /**
-     * Sets the state of swipe-to-delete.
-     */
-    fun setSwipeToDelete(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_SWIPE_TO_DELETE, enabled)
-            .apply()
-    }
 
-    fun getSwipeToDeleteProvider(context: Context): String {
-        val value = getPreferences(context).getString(
-            KEY_SWIPE_TO_DELETE_PROVIDER,
-            DEFAULT_SWIPE_TO_DELETE_PROVIDER
-        ).orEmpty()
-        return if (SWIPE_TO_DELETE_PROVIDER_VALUES.contains(value)) {
-            value
-        } else {
-            DEFAULT_SWIPE_TO_DELETE_PROVIDER
-        }
-    }
-
-    fun setSwipeToDeleteProvider(context: Context, provider: String) {
-        val normalized = if (SWIPE_TO_DELETE_PROVIDER_VALUES.contains(provider)) {
-            provider
-        } else {
-            DEFAULT_SWIPE_TO_DELETE_PROVIDER
-        }
-        getPreferences(context).edit()
-            .putString(KEY_SWIPE_TO_DELETE_PROVIDER, normalized)
-            .commit()
-    }
     
     /**
      * Returns the state of automatically showing the keyboard when a field gains focus.
@@ -2203,134 +1860,6 @@ object SettingsManager {
     fun setAltCtrlSpeechShortcutEnabled(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
             .putBoolean(KEY_ALT_CTRL_SPEECH_SHORTCUT, enabled)
-            .apply()
-    }
-
-    enum class ClicksPowerButtonMode(val persistedValue: String) {
-        NATIVE("native"),
-        QUICK_LAUNCHER("quick_launcher"),
-        OPEN_PASTIERA("open_pastiera"),
-        TOGGLE_KEYBOARD_MODE("toggle_keyboard_mode"),
-        TOGGLE_EMOJI_PICKER("toggle_emoji_picker"),
-        ALT("alt"),
-        TAB("tab"),
-        SYM("sym");
-
-        companion object {
-            fun fromPersistedValue(value: String?): ClicksPowerButtonMode =
-                entries.firstOrNull { it.persistedValue == value } ?: NATIVE
-        }
-    }
-
-    fun getClicksButtonMode(context: Context): ClicksPowerButtonMode =
-        ClicksPowerButtonMode.fromPersistedValue(
-            getPreferences(context).getString(KEY_CLICKS_BUTTON_MODE, null)
-        )
-
-    fun setClicksButtonMode(context: Context, mode: ClicksPowerButtonMode) {
-        getPreferences(context).edit().putString(KEY_CLICKS_BUTTON_MODE, mode.persistedValue).apply()
-    }
-
-    fun getClicksMetaButtonMode(context: Context): ClicksPowerButtonMode =
-        ClicksPowerButtonMode.fromPersistedValue(
-            getPreferences(context).getString(KEY_CLICKS_META_BUTTON_MODE, null)
-        )
-
-    fun setClicksMetaButtonMode(context: Context, mode: ClicksPowerButtonMode) {
-        getPreferences(context).edit().putString(KEY_CLICKS_META_BUTTON_MODE, mode.persistedValue).apply()
-    }
-
-    fun getClicksAltButtonMode(context: Context): ClicksPowerButtonMode =
-        ClicksPowerButtonMode.fromPersistedValue(
-            getPreferences(context).getString(KEY_CLICKS_ALT_BUTTON_MODE, null)
-        )
-
-    fun setClicksAltButtonMode(context: Context, mode: ClicksPowerButtonMode) {
-        getPreferences(context).edit().putString(KEY_CLICKS_ALT_BUTTON_MODE, mode.persistedValue).apply()
-    }
-
-    fun getClicksMicrophoneButtonMode(context: Context): ClicksPowerButtonMode =
-        ClicksPowerButtonMode.fromPersistedValue(
-            getPreferences(context).getString(KEY_CLICKS_MICROPHONE_BUTTON_MODE, null)
-        )
-
-    fun setClicksMicrophoneButtonMode(context: Context, mode: ClicksPowerButtonMode) {
-        getPreferences(context).edit()
-            .putString(KEY_CLICKS_MICROPHONE_BUTTON_MODE, mode.persistedValue)
-            .apply()
-    }
-
-    internal fun getClicksDesiredButtonBinding(
-        context: Context,
-        target: ClicksButtonBindingTarget
-    ): ClicksDesiredButtonBinding? {
-        val (choiceKey, outputKey) = clicksDesiredButtonBindingKeys(target)
-        val preferences = getPreferences(context)
-        val choiceId = preferences.getString(choiceKey, null)?.takeIf(String::isNotBlank) ?: return null
-        val output = preferences.getString(outputKey, null)?.decodeClicksRemapOutput() ?: return null
-        return ClicksDesiredButtonBinding(choiceId, output)
-    }
-
-    internal fun setClicksDesiredButtonBinding(
-        context: Context,
-        target: ClicksButtonBindingTarget,
-        binding: ClicksDesiredButtonBinding
-    ) {
-        require(binding.firmwareOutput.size == 2)
-        val (choiceKey, outputKey) = clicksDesiredButtonBindingKeys(target)
-        getPreferences(context).edit()
-            .putString(choiceKey, binding.choiceId)
-            .putString(outputKey, binding.firmwareOutput.encodeClicksRemapOutput())
-            .apply()
-    }
-
-    private fun clicksDesiredButtonBindingKeys(target: ClicksButtonBindingTarget): Pair<String, String> =
-        when (target) {
-            ClicksButtonBindingTarget.RED ->
-                KEY_CLICKS_RED_BUTTON_BINDING_CHOICE to KEY_CLICKS_RED_BUTTON_BINDING_OUTPUT
-            ClicksButtonBindingTarget.KEYBOARD ->
-                KEY_CLICKS_KEYBOARD_BUTTON_BINDING_CHOICE to KEY_CLICKS_KEYBOARD_BUTTON_BINDING_OUTPUT
-            ClicksButtonBindingTarget.MICROPHONE ->
-                KEY_CLICKS_MICROPHONE_BUTTON_BINDING_CHOICE to KEY_CLICKS_MICROPHONE_BUTTON_BINDING_OUTPUT
-        }
-
-    private fun ByteArray.encodeClicksRemapOutput(): String = joinToString(separator = "") {
-        "%02x".format(it.toInt() and 0xff)
-    }
-
-    private fun String.decodeClicksRemapOutput(): ByteArray? {
-        if (length != 4) return null
-        return runCatching {
-            byteArrayOf(substring(0, 2).toInt(16).toByte(), substring(2, 4).toInt(16).toByte())
-        }.getOrNull()
-    }
-
-    internal fun applyClicksRecommendedButtonModes(context: Context): Boolean =
-        getPreferences(context).edit()
-            .putString(KEY_CLICKS_BUTTON_MODE, ClicksPowerButtonMode.QUICK_LAUNCHER.persistedValue)
-            .putString(KEY_CLICKS_META_BUTTON_MODE, ClicksPowerButtonMode.QUICK_LAUNCHER.persistedValue)
-            .putString(KEY_CLICKS_ALT_BUTTON_MODE, ClicksPowerButtonMode.NATIVE.persistedValue)
-            .putString(KEY_CLICKS_MICROPHONE_BUTTON_MODE, ClicksPowerButtonMode.NATIVE.persistedValue)
-            .putBoolean(KEY_ALT_CTRL_SPEECH_SHORTCUT, true)
-            .commit()
-
-    /**
-     * Returns whether Ctrl+letter app shortcuts should be resolved through
-     * the active Pastiera layout before being passed to the target app.
-     */
-    fun getLayoutAwareCtrlShortcutsEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_LAYOUT_AWARE_CTRL_SHORTCUTS,
-            DEFAULT_LAYOUT_AWARE_CTRL_SHORTCUTS
-        )
-    }
-
-    /**
-     * Sets whether Ctrl+letter app shortcuts should use the active Pastiera layout.
-     */
-    fun setLayoutAwareCtrlShortcutsEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_LAYOUT_AWARE_CTRL_SHORTCUTS, enabled)
             .apply()
     }
 
@@ -2395,34 +1924,6 @@ object SettingsManager {
         getPreferences(context).edit()
             .putLong(KEY_ACCESSIBILITY_SUGGESTIONS_ANNOUNCEMENT_DELAY_MS, clamped)
             .apply()
-    }
-
-    /**
-     * Returns the optional global layout id used for variation ordering across all layouts.
-     * Returns null when no override is configured.
-     */
-    fun getGlobalVariationLayoutOverride(context: Context): String? {
-        val stored = getPreferences(context).getString(
-            KEY_GLOBAL_VARIATION_LAYOUT_OVERRIDE,
-            DEFAULT_GLOBAL_VARIATION_LAYOUT_OVERRIDE
-        )?.trim().orEmpty()
-        return stored.ifEmpty { null }
-    }
-
-    /**
-     * Sets the optional global layout id used for variation ordering.
-     * Pass null/blank to disable the override and use per-layout behavior.
-     */
-    fun setGlobalVariationLayoutOverride(context: Context, layoutName: String?) {
-        val normalized = layoutName?.trim().orEmpty()
-        val editor = getPreferences(context).edit()
-        if (normalized.isEmpty()) {
-            editor.remove(KEY_GLOBAL_VARIATION_LAYOUT_OVERRIDE)
-        } else {
-            editor.putString(KEY_GLOBAL_VARIATION_LAYOUT_OVERRIDE, normalized)
-        }
-        editor.apply()
-        notifyVariationsUpdated(context)
     }
 
     fun getMinAccessibilitySuggestionsAnnouncementDelayMs(): Long =
@@ -2618,19 +2119,6 @@ object SettingsManager {
         return getStaticVariationBarPreset(context) != STATIC_VARIATION_PRESET_OFF
     }
 
-    /**
-     * Sets whether the static variation bar mode is enabled.
-     */
-    fun setStaticVariationBarModeEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_STATIC_VARIATION_BAR_MODE, enabled)
-            .putString(
-                KEY_STATIC_VARIATION_BAR_PRESET,
-                if (enabled) STATIC_VARIATION_PRESET_SYMBOLS else STATIC_VARIATION_PRESET_OFF
-            )
-            .apply()
-    }
-
     fun getStaticVariationBarPreset(context: Context): String {
         val prefs = getPreferences(context)
         val stored = prefs.getString(KEY_STATIC_VARIATION_BAR_PRESET, null)
@@ -2680,26 +2168,6 @@ object SettingsManager {
                 staticVariationsAlt = getStaticVariationAltPreset(normalized)
             )
         }
-    }
-
-    /**
-     * Returns whether the base (top) static variation row is enabled.
-     * Shift/Alt static layers remain available independently.
-     */
-    fun isStaticVariationBarBaseLayerEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_STATIC_VARIATION_BAR_BASE_LAYER_ENABLED,
-            DEFAULT_STATIC_VARIATION_BAR_BASE_LAYER_ENABLED
-        )
-    }
-
-    /**
-     * Sets whether the base (top) static variation row is enabled.
-     */
-    fun setStaticVariationBarBaseLayerEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_STATIC_VARIATION_BAR_BASE_LAYER_ENABLED, enabled)
-            .apply()
     }
 
     /**
@@ -2867,13 +2335,6 @@ object SettingsManager {
             .apply()
     }
     
-    /**
-     * Returns true if custom SYM mappings exist.
-     */
-    fun hasCustomSymMappings(context: Context): Boolean {
-        val prefs = getPreferences(context)
-        return prefs.contains(KEY_SYM_MAPPINGS_CUSTOM)
-    }
     
     /**
      * Returns custom SYM mappings for page 2.
@@ -2968,13 +2429,6 @@ object SettingsManager {
             .apply()
     }
     
-    /**
-     * Returns true if custom SYM page 2 mappings exist.
-     */
-    fun hasCustomSymMappingsPage2(context: Context): Boolean {
-        val prefs = getPreferences(context)
-        return prefs.contains(KEY_SYM_MAPPINGS_PAGE2_CUSTOM)
-    }
     
     /**
      * Returns whether auto-correction is enabled.
@@ -3056,23 +2510,11 @@ object SettingsManager {
         return getPreferences(context).getBoolean(KEY_SUGGESTION_DEBUG_LOGGING, DEFAULT_SUGGESTION_DEBUG_LOGGING)
     }
 
-    fun setSuggestionDebugLoggingEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_SUGGESTION_DEBUG_LOGGING, enabled)
-            .apply()
-    }
-
     /**
      * Optional debug logging for IME overlay / inset calculations.
      */
     fun isImeOverlayDebugLoggingEnabled(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_IME_OVERLAY_DEBUG_LOGGING, DEFAULT_IME_OVERLAY_DEBUG_LOGGING)
-    }
-
-    fun setImeOverlayDebugLoggingEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_IME_OVERLAY_DEBUG_LOGGING, enabled)
-            .apply()
     }
 
     /**
@@ -3119,29 +2561,11 @@ object SettingsManager {
     }
 
     /**
-     * Enables or disables keyboard proximity ranking for suggestions.
-     */
-    fun setUseKeyboardProximity(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_USE_KEYBOARD_PROXIMITY, enabled)
-            .apply()
-    }
-
-    /**
      * Returns whether edit type ranking is enabled for suggestions.
      * When enabled, suggestions are ranked by edit type (insert > substitute > delete).
      */
     fun getUseEditTypeRanking(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_USE_EDIT_TYPE_RANKING, DEFAULT_USE_EDIT_TYPE_RANKING)
-    }
-
-    /**
-     * Enables or disables edit type ranking for suggestions.
-     */
-    fun setUseEditTypeRanking(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_USE_EDIT_TYPE_RANKING, enabled)
-            .apply()
     }
 
     /**
@@ -3169,81 +2593,51 @@ object SettingsManager {
             .apply()
     }
 
+    /** Stored JSON of the user's own text replacements (the "_en" suffix predates Numen being English only). */
+    private const val KEY_CUSTOM_AUTO_CORRECTIONS = "auto_correct_custom_en"
+
+    /** Legacy JSON field that held a language display name; skipped when reading. */
+    private const val LEGACY_LANGUAGE_NAME_KEY = "__name"
+
     /**
-     * Returns the list of languages enabled for auto-correction.
-     * @return Set of language codes (e.g. "it", "en")
+     * Returns the user's own text replacements.
      */
-    fun getAutoCorrectEnabledLanguages(context: Context): Set<String> {
-        val prefs = getPreferences(context)
-        val languagesString = prefs.getString(KEY_AUTO_CORRECT_ENABLED_LANGUAGES, null)
-        
-        // If languages are explicitly set, return them as-is (user controlled)
-        if (languagesString != null && languagesString.isNotEmpty()) {
-            return languagesString.split(",").toSet()
-        }
-        
-        // Default: system language + x-pastiera, with fallback to English
-        val systemLanguage = context.applicationContext.resources.configuration.locales[0].language.lowercase()
-        val supportedLanguages = setOf("it", "en", "es", "fr", "de", "pl")
-        
-        val defaultLanguage = if (systemLanguage in supportedLanguages) {
-            systemLanguage
-        } else {
-            "en" // Fallback to English
-        }
-        
-        return setOf(defaultLanguage, "x-pastiera")
-    }
-    
-    /**
-     * Sets the list of languages enabled for auto-correction.
-     * @param languages Set of language codes (e.g. "it", "en")
-     */
-    fun setAutoCorrectEnabledLanguages(context: Context, languages: Set<String>) {
-        val languagesString = languages.joinToString(",")
-        getPreferences(context).edit()
-            .putString(KEY_AUTO_CORRECT_ENABLED_LANGUAGES, languagesString)
-            .apply()
-    }
-    
-    /**
-     * Returns true if a language is enabled for auto-correction.
-     */
-    fun isAutoCorrectLanguageEnabled(context: Context, language: String): Boolean {
-        val enabledLanguages = getAutoCorrectEnabledLanguages(context)
-        // If the list is empty, all languages are enabled (default behavior)
-        return enabledLanguages.isEmpty() || enabledLanguages.contains(language)
-    }
-    
-    /**
-     * Special JSON field for the language name.
-     */
-    private const val LANGUAGE_NAME_KEY = "__name"
-    
-    /**
-     * Returns custom corrections for a language.
-     */
-    fun getCustomAutoCorrections(context: Context, languageCode: String): Map<String, String> {
-        val prefs = getPreferences(context)
-        val key = "auto_correct_custom_$languageCode"
-        val jsonString = prefs.getString(key, null) ?: return emptyMap()
-        
+    fun getCustomAutoCorrections(context: Context): Map<String, String> {
+        val jsonString = getPreferences(context).getString(KEY_CUSTOM_AUTO_CORRECTIONS, null) ?: return emptyMap()
+
         return try {
             val jsonObject = JSONObject(jsonString)
             val corrections = mutableMapOf<String, String>()
             val keys = jsonObject.keys()
             while (keys.hasNext()) {
                 val correctionKey = keys.next()
-                // Skip the special name field
-                if (correctionKey != LANGUAGE_NAME_KEY) {
-                    val value = jsonObject.getString(correctionKey)
-                    corrections[correctionKey] = value
+                if (correctionKey != LEGACY_LANGUAGE_NAME_KEY) {
+                    corrections[correctionKey] = jsonObject.getString(correctionKey)
                 }
             }
             corrections
         } catch (e: Exception) {
-            Log.e(TAG, "Error loading custom corrections for $languageCode", e)
+            Log.e(TAG, "Error loading custom text replacements", e)
             emptyMap()
+        }
+    }
+
+    /**
+     * Saves the user's own text replacements.
+     */
+    fun saveCustomAutoCorrections(context: Context, corrections: Map<String, String>) {
+        try {
+            val jsonObject = JSONObject()
+            corrections.forEach { (key, value) ->
+                if (key != LEGACY_LANGUAGE_NAME_KEY) {
+                    jsonObject.put(key, value)
+                }
+            }
+            getPreferences(context).edit()
+                .putString(KEY_CUSTOM_AUTO_CORRECTIONS, jsonObject.toString())
+                .apply()
+        } catch (e: Exception) {
+            Log.e(TAG, "Error saving custom text replacements", e)
         }
     }
 
@@ -3371,93 +2765,6 @@ object SettingsManager {
     }
     
     /**
-     * Returns the display name of a custom language from JSON.
-     */
-    fun getCustomLanguageName(context: Context, languageCode: String): String? {
-        val prefs = getPreferences(context)
-        val key = "auto_correct_custom_$languageCode"
-        val jsonString = prefs.getString(key, null) ?: return null
-        
-        return try {
-            val jsonObject = JSONObject(jsonString)
-            if (jsonObject.has(LANGUAGE_NAME_KEY)) {
-                jsonObject.getString(LANGUAGE_NAME_KEY)
-            } else {
-                null
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error loading language name for $languageCode", e)
-            null
-        }
-    }
-    
-    /**
-     * Saves custom corrections for a language.
-     * @param languageName The display name of the language (optional, if null it is not saved/updated)
-     */
-    fun saveCustomAutoCorrections(
-        context: Context, 
-        languageCode: String, 
-        corrections: Map<String, String>,
-        languageName: String? = null
-    ) {
-        try {
-            val jsonObject = JSONObject()
-            
-            // Save the language name if provided
-            if (languageName != null) {
-                jsonObject.put(LANGUAGE_NAME_KEY, languageName)
-            } else {
-                // If not provided, try to keep the existing name
-                val existingName = getCustomLanguageName(context, languageCode)
-                if (existingName != null) {
-                    jsonObject.put(LANGUAGE_NAME_KEY, existingName)
-                }
-            }
-            
-            // Save corrections
-            corrections.forEach { (key, value) ->
-                // Skip the special field if present in the corrections
-                if (key != LANGUAGE_NAME_KEY) {
-                    jsonObject.put(key, value)
-                }
-            }
-            
-            val key = "auto_correct_custom_$languageCode"
-            getPreferences(context).edit()
-                .putString(key, jsonObject.toString())
-                .apply()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error saving custom corrections for $languageCode", e)
-        }
-    }
-    
-    /**
-     * Updates only the display name of a custom language.
-     */
-    fun updateCustomLanguageName(context: Context, languageCode: String, languageName: String) {
-        try {
-            val prefs = getPreferences(context)
-            val key = "auto_correct_custom_$languageCode"
-            val jsonString = prefs.getString(key, null)
-            
-            val jsonObject = if (jsonString != null) {
-                JSONObject(jsonString)
-            } else {
-                JSONObject()
-            }
-            
-            jsonObject.put(LANGUAGE_NAME_KEY, languageName)
-            
-            prefs.edit()
-                .putString(key, jsonObject.toString())
-                .apply()
-        } catch (e: Exception) {
-            Log.e(TAG, "Error updating language name for $languageCode", e)
-        }
-    }
-    
-    /**
      * Returns the long-press action, including optional fixed SYM key layers.
      */
     fun getLongPressModifier(context: Context): String {
@@ -3486,27 +2793,6 @@ object SettingsManager {
             .apply()
     }
     
-    /**
-     * Returns true if long press uses Shift, false if it uses Alt.
-     * @deprecated Use getLongPressModifier() for more granular control
-     */
-    fun isLongPressShift(context: Context): Boolean {
-        return getLongPressModifier(context) == "shift"
-    }
-
-    /**
-     * Returns true if long press uses Variations mode.
-     */
-    fun isLongPressVariations(context: Context): Boolean {
-        return getLongPressModifier(context) == "variations"
-    }
-
-    /**
-     * Returns true if long press uses Sym mode.
-     */
-    fun isLongPressSym(context: Context): Boolean {
-        return getLongPressModifier(context).startsWith("sym")
-    }
 
     /** Returns 1 for Emoji and 2 for Symbols. */
     fun resolveLongPressSymPage(context: Context): Int = when (getLongPressModifier(context)) {
@@ -3516,15 +2802,15 @@ object SettingsManager {
     }
     
     /**
-     * Data class per rappresentare una scorciatoia del launcher.
-     * Estendibile per supportare diversi tipi di azioni in futuro (app, shortcut, ecc.)
+     * A launcher shortcut.
+     * Extensible to support other action types in the future (app, shortcut, etc.)
      */
     data class LauncherShortcut(
-        val type: String = TYPE_APP, // Tipo di azione: "app", "shortcut", ecc.
-        val packageName: String? = null, // Per tipo "app"
-        val appName: String? = null, // Per tipo "app"
-        val action: String? = null, // Per tipo "shortcut" o altri tipi futuri
-        val data: String? = null, // Dati aggiuntivi per tipi futuri
+        val type: String = TYPE_APP, // Action type: "app", "shortcut", etc.
+        val packageName: String? = null, // For type "app"
+        val appName: String? = null, // For type "app"
+        val action: String? = null, // For type "shortcut" or future types
+        val data: String? = null, // Extra data for future types
         val commandId: String? = null,
         val commandSource: String? = null,
         val commandKind: String? = null,
@@ -3537,7 +2823,7 @@ object SettingsManager {
             const val TYPE_SHORTCUT = "shortcut"
             const val TYPE_QUICK_LAUNCHER = "quick_launcher"
             const val TYPE_COMMAND = "command"
-            // Aggiungi altri tipi in futuro qui
+            // Add future types here
         }
     }
     
@@ -3593,7 +2879,7 @@ object SettingsManager {
     private const val KEY_NAV_MODE_MAPPINGS_UPDATED = "nav_mode_mappings_updated"
     
     /**
-     * Imposta una scorciatoia del launcher per un tasto (tipo app).
+     * Sets a launcher shortcut for a key (app type).
      */
     fun setLauncherShortcut(context: Context, keyCode: Int, packageName: String, appName: String) {
         setLauncherCommand(
@@ -3652,7 +2938,7 @@ object SettingsManager {
     }
     
     /**
-     * Imposta un'azione del launcher per un tasto (generico, estendibile).
+     * Sets a launcher action for a key (generic, extensible).
      */
     fun setLauncherAction(context: Context, keyCode: Int, action: LauncherShortcut) {
         val prefs = getPreferences(context)
@@ -3690,12 +2976,12 @@ object SettingsManager {
             })
             prefs.edit().putString(KEY_LAUNCHER_SHORTCUTS, shortcuts.toString()).apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel salvataggio dell'azione per tasto $keyCode", e)
+            Log.e(TAG, "Error saving action for key $keyCode", e)
         }
     }
     
     /**
-     * Rimuove una scorciatoia del launcher per un tasto.
+     * Removes the launcher shortcut for a key.
      */
     fun removeLauncherShortcut(context: Context, keyCode: Int) {
         val prefs = getPreferences(context)
@@ -3706,13 +2992,13 @@ object SettingsManager {
             shortcuts.remove(keyCode.toString())
             prefs.edit().putString(KEY_LAUNCHER_SHORTCUTS, shortcuts.toString()).apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nella rimozione della scorciatoia per tasto $keyCode", e)
+            Log.e(TAG, "Error removing shortcut for key $keyCode", e)
         }
     }
     
     /**
-     * Scambia le scorciatoie del launcher tra due tasti (operazione atomica).
-     * Se uno dei tasti non ha uno shortcut, lo shortcut viene spostato.
+     * Swaps launcher shortcuts between two keys (atomic operation).
+     * If one key has no shortcut, the other key's shortcut is moved.
      */
     fun swapLauncherShortcuts(context: Context, fromKeyCode: Int, toKeyCode: Int) {
         val prefs = getPreferences(context)
@@ -3740,12 +3026,12 @@ object SettingsManager {
             // Save atomically
             prefs.edit().putString(KEY_LAUNCHER_SHORTCUTS, shortcuts.toString()).apply()
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nello scambio delle scorciatoie tra tasti $fromKeyCode e $toKeyCode", e)
+            Log.e(TAG, "Error swapping shortcuts between keys $fromKeyCode and $toKeyCode", e)
         }
     }
     
     /**
-     * Ottiene tutte le scorciatoie del launcher salvate.
+     * Returns all saved launcher shortcuts.
      */
     fun getLauncherShortcuts(context: Context): Map<Int, LauncherShortcut> {
         ensureQuickLauncherDefaultShortcut(context)
@@ -3793,14 +3079,14 @@ object SettingsManager {
                 }
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Errore nel caricamento delle scorciatoie", e)
+            Log.e(TAG, "Error loading shortcuts", e)
         }
         
         return shortcuts
     }
     
     /**
-     * Ottiene una scorciatoia del launcher per un tasto specifico.
+     * Returns the launcher shortcut for a specific key.
      */
     fun getLauncherShortcut(context: Context, keyCode: Int): LauncherShortcut? {
         return getLauncherShortcuts(context)[keyCode]
@@ -3900,7 +3186,7 @@ object SettingsManager {
                 }
             }
         } catch (error: Exception) {
-            Log.e(TAG, "Errore nel caricamento command source visibility", error)
+            Log.e(TAG, "Error loading command source visibility", error)
             defaults
         }
     }
@@ -3956,7 +3242,7 @@ object SettingsManager {
             }
             result
         } catch (error: Exception) {
-            Log.e(TAG, "Errore nel caricamento quick launcher command customizations", error)
+            Log.e(TAG, "Error loading quick launcher command customizations", error)
             emptyMap()
         }
     }
@@ -4056,14 +3342,14 @@ object SettingsManager {
     }
     
     /**
-     * Restituisce se le scorciatoie del launcher sono abilitate.
+     * Returns whether launcher shortcuts are enabled.
      */
     fun getLauncherShortcutsEnabled(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_LAUNCHER_SHORTCUTS_ENABLED, DEFAULT_LAUNCHER_SHORTCUTS_ENABLED)
     }
     
     /**
-     * Imposta se le scorciatoie del launcher sono abilitate.
+     * Sets whether launcher shortcuts are enabled.
      */
     fun setLauncherShortcutsEnabled(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
@@ -4231,14 +3517,14 @@ object SettingsManager {
     private const val DEFAULT_POWER_SHORTCUTS_ENABLED = true
     
     /**
-     * Restituisce se i Power Shortcuts sono abilitati.
+     * Returns whether Power Shortcuts are enabled.
      */
     fun getPowerShortcutsEnabled(context: Context): Boolean {
         return getPreferences(context).getBoolean(KEY_POWER_SHORTCUTS_ENABLED, DEFAULT_POWER_SHORTCUTS_ENABLED)
     }
     
     /**
-     * Imposta se i Power Shortcuts sono abilitati.
+     * Sets whether Power Shortcuts are enabled.
      */
     fun setPowerShortcutsEnabled(context: Context, enabled: Boolean) {
         getPreferences(context).edit()
@@ -4462,60 +3748,14 @@ object SettingsManager {
         }
     }
     
-    /**
-     * Returns true if custom nav mode mappings exist.
-     */
-    fun hasCustomNavModeMappings(context: Context): Boolean {
-        val mappingsFile = getNavModeMappingsFile(context)
-        return mappingsFile.exists()
-    }
     
-    /**
-     * Returns the selected keyboard layout name.
-     */
-    fun getKeyboardLayout(context: Context): String {
-        return getPreferences(context).getString(KEY_KEYBOARD_LAYOUT, DEFAULT_KEYBOARD_LAYOUT) ?: DEFAULT_KEYBOARD_LAYOUT
-    }
-    
-    /**
-     * Sets the keyboard layout name.
-     */
-    fun setKeyboardLayout(context: Context, layoutName: String) {
-        getPreferences(context).edit()
-            .putString(KEY_KEYBOARD_LAYOUT, layoutName)
-            .apply()
-    }
-
-    /**
-     * Returns whether keyboard layout should be resolved automatically from subtype/locale mapping.
-     * If false, the manually selected layout is used across all locales.
-     */
-    fun isKeyboardLayoutAutoByLocale(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_KEYBOARD_LAYOUT_AUTO_BY_LOCALE,
-            DEFAULT_KEYBOARD_LAYOUT_AUTO_BY_LOCALE
-        )
-    }
-
-    /**
-     * Enables/disables automatic keyboard layout resolution by locale mapping.
-     */
-    fun setKeyboardLayoutAutoByLocale(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_KEYBOARD_LAYOUT_AUTO_BY_LOCALE, enabled)
-            .apply()
-    }
-
-    fun notifyKeyboardLayoutAutoMappingUpdated(context: Context) {
-        getPreferences(context).edit()
-            .putLong(KEY_KEYBOARD_LAYOUT_AUTO_MAPPING_UPDATED, System.currentTimeMillis())
-            .apply()
-    }
+    /** Numen is English only: the physical layout is always qwerty, whatever an older version saved. */
+    @Suppress("UNUSED_PARAMETER")
+    fun getKeyboardLayout(context: Context): String = DEFAULT_KEYBOARD_LAYOUT
 
     /**
      * Returns the manual physical keyboard profile override used for device-specific mappings.
-     * Supported values: auto, key2, Q25, titan, titan2, titan2elite_qwerty, mp01,
-     * clicks_razr, clicks_pixel, clicks_power.
+     * Supported values: auto, titan, titan2, titan2elite_qwerty.
      */
     fun getPhysicalKeyboardProfileOverride(context: Context): String {
         val value = getPreferences(context).getString(
@@ -4556,311 +3796,13 @@ object SettingsManager {
             .apply()
     }
 
-    fun getClicksCloseInputOnDisconnect(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_CLICKS_CLOSE_INPUT_ON_DISCONNECT,
-            DEFAULT_CLICKS_CLOSE_INPUT_ON_DISCONNECT
-        )
-    }
-
-    fun setClicksCloseInputOnDisconnect(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_CLICKS_CLOSE_INPUT_ON_DISCONNECT, enabled)
-            .apply()
-    }
-
-    fun getClicksShowKeyboardOnlyWithTextFocus(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_CLICKS_SHOW_KEYBOARD_ONLY_WITH_TEXT_FOCUS,
-            DEFAULT_CLICKS_SHOW_KEYBOARD_ONLY_WITH_TEXT_FOCUS
-        )
-    }
-
-    fun setClicksShowKeyboardOnlyWithTextFocus(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_CLICKS_SHOW_KEYBOARD_ONLY_WITH_TEXT_FOCUS, enabled)
-            .apply()
-    }
-
-    fun hasExplainedClicksBluetoothPermission(context: Context): Boolean {
-        return getPreferences(context).getBoolean(KEY_CLICKS_BLUETOOTH_PERMISSION_EXPLAINED, false)
-    }
-
-    fun setClicksBluetoothPermissionExplained(context: Context) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_CLICKS_BLUETOOTH_PERMISSION_EXPLAINED, true)
-            .apply()
-    }
-
-    fun isClicksChargingAutomationEnabled(context: Context): Boolean =
-        getPreferences(context).getBoolean(KEY_CLICKS_CHARGING_AUTOMATION, false)
-
-    fun setClicksChargingAutomationEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit().putBoolean(KEY_CLICKS_CHARGING_AUTOMATION, enabled).apply()
-    }
-
-    fun getClicksChargingStartPercent(context: Context): Int =
-        getPreferences(context).getInt(
-            KEY_CLICKS_CHARGING_START_PERCENT,
-            DEFAULT_CLICKS_CHARGING_START_PERCENT
-        ).coerceIn(5, 90)
-
-    fun setClicksChargingStartPercent(context: Context, percent: Int) {
-        val start = percent.coerceIn(5, 90)
-        val stop = getClicksChargingStopPercent(context).coerceAtLeast(start + 1)
-        getPreferences(context).edit()
-            .putInt(KEY_CLICKS_CHARGING_START_PERCENT, start)
-            .putInt(KEY_CLICKS_CHARGING_STOP_PERCENT, stop.coerceAtMost(95))
-            .apply()
-    }
-
-    fun getClicksChargingStopPercent(context: Context): Int =
-        getPreferences(context).getInt(
-            KEY_CLICKS_CHARGING_STOP_PERCENT,
-            DEFAULT_CLICKS_CHARGING_STOP_PERCENT
-        ).coerceIn(6, 95)
-
-    fun setClicksChargingStopPercent(context: Context, percent: Int) {
-        val start = getClicksChargingStartPercent(context)
-        getPreferences(context).edit()
-            .putInt(KEY_CLICKS_CHARGING_STOP_PERCENT, percent.coerceIn(start + 1, 95))
-            .apply()
-    }
-
-    fun getClicksManualChargingUntil(context: Context): Long =
-        getPreferences(context).getLong(KEY_CLICKS_MANUAL_CHARGING_UNTIL, 0L)
-
-    fun setClicksManualChargingUntil(context: Context, timestampMillis: Long) {
-        getPreferences(context).edit()
-            .putLong(KEY_CLICKS_MANUAL_CHARGING_UNTIL, timestampMillis.coerceAtLeast(0L))
-            .apply()
-    }
-
-    enum class ClicksOverlappingKeysMode(val persistedValue: String) {
-        OFF("off"),
-        ADJACENT_ONLY("adjacent_only"),
-        ALL_NON_MODIFIERS("all_non_modifiers");
-
-        companion object {
-            fun fromPersistedValue(value: String?): ClicksOverlappingKeysMode =
-                entries.firstOrNull { it.persistedValue == value } ?: OFF
-        }
-    }
-
-    enum class ClicksNumberRowInputMode(val persistedValue: String) {
-        NORMAL("normal"),
-        IGNORE_WHILE_ADJACENT_KEY_HELD("ignore_while_adjacent_key_held"),
-        IGNORE_WHILE_ANY_KEY_HELD("ignore_while_any_key_held"),
-        LONG_PRESS("long_press"),
-        IGNORE_ALL("ignore_all");
-
-        companion object {
-            fun fromPersistedValue(value: String?): ClicksNumberRowInputMode = when (value) {
-                // Compatibility with the first, uncommitted implementation installed on test devices.
-                "ignore_while_other_key_held" -> IGNORE_WHILE_ANY_KEY_HELD
-                else -> entries.firstOrNull { it.persistedValue == value } ?: NORMAL
-            }
-        }
-    }
-
-    fun getClicksOverlappingKeysMode(context: Context): ClicksOverlappingKeysMode {
-        val preferences = getPreferences(context)
-        if (preferences.contains(KEY_CLICKS_OVERLAPPING_KEYS_MODE)) {
-            return ClicksOverlappingKeysMode.fromPersistedValue(
-                preferences.getString(KEY_CLICKS_OVERLAPPING_KEYS_MODE, null)
-            )
-        }
-        return if (preferences.getBoolean(KEY_CLICKS_OVERLAPPING_KEYS_ENABLED, false)) {
-            ClicksOverlappingKeysMode.ALL_NON_MODIFIERS
-        } else {
-            ClicksOverlappingKeysMode.OFF
-        }
-    }
-
-    fun setClicksOverlappingKeysMode(context: Context, mode: ClicksOverlappingKeysMode) {
-        getPreferences(context).edit()
-            .putString(KEY_CLICKS_OVERLAPPING_KEYS_MODE, mode.persistedValue)
-            .remove(KEY_CLICKS_OVERLAPPING_KEYS_ENABLED)
-            .apply()
-    }
-
-    fun getClicksNumberRowInputMode(context: Context): ClicksNumberRowInputMode {
-        return ClicksNumberRowInputMode.fromPersistedValue(
-            getPreferences(context).getString(KEY_CLICKS_NUMBER_ROW_INPUT_MODE, null)
-        )
-    }
-
-    fun setClicksNumberRowInputMode(context: Context, mode: ClicksNumberRowInputMode) {
-        getPreferences(context).edit()
-            .putString(KEY_CLICKS_NUMBER_ROW_INPUT_MODE, mode.persistedValue)
-            .apply()
-    }
-
-    fun isClicksNumberRowRepeatEnabled(context: Context): Boolean =
-        getPreferences(context).getBoolean(KEY_CLICKS_NUMBER_ROW_REPEAT_ENABLED, true)
-
-    fun setClicksNumberRowRepeatEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_CLICKS_NUMBER_ROW_REPEAT_ENABLED, enabled)
-            .apply()
-    }
-
-    fun getClicksPowerKeyboardSnapshot(
-        context: Context,
-        deviceName: String
-    ): ClicksPowerKeyboardStateSnapshot? = readClicksPowerKeyboardSnapshots(context)
-        .filter { it.deviceName.equals(deviceName, ignoreCase = true) }
-        .maxByOrNull { it.savedAtMillis }
-
-    fun getMostRecentClicksPowerKeyboardSnapshot(context: Context): ClicksPowerKeyboardStateSnapshot? =
-        readClicksPowerKeyboardSnapshots(context).maxByOrNull { it.savedAtMillis }
-
-    fun saveClicksPowerKeyboardSnapshot(
-        context: Context,
-        deviceName: String,
-        state: ClicksPowerKeyboardState
-    ) {
-        if (!ClicksPowerKeyboardStateSnapshotCodec.hasMeaningfulDeviceData(state)) return
-        val snapshot = ClicksPowerKeyboardStateSnapshot(
-            deviceName = deviceName,
-            state = ClicksPowerKeyboardStateSnapshotCodec.forStorage(state),
-            savedAtMillis = System.currentTimeMillis()
-        )
-        val snapshots = readClicksPowerKeyboardSnapshots(context).toMutableList()
-        snapshots.removeAll {
-            it.identity == snapshot.identity ||
-                (it.deviceName.equals(snapshot.deviceName, ignoreCase = true) &&
-                    (it.state.serialNumber == null || snapshot.state.serialNumber == null))
-        }
-        snapshots += snapshot
-        val encoded = JSONArray().also { array ->
-            snapshots.sortedBy { it.savedAtMillis }.forEach { item ->
-                array.put(JSONObject(ClicksPowerKeyboardStateSnapshotCodec.encode(item)))
-            }
-        }
-        getPreferences(context).edit()
-            .putString(KEY_CLICKS_POWER_KEYBOARD_SNAPSHOTS, encoded.toString())
-            .apply()
-    }
-
-    private fun readClicksPowerKeyboardSnapshots(context: Context): List<ClicksPowerKeyboardStateSnapshot> {
-        val serialized = getPreferences(context)
-            .getString(KEY_CLICKS_POWER_KEYBOARD_SNAPSHOTS, null)
-            ?: return emptyList()
-        return runCatching {
-            JSONArray(serialized).let { array ->
-                List(array.length()) { index ->
-                    ClicksPowerKeyboardStateSnapshotCodec.decode(array.getJSONObject(index).toString())
-                }.filterNotNull()
-            }
-        }.getOrDefault(emptyList())
-    }
-
-    /**
-     * Returns whether Alt+Shift shortcut for keyboard layout cycling is enabled.
-     */
-    fun isAltShiftLayoutSwitchEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_ALT_SHIFT_LAYOUT_SWITCH,
-            DEFAULT_ALT_SHIFT_LAYOUT_SWITCH
-        )
-    }
-
-    /**
-     * Keeps Alt+Shift enabled for existing installations while using the safer disabled
-     * default for installations created after this migration was introduced.
-     */
-    fun initializeAltShiftLayoutSwitchDefault(context: Context) {
-        val preferences = getPreferences(context)
-        if (preferences.contains(KEY_ALT_SHIFT_DEFAULT_INITIALIZED)) return
-
-        val existingInstallation = preferences.all.isNotEmpty()
-        val editor = preferences.edit()
-        if (!preferences.contains(KEY_ALT_SHIFT_LAYOUT_SWITCH)) {
-            editor.putBoolean(KEY_ALT_SHIFT_LAYOUT_SWITCH, existingInstallation)
-        }
-        editor.putBoolean(KEY_ALT_SHIFT_DEFAULT_INITIALIZED, true).apply()
-    }
-
-    /**
-     * Enables/disables Alt+Shift shortcut for keyboard layout cycling.
-     */
-    fun setAltShiftLayoutSwitchEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_ALT_SHIFT_LAYOUT_SWITCH, enabled)
-            .apply()
-    }
-
-    /**
-     * Returns whether Alt+Enter shortcut for keyboard layout cycling is enabled.
-     */
-    fun isAltEnterLayoutSwitchEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_ALT_ENTER_LAYOUT_SWITCH,
-            DEFAULT_ALT_ENTER_LAYOUT_SWITCH
-        )
-    }
-
-    /**
-     * Enables/disables Alt+Enter shortcut for keyboard layout cycling.
-     */
-    fun setAltEnterLayoutSwitchEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_ALT_ENTER_LAYOUT_SWITCH, enabled)
-            .apply()
-    }
-
-    /**
-     * Returns whether Ctrl+Space shortcut for keyboard layout cycling is enabled.
-     */
-    fun isCtrlSpaceLayoutSwitchEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_CTRL_SPACE_LAYOUT_SWITCH,
-            DEFAULT_CTRL_SPACE_LAYOUT_SWITCH
-        )
-    }
-
-    /**
-     * Enables/disables Ctrl+Space shortcut for keyboard layout cycling.
-     */
-    fun setCtrlSpaceLayoutSwitchEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_CTRL_SPACE_LAYOUT_SWITCH, enabled)
-            .apply()
-    }
-
-    /**
-     * Returns whether toast notification on layout switch is enabled.
-     */
-    fun isToastOnLayoutSwitchEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_TOAST_ON_LAYOUT_SWITCH,
-            DEFAULT_TOAST_ON_LAYOUT_SWITCH
-        )
-    }
-
-    /**
-     * Enables/disables toast notification on layout switch.
-     */
-    fun setToastOnLayoutSwitchEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_TOAST_ON_LAYOUT_SWITCH, enabled)
-            .apply()
-    }
-
     private fun normalizePhysicalKeyboardProfileOverride(profile: String?): String {
         val normalized = profile?.trim().orEmpty()
         return when {
             normalized.equals("auto", ignoreCase = true) -> "auto"
-            normalized.equals("key2", ignoreCase = true) -> "key2"
-            normalized.equals("q25", ignoreCase = true) -> "Q25"
             normalized.equals("titan", ignoreCase = true) -> "titan"
             normalized.equals("titan2", ignoreCase = true) -> "titan2"
             normalized.equals("titan2elite_qwerty", ignoreCase = true) -> "titan2elite_qwerty"
-            normalized.equals("mp01", ignoreCase = true) -> "mp01"
-            normalized.equals("clicks_razr", ignoreCase = true) -> "clicks_razr"
-            normalized.equals("clicks_pixel", ignoreCase = true) -> "clicks_pixel"
-            normalized.equals("clicks_power", ignoreCase = true) -> "clicks_power"
             else -> DEFAULT_PHYSICAL_KEYBOARD_PROFILE_OVERRIDE
         }
     }
@@ -4876,86 +3818,6 @@ object SettingsManager {
 
     fun physicalKeyboardCurrencySymbols(): List<String> = listOf("€", "$", "£", "¥", "₹", "₽", "₿", "¤")
 
-    private fun isLayoutAvailable(context: Context, layoutName: String): Boolean {
-        if (it.palsoftware.pastiera.data.layout.LayoutFileStore.layoutExists(context, layoutName)) {
-            return true
-        }
-        return try {
-            BundledLayoutAssets.openLayout(context.assets, layoutName)?.use { true } ?: false
-        } catch (e: Exception) {
-            false
-        }
-    }
-
-    /**
-     * Returns the list of keyboard layouts configured for cycling.
-     * Falls back to a single-entry list using the current layout if no list is stored.
-     */
-    fun getKeyboardLayoutList(context: Context): List<String> {
-        val prefs = getPreferences(context)
-        val jsonString = prefs.getString(KEY_KEYBOARD_LAYOUT_LIST, null) ?: return listOf(getKeyboardLayout(context))
-        return try {
-            val array = org.json.JSONArray(jsonString)
-            val seen = LinkedHashSet<String>()
-            for (i in 0 until array.length()) {
-                val name = array.optString(i, null)?.trim()
-                if (!name.isNullOrEmpty()) {
-                    seen.add(name)
-                }
-            }
-            if (seen.isEmpty()) {
-                listOf(getKeyboardLayout(context))
-            } else {
-                seen.toList()
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error parsing keyboard layout list, falling back to single layout", e)
-            listOf(getKeyboardLayout(context))
-        }
-    }
-
-    /**
-     * Saves the list of keyboard layouts used for cycling.
-     * The caller is responsible for also selecting the active layout via setKeyboardLayout().
-     */
-    fun setKeyboardLayoutList(context: Context, layouts: List<String>) {
-        val normalized = layouts.map { it.trim() }.filter { it.isNotBlank() }.distinct()
-        if (normalized.isEmpty()) {
-            // Clear the list to fall back to single-layout behaviour.
-            getPreferences(context).edit()
-                .remove(KEY_KEYBOARD_LAYOUT_LIST)
-                .apply()
-            return
-        }
-        val array = org.json.JSONArray()
-        normalized.forEach { array.put(it) }
-        getPreferences(context).edit()
-            .putString(KEY_KEYBOARD_LAYOUT_LIST, array.toString())
-            .apply()
-    }
-
-    /**
-     * Cycles to the next keyboard layout in the configured list and returns its id.
-     * Always loops: even with a single entry we "cycle" back to it, so long press
-     * consistently triggers a layout reload/toast and never becomes a no-op.
-     */
-    fun cycleKeyboardLayout(context: Context): String? {
-        val current = getKeyboardLayout(context)
-        // Normalize list: keep order, drop blanks/duplicates, ensure at least one entry.
-        val baseLayouts = getKeyboardLayoutList(context).ifEmpty { listOf(current) }
-        val normalized = if (baseLayouts.contains(current)) baseLayouts else listOf(current) + baseLayouts
-        val missing = normalized.filterNot { isLayoutAvailable(context, it) }
-        if (missing.isNotEmpty()) {
-            Log.w(TAG, "Skipping missing layouts: ${missing.joinToString()}")
-        }
-        val layouts = normalized.filter { isLayoutAvailable(context, it) }.ifEmpty { listOf(current) }
-
-        val currentIndex = layouts.indexOf(current).let { if (it >= 0) it else 0 }
-        val nextIndex = (currentIndex + 1) % layouts.size
-        val nextLayout = layouts[nextIndex]
-        setKeyboardLayout(context, nextLayout)
-        return nextLayout
-    }
     
     /**
      * Sets the SYM page to restore when returning from settings.
@@ -5201,44 +4063,8 @@ object SettingsManager {
             .apply()
     }
 
-    /**
-     * Returns the set of dismissed release tag names.
-     * @param context The context
-     * @return Set of release tag names that were dismissed by the user
-     */
-    fun getDismissedReleases(context: Context): Set<String> {
-        val prefs = getPreferences(context)
-        val dismissedString = prefs.getString(KEY_DISMISSED_RELEASES, null) ?: return emptySet()
-        return if (dismissedString.isBlank()) {
-            emptySet()
-        } else {
-            dismissedString.split(",").toSet()
-        }
-    }
     
-    /**
-     * Adds a release tag name to the dismissed releases set.
-     * @param context The context
-     * @param tagName The release tag name to dismiss
-     */
-    fun addDismissedRelease(context: Context, tagName: String) {
-        val dismissed = getDismissedReleases(context).toMutableSet()
-        dismissed.add(tagName)
-        val dismissedString = dismissed.joinToString(",")
-        getPreferences(context).edit()
-            .putString(KEY_DISMISSED_RELEASES, dismissedString)
-            .apply()
-    }
     
-    /**
-     * Checks if a release tag name has been dismissed.
-     * @param context The context
-     * @param tagName The release tag name to check
-     * @return true if the release was dismissed, false otherwise
-     */
-    fun isReleaseDismissed(context: Context, tagName: String): Boolean {
-        return getDismissedReleases(context).contains(tagName)
-    }
     
     /**
      * Checks if the tutorial has been completed.
@@ -5256,7 +4082,6 @@ object SettingsManager {
     fun setTutorialCompleted(context: Context) {
         getPreferences(context).edit()
             .putBoolean(KEY_TUTORIAL_COMPLETED, true)
-            .putString(KEY_LAST_SEEN_WHATS_NEW_VERSION, BuildConfig.VERSION_NAME)
             .apply()
     }
     
@@ -5267,33 +4092,6 @@ object SettingsManager {
     fun resetTutorialCompleted(context: Context) {
         getPreferences(context).edit()
             .putBoolean(KEY_TUTORIAL_COMPLETED, false)
-            .apply()
-    }
-
-    fun shouldShowWhatsNew(context: Context, currentVersion: String): Boolean {
-        // Numen has no "what's new" page; the release notes describe Pastiera.
-        if (!BuildConfig.UPSTREAM_BRANDING) return false
-        if (!isTutorialCompleted(context)) return false
-        val normalizedCurrent = currentVersion.trim()
-        if (normalizedCurrent.isBlank()) return false
-
-        val lastSeen = getPreferences(context).getString(KEY_LAST_SEEN_WHATS_NEW_VERSION, null)
-        return lastSeen != normalizedCurrent
-    }
-
-    fun getLastSeenWhatsNewVersion(context: Context): String? {
-        return getPreferences(context)
-            .getString(KEY_LAST_SEEN_WHATS_NEW_VERSION, null)
-            ?.trim()
-            ?.takeIf { it.isNotBlank() }
-    }
-
-    fun markWhatsNewSeen(context: Context, version: String) {
-        val normalizedVersion = version.trim()
-        if (normalizedVersion.isBlank()) return
-
-        getPreferences(context).edit()
-            .putString(KEY_LAST_SEEN_WHATS_NEW_VERSION, normalizedVersion)
             .apply()
     }
 
@@ -5336,147 +4134,6 @@ object SettingsManager {
         getPreferences(context).edit()
             .putLong(KEY_CLIPBOARD_RETENTION_TIME, minutes)
             .apply()
-    }
-
-    /**
-     * Returns whether trackpad gesture suggestions are enabled.
-     * @param context The context
-     * @return Whether trackpad gestures are enabled
-     */
-    fun getTrackpadGesturesEnabled(context: Context): Boolean {
-        // Numen keeps the keyboard surface for scrolling only.
-        if (!BuildConfig.UPSTREAM_BRANDING) return false
-        return getPreferences(context).getBoolean(KEY_TRACKPAD_GESTURES_ENABLED, DEFAULT_TRACKPAD_GESTURES_ENABLED)
-    }
-
-    /**
-     * Sets whether trackpad gesture suggestions are enabled.
-     * @param context The context
-     * @param enabled Whether to enable trackpad gestures
-     */
-    fun setTrackpadGesturesEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_TRACKPAD_GESTURES_ENABLED, enabled)
-            .commit()  // Use commit() instead of apply() to ensure synchronous write
-    }
-
-    fun getTrackpadGestureAddWordEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_TRACKPAD_GESTURE_ADD_WORD_ENABLED,
-            DEFAULT_TRACKPAD_GESTURE_ADD_WORD_ENABLED
-        )
-    }
-
-    fun setTrackpadGestureAddWordEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_TRACKPAD_GESTURE_ADD_WORD_ENABLED, enabled)
-            .commit()
-    }
-
-    fun getTrackpadGestureAddWordFullWidthEnabled(context: Context): Boolean {
-        return getPreferences(context).getBoolean(
-            KEY_TRACKPAD_GESTURE_ADD_WORD_FULL_WIDTH_ENABLED,
-            DEFAULT_TRACKPAD_GESTURE_ADD_WORD_FULL_WIDTH_ENABLED
-        )
-    }
-
-    fun setTrackpadGestureAddWordFullWidthEnabled(context: Context, enabled: Boolean) {
-        getPreferences(context).edit()
-            .putBoolean(KEY_TRACKPAD_GESTURE_ADD_WORD_FULL_WIDTH_ENABLED, enabled)
-            .commit()
-    }
-
-    /**
-     * Returns the swipe threshold for trackpad gestures.
-     */
-    fun getTrackpadSwipeThreshold(context: Context): Float {
-        return getPreferences(context).getFloat(KEY_TRACKPAD_SWIPE_THRESHOLD, DEFAULT_TRACKPAD_SWIPE_THRESHOLD)
-            .coerceIn(MIN_TRACKPAD_SWIPE_THRESHOLD, MAX_TRACKPAD_SWIPE_THRESHOLD)
-    }
-
-    /**
-     * Sets the swipe threshold for trackpad gestures.
-     * Value is clamped to allowed range.
-     */
-    fun setTrackpadSwipeThreshold(context: Context, threshold: Float) {
-        val clamped = threshold.coerceIn(MIN_TRACKPAD_SWIPE_THRESHOLD, MAX_TRACKPAD_SWIPE_THRESHOLD)
-        getPreferences(context).edit()
-            .putFloat(KEY_TRACKPAD_SWIPE_THRESHOLD, clamped)
-            .commit()  // Use commit() instead of apply() to ensure synchronous write
-    }
-
-    fun getMinTrackpadSwipeThreshold(): Float = MIN_TRACKPAD_SWIPE_THRESHOLD
-    fun getMaxTrackpadSwipeThreshold(): Float = MAX_TRACKPAD_SWIPE_THRESHOLD
-    fun getDefaultTrackpadSwipeThreshold(): Float = DEFAULT_TRACKPAD_SWIPE_THRESHOLD
-
-    fun getTrackpadSuggestionSwipeThreshold(context: Context): Float {
-        val prefs = getPreferences(context)
-        return prefs.getFloat(
-            KEY_TRACKPAD_SUGGESTION_SWIPE_THRESHOLD,
-            prefs.getFloat(KEY_TRACKPAD_SWIPE_THRESHOLD, DEFAULT_TRACKPAD_SUGGESTION_SWIPE_THRESHOLD)
-        ).coerceIn(MIN_TRACKPAD_SWIPE_THRESHOLD, MAX_TRACKPAD_SWIPE_THRESHOLD)
-    }
-
-    fun setTrackpadSuggestionSwipeThreshold(context: Context, threshold: Float) {
-        val clamped = threshold.coerceIn(MIN_TRACKPAD_SWIPE_THRESHOLD, MAX_TRACKPAD_SWIPE_THRESHOLD)
-        getPreferences(context).edit()
-            .putFloat(KEY_TRACKPAD_SUGGESTION_SWIPE_THRESHOLD, clamped)
-            .commit()
-    }
-
-    fun getTrackpadDeleteSwipeThreshold(context: Context): Float {
-        val prefs = getPreferences(context)
-        return prefs.getFloat(
-            KEY_TRACKPAD_DELETE_SWIPE_THRESHOLD,
-            prefs.getFloat(KEY_TRACKPAD_SWIPE_THRESHOLD, DEFAULT_TRACKPAD_DELETE_SWIPE_THRESHOLD)
-        ).coerceIn(MIN_TRACKPAD_SWIPE_THRESHOLD, MAX_TRACKPAD_SWIPE_THRESHOLD)
-    }
-
-    fun setTrackpadDeleteSwipeThreshold(context: Context, threshold: Float) {
-        val clamped = threshold.coerceIn(MIN_TRACKPAD_SWIPE_THRESHOLD, MAX_TRACKPAD_SWIPE_THRESHOLD)
-        getPreferences(context).edit()
-            .putFloat(KEY_TRACKPAD_DELETE_SWIPE_THRESHOLD, clamped)
-            .commit()
-    }
-
-    fun getTrackpadProvider(context: Context): String {
-        val value = getPreferences(context).getString(KEY_TRACKPAD_PROVIDER, DEFAULT_TRACKPAD_PROVIDER).orEmpty()
-        return if (TRACKPAD_PROVIDER_VALUES.contains(value)) value else DEFAULT_TRACKPAD_PROVIDER
-    }
-
-    fun setTrackpadProvider(context: Context, provider: String) {
-        val normalized = if (TRACKPAD_PROVIDER_VALUES.contains(provider)) provider else DEFAULT_TRACKPAD_PROVIDER
-        getPreferences(context).edit()
-            .putString(KEY_TRACKPAD_PROVIDER, normalized)
-            .commit()
-    }
-
-    fun getTrackpadShizukuDevice(context: Context): String {
-        val value = getPreferences(context)
-            .getString(KEY_TRACKPAD_SHIZUKU_DEVICE, TRACKPAD_SHIZUKU_DEVICE_AUTO)
-            .orEmpty()
-        return if (value == TRACKPAD_SHIZUKU_DEVICE_AUTO || isTrackpadEventNode(value)) {
-            value
-        } else {
-            TRACKPAD_SHIZUKU_DEVICE_AUTO
-        }
-    }
-
-    fun setTrackpadShizukuDevice(context: Context, device: String) {
-        val normalized = if (
-            device == TRACKPAD_SHIZUKU_DEVICE_AUTO || isTrackpadEventNode(device)
-        ) {
-            device
-        } else {
-            TRACKPAD_SHIZUKU_DEVICE_AUTO
-        }
-        getPreferences(context).edit()
-            .putString(KEY_TRACKPAD_SHIZUKU_DEVICE, normalized)
-            .apply()
-    }
-
-    private fun isTrackpadEventNode(value: String): Boolean {
-        return Regex("^/dev/input/event\\d+$").matches(value)
     }
 
     /**
@@ -5653,204 +4310,6 @@ object SettingsManager {
             .apply()
     }
 
-    // Custom Input Styles (Additional Subtypes)
-    private const val KEY_CUSTOM_INPUT_STYLES = "custom_input_styles"
-    private const val KEY_INPUT_STYLE_SUGGESTION_LOCALES = "input_style_suggestion_locales"
-    private const val KEY_HIDDEN_SYSTEM_INPUT_STYLES = "hidden_system_input_styles"
-
-    /**
-     * Gets the custom input styles preference string.
-     * Returns default from predefined_subtypes resource if not set.
-     */
-    fun getCustomInputStyles(context: Context): String {
-        val prefs = getPreferences(context)
-        val custom = prefs.getString(KEY_CUSTOM_INPUT_STYLES, null)
-        if (custom != null) {
-            return custom
-        }
-
-        // Load default from predefined_subtypes resource
-        return try {
-            val arrayResId = context.resources.getIdentifier(
-                "predefined_subtypes",
-                "array",
-                context.packageName
-            )
-            if (arrayResId == 0) {
-                return ""
-            }
-            val array = context.resources.getStringArray(arrayResId)
-            array.joinToString(";")
-        } catch (e: Exception) {
-            Log.e(TAG, "Error loading predefined subtypes", e)
-            ""
-        }
-    }
-
-    /**
-     * Sets the custom input styles preference string.
-     */
-    fun setCustomInputStyles(context: Context, stylesString: String) {
-        getPreferences(context).edit()
-            .putString(KEY_CUSTOM_INPUT_STYLES, stylesString)
-            .apply()
-    }
-
-    fun isSystemInputStyleHidden(context: Context, locale: String, layout: String): Boolean {
-        return hiddenSystemInputStyleKeys(context).contains(inputStyleKey(locale, layout))
-    }
-
-    fun hideSystemInputStyle(context: Context, locale: String, layout: String) {
-        val updated = hiddenSystemInputStyleKeys(context).toMutableSet()
-        updated.add(inputStyleKey(locale, layout))
-        saveHiddenSystemInputStyleKeys(context, updated)
-    }
-
-    fun showSystemInputStyle(context: Context, locale: String, layout: String) {
-        val updated = hiddenSystemInputStyleKeys(context).toMutableSet()
-        updated.remove(inputStyleKey(locale, layout))
-        saveHiddenSystemInputStyleKeys(context, updated)
-    }
-
-    fun getAdditionalSuggestionLocalesForInputStyle(
-        context: Context,
-        locale: String,
-        layout: String
-    ): List<String> {
-        val jsonString = getPreferences(context).getString(KEY_INPUT_STYLE_SUGGESTION_LOCALES, null)
-            ?: return emptyList()
-        return try {
-            val root = org.json.JSONObject(jsonString)
-            val array = suggestionLocalesArrayForInputStyle(root, locale, layout) ?: return emptyList()
-            suggestionLocalesFromArray(array)
-        } catch (e: Exception) {
-            Log.e(TAG, "Error parsing input style suggestion locales", e)
-            emptyList()
-        }
-    }
-
-    private fun suggestionLocalesArrayForInputStyle(
-        root: org.json.JSONObject,
-        locale: String,
-        layout: String
-    ): org.json.JSONArray? {
-        val normalizedLocale = normalizeSuggestionLocaleTag(locale)
-        val language = normalizedLocale.substringBefore("-")
-        val exactKey = inputStyleSuggestionKey(locale, layout)
-        val languageLayoutKey = inputStyleKey(language, layout)
-
-        root.optJSONArray(exactKey)?.let { return it }
-        root.optJSONArray(languageLayoutKey)?.let { return it }
-
-        legacySuggestionLayoutAliases(layout).forEach { legacyLayout ->
-            root.optJSONArray(inputStyleKey(normalizedLocale, legacyLayout))?.let { return it }
-            root.optJSONArray(inputStyleKey(language, legacyLayout))?.let { return it }
-        }
-
-        return null
-    }
-
-    private fun legacySuggestionLayoutAliases(layout: String): List<String> {
-        return when (layout.trim()) {
-            "qwertz" -> listOf("german_multitap_qwertz")
-            else -> emptyList()
-        }
-    }
-
-    private fun suggestionLocalesFromArray(array: org.json.JSONArray): List<String> {
-        return buildList {
-            for (i in 0 until array.length()) {
-                val tag = array.optString(i).trim()
-                if (tag.isNotBlank()) {
-                    add(normalizeSuggestionLocaleTag(tag))
-                }
-            }
-        }.distinct()
-    }
-
-    fun setAdditionalSuggestionLocalesForInputStyle(
-        context: Context,
-        locale: String,
-        layout: String,
-        locales: List<String>
-    ) {
-        val prefs = getPreferences(context)
-        val root = try {
-            org.json.JSONObject(prefs.getString(KEY_INPUT_STYLE_SUGGESTION_LOCALES, null) ?: "{}")
-        } catch (_: Exception) {
-            org.json.JSONObject()
-        }
-        val key = inputStyleSuggestionKey(locale, layout)
-        val normalized = locales
-            .map { normalizeSuggestionLocaleTag(it) }
-            .filter { it.isNotBlank() }
-            .distinct()
-        if (normalized.isEmpty()) {
-            root.remove(key)
-        } else {
-            val array = org.json.JSONArray()
-            normalized.forEach { array.put(it) }
-            root.put(key, array)
-        }
-        prefs.edit()
-            .putString(KEY_INPUT_STYLE_SUGGESTION_LOCALES, root.toString())
-            .apply()
-    }
-
-    fun removeAdditionalSuggestionLocalesForInputStyle(
-        context: Context,
-        locale: String,
-        layout: String
-    ) {
-        val prefs = getPreferences(context)
-        val root = try {
-            org.json.JSONObject(prefs.getString(KEY_INPUT_STYLE_SUGGESTION_LOCALES, null) ?: "{}")
-        } catch (_: Exception) {
-            return
-        }
-        root.remove(inputStyleSuggestionKey(locale, layout))
-        prefs.edit()
-            .putString(KEY_INPUT_STYLE_SUGGESTION_LOCALES, root.toString())
-            .apply()
-    }
-
-    private fun inputStyleSuggestionKey(locale: String, layout: String): String {
-        return inputStyleKey(locale, layout)
-    }
-
-    private fun inputStyleKey(locale: String, layout: String): String {
-        return "${normalizeSuggestionLocaleTag(locale)}:${layout.trim()}"
-    }
-
-    private fun normalizeSuggestionLocaleTag(locale: String): String {
-        return locale.trim().replace('_', '-')
-    }
-
-    private fun hiddenSystemInputStyleKeys(context: Context): Set<String> {
-        val jsonString = getPreferences(context).getString(KEY_HIDDEN_SYSTEM_INPUT_STYLES, null)
-            ?: return emptySet()
-        return try {
-            val array = org.json.JSONArray(jsonString)
-            buildSet {
-                for (i in 0 until array.length()) {
-                    val key = array.optString(i).trim()
-                    if (key.isNotBlank()) add(key)
-                }
-            }
-        } catch (e: Exception) {
-            Log.e(TAG, "Error parsing hidden system input styles", e)
-            emptySet()
-        }
-    }
-
-    private fun saveHiddenSystemInputStyleKeys(context: Context, keys: Set<String>) {
-        val array = org.json.JSONArray()
-        keys.sorted().forEach { array.put(it) }
-        getPreferences(context).edit()
-            .putString(KEY_HIDDEN_SYSTEM_INPUT_STYLES, array.toString())
-            .apply()
-    }
-    
     // ========================
     // Status Bar Button Slots
     // ========================
@@ -6037,7 +4496,8 @@ object SettingsManager {
 
     private fun normalizeStatusBarSlots(buttonIds: List<String>): List<String> {
         val available = getAvailableStatusBarButtons().toSet()
-        return buttonIds.map { buttonId ->
+        return buttonIds.map { stored ->
+            val buttonId = if (stored == LEGACY_STATUS_BAR_BUTTON_LANGUAGE) STATUS_BAR_BUTTON_EMOJI else stored
             if (buttonId in available) buttonId else STATUS_BAR_BUTTON_NONE
         }
     }
@@ -6177,7 +4637,6 @@ object SettingsManager {
             STATUS_BAR_BUTTON_CLIPBOARD,
             STATUS_BAR_BUTTON_EMOJI,
             STATUS_BAR_BUTTON_MICROPHONE,
-            STATUS_BAR_BUTTON_LANGUAGE,
             STATUS_BAR_BUTTON_HAMBURGER,
             STATUS_BAR_BUTTON_MINIMAL_UI,
             STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE,
@@ -6268,20 +4727,6 @@ object SettingsManager {
         getPreferences(context).edit()
             .putString(KEY_APP_ENTER_BEHAVIOR_OVERRIDES, array.toString())
             .apply()
-    }
-
-    fun setAppEnterBehaviorOverride(context: Context, packageName: String, behavior: String) {
-        val updated = getAppEnterBehaviorOverrides(context)
-            .filterNot { it.packageName == packageName } +
-            AppEnterBehaviorOverride(packageName, normalizeEnterBehavior(behavior))
-        setAppEnterBehaviorOverrides(context, updated)
-    }
-
-    fun removeAppEnterBehaviorOverride(context: Context, packageName: String) {
-        setAppEnterBehaviorOverrides(
-            context,
-            getAppEnterBehaviorOverrides(context).filterNot { it.packageName == packageName }
-        )
     }
 
     private fun normalizeEnterBehaviorPreset(preset: String): String {

@@ -32,7 +32,6 @@ class SuggestionControllerReplacementReadinessTest {
     fun setUp() {
         context = RuntimeEnvironment.getApplication()
         SettingsManager.getPreferences(context).edit().clear().commit()
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("en"))
         AutoCorrector.loadCorrections(context.assets, context)
     }
 
@@ -60,7 +59,7 @@ class SuggestionControllerReplacementReadinessTest {
 
     @Test
     fun customReplacementDoesNotWaitForDictionaryWhenSuggestionsAreDisabled() {
-        SettingsManager.saveCustomAutoCorrections(context, "en", mapOf("brb" to "be right back"))
+        SettingsManager.saveCustomAutoCorrections(context, mapOf("brb" to "be right back"))
         AutoCorrector.loadCorrections(context.assets, context)
         val controller = newController(
             ControlledDictionaryRepository(ready = false, loadFails = false),
@@ -188,23 +187,6 @@ class SuggestionControllerReplacementReadinessTest {
 
         assertTrue(result.replaced)
         assertEquals("didn't\n", input.text)
-    }
-
-    @Test
-    fun disabledLanguageDoesNotCreateAnEnglishReplacement() {
-        SettingsManager.setAutoCorrectEnabledLanguages(context, setOf("de"))
-        AutoCorrector.loadCorrections(context.assets, context)
-        val controller = newController(
-            ControlledDictionaryRepository(ready = false, loadFails = false),
-            experimentalSuggestionsEnabled = false,
-            suggestionsEnabled = false
-        )
-        val input = FakeInputConnection(context, "im")
-
-        val result = controller.onBoundaryKey(KeyEvent.KEYCODE_SPACE, null, input)
-
-        assertFalse(result.replaced)
-        assertEquals("im ", input.text)
     }
 
     @Test

@@ -2,18 +2,11 @@ package it.palsoftware.pastiera.inputmethod.ui
 
 import android.animation.Animator
 import android.animation.AnimatorListenerAdapter
-import android.animation.ValueAnimator
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.DashPathEffect
 import android.graphics.drawable.ColorDrawable
 import android.graphics.drawable.GradientDrawable
-import android.text.SpannableString
-import android.text.Spanned
-import android.text.TextPaint
-import android.text.style.UnderlineSpan
-import android.view.inputmethod.InputMethodManager
 import androidx.core.content.ContextCompat
 import androidx.core.widget.TextViewCompat
 import android.os.Handler
@@ -24,7 +17,6 @@ import android.view.Gravity
 import android.view.MotionEvent
 import android.view.View
 import android.view.ViewGroup
-import android.view.animation.AccelerateDecelerateInterpolator
 import android.widget.FrameLayout
 import android.widget.LinearLayout
 import android.widget.TextView
@@ -43,10 +35,8 @@ import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
 import android.content.res.AssetManager
-import it.palsoftware.pastiera.inputmethod.SubtypeCycler
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarButtonRegistry
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarButtonHost
-import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarAnimator
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarButtonId
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarButtonPosition
 import it.palsoftware.pastiera.inputmethod.statusbar.StatusBarCallbacks
@@ -140,8 +130,6 @@ class VariationBarView(
     private var lastClipboardCount: Int? = null
     private var isTitan2Layout: Boolean = false
     
-    // New modular components
-    private val statusBarAnimator = StatusBarAnimator()
     private val buttonHost = buttonRegistry?.let { StatusBarButtonHost(context, it) }
     var forceVariationAreaVisible: Boolean = false
         set(value) {
@@ -311,8 +299,6 @@ class VariationBarView(
         }
     }
 
-    fun getWrapper(): FrameLayout? = wrapper
-
     fun setSymModeActive(active: Boolean) {
         isSymModeActive = active
         if (active) {
@@ -353,39 +339,6 @@ class VariationBarView(
         container?.visibility = View.GONE
         wrapper?.visibility = View.GONE
         overlay?.visibility = View.GONE
-    }
-
-    fun hideForSym(onHidden: () -> Unit) {
-        val containerView = container ?: run {
-            onHidden()
-            return
-        }
-        val row = currentVariationsRow
-        val overlayView = overlay
-
-        buttonHost?.detachAll()
-        hideSwipeIndicator(immediate = true)
-        hideSwipeHintImmediate()
-        shouldShowSwipeHint = false
-
-        if (row != null && row.parent == containerView && row.visibility == View.VISIBLE) {
-            animateVariationsOut(row) {
-                (row.parent as? ViewGroup)?.removeView(row)
-                if (currentVariationsRow == row) {
-                    currentVariationsRow = null
-                }
-                containerView.visibility = View.GONE
-                wrapper?.visibility = View.GONE
-                overlayView?.visibility = View.GONE
-                onHidden()
-            }
-        } else {
-            currentVariationsRow = null
-            containerView.visibility = View.GONE
-            wrapper?.visibility = View.GONE
-            overlayView?.visibility = View.GONE
-            onHidden()
-        }
     }
 
     fun showVariations(snapshot: StatusBarController.StatusSnapshot, inputConnection: android.view.inputmethod.InputConnection?) {
@@ -516,7 +469,6 @@ class VariationBarView(
             }
             leftButtonsContainer?.alpha = 1f
             buttonsContainer?.alpha = 1f
-            buttonHost?.refreshLanguageText()
             return
         }
 
@@ -732,9 +684,6 @@ class VariationBarView(
         if (variationAreaVisible) {
             variationsRow.alpha = 1f
             variationsRow.visibility = View.VISIBLE
-            buttonHost?.refreshLanguageText()
-        } else {
-            buttonHost?.refreshLanguageText()
         }
     }
 
@@ -1257,42 +1206,6 @@ class VariationBarView(
     private fun colorWithAlpha(color: Int, alpha: Int): Int =
         Color.argb(alpha.coerceIn(0, 255), Color.red(color), Color.green(color), Color.blue(color))
 
-    private fun animateVariationsIn(view: View) {
-        view.alpha = 0f
-        view.visibility = View.VISIBLE
-        ValueAnimator.ofFloat(0f, 1f).apply {
-            duration = 75
-            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
-            addUpdateListener { animation ->
-                val progress = animation.animatedValue as Float
-                view.alpha = progress
-            }
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    view.alpha = 1f
-                }
-            })
-        }.start()
-    }
-
-    private fun animateVariationsOut(view: View, onAnimationEnd: (() -> Unit)? = null) {
-        ValueAnimator.ofFloat(1f, 0f).apply {
-            duration = 50
-            interpolator = android.view.animation.AccelerateDecelerateInterpolator()
-            addUpdateListener { animation ->
-                val progress = animation.animatedValue as Float
-                view.alpha = progress
-            }
-            addListener(object : AnimatorListenerAdapter() {
-                override fun onAnimationEnd(animation: Animator) {
-                    view.visibility = View.GONE
-                    view.alpha = 1f
-                    onAnimationEnd?.invoke()
-                }
-            })
-        }.start()
-    }
-
     private fun findClickableViewAt(parent: View, x: Float, y: Float): View? {
         if (parent !is ViewGroup) {
             return if (x >= 0 && x < parent.width &&
@@ -1332,13 +1245,6 @@ class VariationBarView(
         staticVariationsShift = emptyList()
         staticVariationsAlt = emptyList()
         emailVariations = emptyList()
-    }
-
-    /**
-     * Updates the language button text with the current language code.
-     */
-    fun updateLanguageButtonText() {
-        buttonHost?.refreshLanguageText()
     }
 
     private fun dpToPx(dp: Float): Int {

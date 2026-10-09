@@ -9,18 +9,27 @@ import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import it.palsoftware.pastiera.inputmethod.subtype.AdditionalSubtypeUtils
+import java.io.File
 
 class PastieraApplication : Application() {
     override fun onCreate() {
         super.onCreate()
-        SettingsManager.initializeAltShiftLayoutSwitchDefault(this)
         SettingsManager.enforceTitan2EliteRoundedCornersOnce(this)
+        SettingsManager.migrateKeyboardThemeLayoutOverrides(this)
         AppPackageChangeMonitor.register(this)
-        ClicksPowerKeyboardController.initialize(this)
         publishSoftwareKeyboardModeShortcut()
         Handler(Looper.getMainLooper()).post {
-            AdditionalSubtypeUtils.registerAdditionalSubtypes(this)
+            AdditionalSubtypeUtils.clearAdditionalSubtypes(this)
         }
+        Thread(::deleteLeftoverFiles).start()
+    }
+
+    /**
+     * Removes what earlier versions stored for other languages and layouts: downloaded or imported
+     * dictionaries (one could replace the English one) and custom layouts. Nothing reads them now.
+     */
+    private fun deleteLeftoverFiles() {
+        LEFTOVER_FILES.map { File(filesDir, it) }.filter { it.exists() }.forEach { it.deleteRecursively() }
     }
 
     private fun publishSoftwareKeyboardModeShortcut() {
@@ -45,5 +54,6 @@ class PastieraApplication : Application() {
 
     companion object {
         private const val SOFTWARE_KEYBOARD_MODE_SHORTCUT_ID = "software_keyboard_mode_toggle"
+        private val LEFTOVER_FILES = listOf("dictionaries_serialized", "keyboard_layouts", "locale_layout_mapping.json")
     }
 }

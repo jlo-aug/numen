@@ -12,7 +12,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.filled.Tune
-import androidx.compose.foundation.clickable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -271,8 +270,7 @@ fun StatusBarButtonsScreen(
 
         // Titan 2 Elite display corners: Numen shows them only on an Elite or if already enabled.
         val showEliteCorners = remember {
-            BuildConfig.UPSTREAM_BRANDING ||
-                it.palsoftware.pastiera.inputmethod.DeviceSpecific.isTitan2EliteDevice() ||
+            it.palsoftware.pastiera.inputmethod.DeviceSpecific.isTitan2EliteDevice() ||
                 SettingsManager.getTitan2EliteRoundedCornerInsetsEnabled(context)
         }
         if (showEliteCorners) {
@@ -755,32 +753,10 @@ fun ModifierIndicatorMultiSelect(
                     ) {
                         Text(
                             text = getModifierIndicatorLabel(indicator),
-                            style = if (
-                                BuildConfig.UPSTREAM_BRANDING && ( // Numen shows no WIP badges
-                                    indicator == SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP ||
-                                        indicator == SettingsManager.MODIFIER_INDICATOR_STATUS_BAR
-                                    )
-                            ) {
-                                MaterialTheme.typography.labelSmall
-                            } else {
-                                MaterialTheme.typography.labelMedium
-                            },
+                            style = MaterialTheme.typography.labelMedium,
                             fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
                             maxLines = 1
                         )
-                        if (
-                            BuildConfig.UPSTREAM_BRANDING && (
-                                indicator == SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP ||
-                                    indicator == SettingsManager.MODIFIER_INDICATOR_STATUS_BAR
-                                )
-                        ) {
-                            Text(
-                                text = "WIP",
-                                style = MaterialTheme.typography.labelSmall,
-                                fontWeight = FontWeight.Bold,
-                                modifier = Modifier.padding(start = 4.dp)
-                            )
-                        }
                     }
                 }
             }
@@ -803,16 +779,6 @@ private fun getModifierIndicatorLabel(indicator: String): String {
         SettingsManager.MODIFIER_INDICATOR_MENU_BAR -> stringResource(R.string.modifier_indicators_menu_bar)
         SettingsManager.MODIFIER_INDICATOR_STATUS_BAR -> stringResource(R.string.modifier_indicators_status_bar)
         else -> indicator
-    }
-}
-
-@Composable
-private fun getModifierIndicatorDescription(indicator: String): String {
-    return when (indicator) {
-        SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP -> stringResource(R.string.modifier_indicators_bottom_strip_description)
-        SettingsManager.MODIFIER_INDICATOR_MENU_BAR -> stringResource(R.string.modifier_indicators_menu_bar_description)
-        SettingsManager.MODIFIER_INDICATOR_STATUS_BAR -> stringResource(R.string.modifier_indicators_status_bar_description)
-        else -> ""
     }
 }
 
@@ -976,7 +942,6 @@ private fun getButtonDisplayName(buttonId: String): String {
         SettingsManager.STATUS_BAR_BUTTON_CLIPBOARD -> stringResource(R.string.status_bar_button_clipboard)
         SettingsManager.STATUS_BAR_BUTTON_MICROPHONE -> stringResource(R.string.status_bar_button_microphone)
         SettingsManager.STATUS_BAR_BUTTON_EMOJI -> stringResource(R.string.status_bar_button_emoji)
-        SettingsManager.STATUS_BAR_BUTTON_LANGUAGE -> stringResource(R.string.status_bar_button_language)
         SettingsManager.STATUS_BAR_BUTTON_HAMBURGER -> stringResource(R.string.status_bar_button_hamburger)
         SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> stringResource(R.string.status_bar_button_minimal_ui)
         SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> stringResource(R.string.status_bar_button_software_keyboard_mode)
@@ -995,7 +960,6 @@ private fun getButtonDescription(buttonId: String): String {
         SettingsManager.STATUS_BAR_BUTTON_CLIPBOARD -> stringResource(R.string.status_bar_button_clipboard_description)
         SettingsManager.STATUS_BAR_BUTTON_MICROPHONE -> stringResource(R.string.status_bar_button_microphone_description)
         SettingsManager.STATUS_BAR_BUTTON_EMOJI -> stringResource(R.string.status_bar_button_emoji_description)
-        SettingsManager.STATUS_BAR_BUTTON_LANGUAGE -> stringResource(R.string.status_bar_button_language_description)
         SettingsManager.STATUS_BAR_BUTTON_HAMBURGER -> stringResource(R.string.status_bar_button_hamburger_description)
         SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> stringResource(R.string.status_bar_button_minimal_ui_description)
         SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> stringResource(R.string.status_bar_button_software_keyboard_mode_description)
@@ -1016,7 +980,6 @@ private fun getButtonIconRes(buttonId: String): Int {
         SettingsManager.STATUS_BAR_BUTTON_CLIPBOARD -> R.drawable.ic_content_paste_24
         SettingsManager.STATUS_BAR_BUTTON_MICROPHONE -> R.drawable.ic_baseline_mic_24
         SettingsManager.STATUS_BAR_BUTTON_EMOJI -> R.drawable.ic_emoji_emotions_24
-        SettingsManager.STATUS_BAR_BUTTON_LANGUAGE -> R.drawable.ic_globe_24
         SettingsManager.STATUS_BAR_BUTTON_HAMBURGER -> R.drawable.ic_menu_24
         SettingsManager.STATUS_BAR_BUTTON_MINIMAL_UI -> R.drawable.ic_minimal_ui_24
         SettingsManager.STATUS_BAR_BUTTON_SOFTWARE_KEYBOARD_MODE -> R.drawable.expansion_panels_24

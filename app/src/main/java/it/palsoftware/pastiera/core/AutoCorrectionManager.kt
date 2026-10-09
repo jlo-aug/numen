@@ -79,8 +79,7 @@ class AutoCorrectionManager(
         isAutoCorrectEnabled: Boolean,
         commitBoundary: Boolean,
         onStatusBarUpdate: () -> Unit,
-        boundaryCharOverride: Char? = null,
-        isKnownWord: ((String) -> Boolean)? = null
+        boundaryCharOverride: Char? = null
     ): Boolean {
         Log.d(
             TAG,
@@ -159,11 +158,7 @@ class AutoCorrectionManager(
         inputConnection.finishComposingText()
 
         val textBeforeCursor = inputConnection.getTextBeforeCursor(100, 0)
-        val correction = AutoCorrector.processText(
-            textBeforeCursor,
-            context = context,
-            isKnownWord = isKnownWord
-        ) ?: return commitCommaSpaceIfEnabled()
+        val correction = AutoCorrector.processText(textBeforeCursor) ?: return commitCommaSpaceIfEnabled()
 
         val (wordToReplace, correctedWord) = correction
         if (correctedWord == wordToReplace) {
@@ -198,15 +193,10 @@ class AutoCorrectionManager(
                 isEnterBoundary -> inputConnection.commitText("\n", 1)
                 isPunctuationBoundary -> {
                     if (
-                        !it.palsoftware.pastiera.SettingsManager.shouldApplyFrenchPunctuationSpacing(context) ||
-                        !Punctuation.commitFrenchSpacedPunctuation(inputConnection, boundaryChar)
+                        !it.palsoftware.pastiera.SettingsManager.getCommaSpace(context) ||
+                        !Punctuation.commitCommaSpace(inputConnection, boundaryChar)
                     ) {
-                        if (
-                            !it.palsoftware.pastiera.SettingsManager.getCommaSpace(context) ||
-                            !Punctuation.commitCommaSpace(inputConnection, boundaryChar)
-                        ) {
-                            inputConnection.commitText(boundaryChar.toString(), 1)
-                        }
+                        inputConnection.commitText(boundaryChar.toString(), 1)
                     }
                 }
             }
