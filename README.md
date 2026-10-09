@@ -13,15 +13,18 @@ Patrick Zauner and contributors. It is not an official Pastiera release.
 ## What's different
 
 - **Hidden bar.** Nothing pops up while you type on the keys. Press SYM to show the bar.
-- **Stronger autocorrect**, on by default. Fixes missing, extra and swapped letters, wrong
-  neighbouring keys, missed spaces and badly mangled long words ("instalaltion" → "installation"),
-  and picks the fix that fits the words before it ("pick up some kilk" → "milk"). Knows common
-  misspellings ("arguement" → "argument") and fixes slips on names you've typed in the
-  conversation. Leaves names, slang, contractions, email addresses and links alone.
-- **Sentence-aware fixes**, on by default. Catches real words in the wrong place ("get dome food"
-  → "get some food", "wagged it's tail" → "wagged its tail", "ill check" → "I'll check").
-- **Undo.** Backspace right after a correction undoes it. A word you undo and keep twice is
-  learned.
+- **Autocorrect built around the Titan 2 Elite's keys**, on by default. Each possible fix is
+  weighed by how likely your fingers made that slip on this keyboard and how well it fits the
+  words around it. Fixes missing, extra and swapped letters, wrong neighbouring keys, missed
+  spaces and badly mangled long words ("instalaltion" → "installation"), and knows common
+  misspellings ("arguement" → "argument"). Leaves names, slang, email addresses and links alone.
+- **It reads the sentence.** Catches real words in the wrong place ("a letter form my mom" →
+  "from", "wagged it's tail" → "wagged its tail", "ill check" → "I'll check"), and looks at a fix
+  again after your next word ("thes is" → "this is").
+- **Undo.** Backspace right after a correction undoes it, even after punctuation. A word you undo
+  and keep twice is learned.
+- **Number lock.** Double-tap Alt to type numbers; it stays on through Space until you tap Alt
+  again.
 - **Typing stats** on the home screen: words, typos fixed, speed and favourite word.
 - **Simpler settings** and a short setup.
 
@@ -40,6 +43,10 @@ Both apps typed the same 19,500 words of everyday messages, with a typo in 12% o
 | Missed letters fixed ("helo") | 3 of 366 | 284 of 361 |
 | Extra letters fixed ("helllo") | 0 of 400 | 368 of 399 |
 | Missed spaces fixed ("seeyou") | 0 of 130 | 111 of 130 |
+
+On real typing it was never tuned on (Aalto University's typing studies), Numen 1.2 fixes 57% of
+physical-keyboard typos, up from 47% in 1.0.1, and changes a correct word 0.4% of the time.
+Gboard's spell checker fixes 47% of the same typos.
 
 ## Install
 
@@ -90,5 +97,5 @@ character you meet on first launch is the numen of your keyboard.
   screen.
 - Word data: Simple English Wikipedia (CC BY-SA 4.0), Tatoeba (CC BY 2.0 FR), Google Books Ngram
   2-grams via orgtre/google-books-ngram-frequency (CC BY 3.0), SCOWL (Kevin Atkinson), Wikipedia's
-  lists of common misspellings (CC BY-SA 4.0) and US Social Security Administration baby names
-  (public domain). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+  lists of common misspellings (CC BY-SA 4.0), the Aalto ITE typing dataset (CC BY 4.0) and US
+  Social Security Administration baby names (public domain). See [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
