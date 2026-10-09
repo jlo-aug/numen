@@ -9,7 +9,7 @@ import java.io.File
 import java.util.Properties
 import org.gradle.api.GradleException
 
-// Config di firma letta da release/keystore.properties (non tracciato) o da env vars
+// Signing config is read from release/keystore.properties (not tracked) or from env vars
 val keystorePropertiesFileCandidates = listOf(
     rootProject.file("release/keystore.properties"),
     rootProject.file("keystore.properties")
@@ -151,8 +151,8 @@ android {
 
                 if (!hasSigningConfig(storePath, storePass, alias, keyPass)) {
                     throw GradleException(
-                        "Missing signing config for nightly build. Define nightlyStoreFile, nightlyStorePassword, nightlyKeyAlias e nightlyKeyPassword in " +
-                            "keystore.properties (non tracciato) o nelle variabili d'ambiente PASTIERA_NIGHTLY_KEYSTORE_PATH, " +
+                        "Missing signing config for nightly build. Define nightlyStoreFile, nightlyStorePassword, nightlyKeyAlias and nightlyKeyPassword in " +
+                            "release/keystore.properties (not tracked) or in the environment variables PASTIERA_NIGHTLY_KEYSTORE_PATH, " +
                             "PASTIERA_NIGHTLY_KEYSTORE_PASSWORD, PASTIERA_NIGHTLY_KEY_ALIAS, PASTIERA_NIGHTLY_KEY_PASSWORD."
                     )
                 }
