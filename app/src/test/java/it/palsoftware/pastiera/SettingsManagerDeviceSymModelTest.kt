@@ -23,15 +23,14 @@ class SettingsManagerDeviceSymModelTest {
     }
 
     @Test
-    fun freshConfiguration_enablesDeviceSymAsFirstKeyLayer() {
+    fun freshConfiguration_opensSymbolsThenTheEmojiPicker() {
         val config = SettingsManager.getSymPagesConfig(context)
 
-        assertTrue(config.deviceEnabled)
-        assertEquals(SymPagesConfig.PAGE_DEVICE, config.firstEnabledKeyLayer())
         assertEquals(
-            listOf(SymPagesConfig.PAGE_DEVICE, SymPagesConfig.PAGE_EMOJI, SymPagesConfig.PAGE_SYMBOLS),
+            listOf(SymPagesConfig.PAGE_SYMBOLS, SymPagesConfig.PAGE_EMOJI_PICKER),
             config.enabledOrderedPages()
         )
+        assertEquals(AltModifierBinding.DeviceSym, SettingsManager.getAltModifierBinding(context))
     }
 
     @Test

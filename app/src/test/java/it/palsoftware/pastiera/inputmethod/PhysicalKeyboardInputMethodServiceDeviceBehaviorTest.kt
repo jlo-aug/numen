@@ -541,6 +541,16 @@ class PhysicalKeyboardInputMethodServiceDeviceBehaviorTest {
 
     @Test
     fun deviceSanity_symACyclesDeviceThenEmojiThenSymbols_exactMappings() {
+        SettingsManager.setSymPagesConfig(
+            RuntimeEnvironment.getApplication(),
+            SymPagesConfig(
+                deviceEnabled = true,
+                emojiEnabled = true,
+                symbolsEnabled = true,
+                emojiPickerEnabled = false,
+                symPageOrder = SymPagesConfig.OLDER_DEFAULT_ORDER
+            )
+        )
         val t0 = 4_000L
 
         tapSym(t0)

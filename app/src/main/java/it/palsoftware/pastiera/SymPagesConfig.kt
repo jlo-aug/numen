@@ -1,14 +1,15 @@
 package it.palsoftware.pastiera
 
 /**
- * Configuration for SYM pages order and visibility.
+ * Configuration for SYM pages order and visibility. By default SYM opens symbols, then the full
+ * emoji picker; the Device SYM page repeats the Alt layer, so it starts off.
  */
 data class SymPagesConfig(
-    val deviceEnabled: Boolean = true,
-    val emojiEnabled: Boolean = true,
+    val deviceEnabled: Boolean = false,
+    val emojiEnabled: Boolean = false,
     val symbolsEnabled: Boolean = true,
     val clipboardEnabled: Boolean = false,
-    val emojiPickerEnabled: Boolean = false,
+    val emojiPickerEnabled: Boolean = true,
     val symPageOrder: List<String> = DEFAULT_ORDER
 ) {
     companion object {
@@ -17,7 +18,9 @@ data class SymPagesConfig(
         const val PAGE_SYMBOLS = "symbols"
         const val PAGE_CLIPBOARD = "clipboard"
         const val PAGE_EMOJI_PICKER = "emoji_picker"
-        val DEFAULT_ORDER = listOf(PAGE_DEVICE, PAGE_EMOJI, PAGE_SYMBOLS, PAGE_CLIPBOARD, PAGE_EMOJI_PICKER)
+        val DEFAULT_ORDER = listOf(PAGE_SYMBOLS, PAGE_EMOJI_PICKER, PAGE_EMOJI, PAGE_DEVICE, PAGE_CLIPBOARD)
+        /** The order before 1.2.1, which saved configs from older versions still use. */
+        val OLDER_DEFAULT_ORDER = listOf(PAGE_DEVICE, PAGE_EMOJI, PAGE_SYMBOLS, PAGE_CLIPBOARD, PAGE_EMOJI_PICKER)
     }
 
     fun normalizedOrder(): List<String> {

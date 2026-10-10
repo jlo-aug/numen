@@ -224,12 +224,14 @@ object SettingsManager {
     const val ENTER_ADDITIONAL_SEND_SHORTCUT_SYM_ENTER = "sym_enter"
     
     // Default slot assignments
-    private const val DEFAULT_SLOT_LEFT = STATUS_BAR_BUTTON_HAMBURGER
-    private const val DEFAULT_SLOT_RIGHT_1 = STATUS_BAR_BUTTON_EMOJI
-    private const val DEFAULT_SLOT_RIGHT_2 = STATUS_BAR_BUTTON_MICROPHONE
+    // The default bar is just emoji on the left and dictation on the right.
+    private const val DEFAULT_SLOT_LEFT = STATUS_BAR_BUTTON_EMOJI
+    private const val DEFAULT_SLOT_RIGHT_1 = STATUS_BAR_BUTTON_MICROPHONE
+    private const val DEFAULT_SLOT_RIGHT_2 = STATUS_BAR_BUTTON_NONE
     private const val DEFAULT_PASTIERINA_SLOT_LEFT = STATUS_BAR_BUTTON_EMOJI
-    private const val DEFAULT_PASTIERINA_SLOT_RIGHT = STATUS_BAR_BUTTON_HAMBURGER
-    private const val DEFAULT_STATUS_BAR_VARIATIONS_VISIBLE = true
+    private const val DEFAULT_PASTIERINA_SLOT_RIGHT = STATUS_BAR_BUTTON_MICROPHONE
+    // Accent variations are for other languages; Numen types English.
+    private const val DEFAULT_STATUS_BAR_VARIATIONS_VISIBLE = false
     private const val DEFAULT_DYNAMIC_VARIATION_BAR_SLOT_COUNT = 7
     private const val DEFAULT_DYNAMIC_VARIATION_BAR_RESIZE_TO_CONTENT = false
     private val DEFAULT_MODIFIER_INDICATORS = setOf(MODIFIER_INDICATOR_BOTTOM_STRIP)
@@ -283,7 +285,8 @@ object SettingsManager {
     private const val DEFAULT_CLEAR_ALT_ON_SPACE = true
     private const val DEFAULT_ALT_CTRL_SPEECH_SHORTCUT = true
     private const val DEFAULT_AUTO_CORRECT_ENABLED = true
-    private const val DEFAULT_SUGGESTIONS_ENABLED = true
+    // The suggestion row stays hidden unless turned on; autocorrect works without it.
+    private const val DEFAULT_SUGGESTIONS_ENABLED = false
     private const val DEFAULT_SNIPPETS_ENABLED = false
     private const val DEFAULT_SNIPPETS_PREFIX = "!"
     private const val DEFAULT_ACCENT_MATCHING_ENABLED = true
@@ -3991,7 +3994,7 @@ object SettingsManager {
             symbolsEnabled &&
             !clipboardEnabled &&
             !emojiPickerEnabled &&
-            normalizedOrder() == SymPagesConfig.DEFAULT_ORDER
+            normalizedOrder() == SymPagesConfig.OLDER_DEFAULT_ORDER
 
     fun getAltModifierBinding(context: Context): AltModifierBinding {
         val prefs = getPreferences(context)
@@ -4341,7 +4344,7 @@ object SettingsManager {
 
     fun getDefaultStatusBarSlotsLeft(): List<String> = listOf(DEFAULT_SLOT_LEFT)
 
-    fun getDefaultStatusBarSlotsRight(): List<String> = listOf(DEFAULT_SLOT_RIGHT_1, DEFAULT_SLOT_RIGHT_2)
+    fun getDefaultStatusBarSlotsRight(): List<String> = listOf(DEFAULT_SLOT_RIGHT_1)
 
     /**
      * Resets status bar slots to the defaults and returns the applied values.
@@ -4380,6 +4383,7 @@ object SettingsManager {
             context = context,
             key = KEY_STATUS_BAR_SLOTS_RIGHT,
             fallback = listOf(getStatusBarSlotRight1(context), getStatusBarSlotRight2(context))
+                .filter { it != STATUS_BAR_BUTTON_NONE }
         )
     }
 

@@ -378,7 +378,11 @@ class InputEventRouterModifierE2ETest {
     @Test
     fun symDevicePage_newDefault_mapsA_andConsumes() {
         val callbacks = TestCallbacks(modifierStateController)
-        symLayoutController.toggleSymPage() // opens Device SYM in the new default config
+        SettingsManager.setSymPagesConfig(
+            context,
+            SymPagesConfig(deviceEnabled = true, emojiEnabled = false, symbolsEnabled = false, emojiPickerEnabled = false)
+        )
+        symLayoutController.toggleSymPage() // opens the Device SYM page
         assertTrue(symLayoutController.isSymActive())
 
         val result = routeKeyDown(
@@ -422,6 +426,7 @@ class InputEventRouterModifierE2ETest {
     @Test
     fun symEmojiPage_customMapping_isUsed() {
         val callbacks = TestCallbacks(modifierStateController)
+        SettingsManager.setSymPagesConfig(context, SymPagesConfig(emojiEnabled = true))
         SettingsManager.saveSymMappings(context, mapOf(KeyEvent.KEYCODE_A to "🧪"))
         alternateCharacterManager.reloadSymMappings()
         symLayoutController.openEmojiPage()
