@@ -25,7 +25,7 @@ import androidx.compose.material.icons.automirrored.filled.KeyboardTab
 import androidx.compose.material.icons.automirrored.filled.ShortText
 import androidx.compose.material.icons.filled.Abc
 import androidx.compose.material.icons.filled.DataObject
-import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EditNote
 import androidx.compose.material.icons.filled.EmojiEmotions
 import androidx.compose.material.icons.filled.EmojiSymbols
 import androidx.compose.material.icons.filled.SpaceBar
@@ -34,9 +34,6 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -59,6 +56,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
 import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.inputmethod.expansion.ExpansionPresentation
 import it.palsoftware.pastiera.inputmethod.expansion.TextExpansionEngine
@@ -84,13 +82,11 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
     var prefixError by remember { mutableStateOf(false) }
     var presentation by remember { mutableStateOf(SettingsManager.getSnippetsPresentation(context)) }
     var policy by remember { mutableStateOf(SettingsManager.getSnippetsActivationPolicy(context)) }
-    var presentationExpanded by remember { mutableStateOf(false) }
     var emojiEnabled by remember { mutableStateOf(SettingsManager.getEmojiShortcodesEnabled(context)) }
     var symbolsEnabled by remember { mutableStateOf(SettingsManager.getSymbolShortcodesEnabled(context)) }
     var emojiPresentation by remember { mutableStateOf(SettingsManager.getEmojiSymbolsPresentation(context)) }
     var emojiPolicy by remember { mutableStateOf(SettingsManager.getEmojiSymbolsActivationPolicy(context)) }
     var exactOnClose by remember { mutableStateOf(SettingsManager.getEmojiSymbolsExactOnClose(context)) }
-    var emojiPresentationExpanded by remember { mutableStateOf(false) }
 
     SettingsScaffold(title = stringResource(R.string.text_expansion_title), onBack = onBack) { padding ->
         Column(
@@ -129,37 +125,18 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
                     singleLine = true
                 )
             }
-            Surface(modifier = Modifier.fillMaxWidth().settingRow("text_expansion.snippets.presentation")) {
-                ExposedDropdownMenuBox(
-                    expanded = presentationExpanded,
-                    onExpandedChange = { presentationExpanded = it },
-                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = presentationLabel(presentation),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.expansion_presentation_title)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(presentationExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = presentationExpanded,
-                        onDismissRequest = { presentationExpanded = false }
-                    ) {
-                        ExpansionPresentation.entries.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(presentationLabel(option)) },
-                                onClick = {
-                                    presentation = option
-                                    SettingsManager.setSnippetsPresentation(context, option)
-                                    presentationExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
+            SettingsDropdownRow(
+                title = stringResource(R.string.expansion_presentation_title),
+                value = presentationLabel(presentation),
+                options = ExpansionPresentation.entries,
+                selected = presentation,
+                optionLabel = { presentationLabel(it) },
+                onSelect = { option ->
+                    presentation = option
+                    SettingsManager.setSnippetsPresentation(context, option)
+                },
+                linkId = "text_expansion.snippets.presentation"
+            )
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_tab_title),
                 linkId = "text_expansion.snippets.tab",
@@ -190,7 +167,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    SettingsRowIcon(Icons.Filled.Edit)
+                    SettingsRowIcon(Icons.Filled.EditNote)
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             stringResource(R.string.snippets_manage_title),
@@ -255,37 +232,18 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
                     SettingsManager.setSymbolShortcodesEnabled(context, it)
                 }
             )
-            Surface(modifier = Modifier.fillMaxWidth().settingRow("text_expansion.emoji_symbols.presentation")) {
-                ExposedDropdownMenuBox(
-                    expanded = emojiPresentationExpanded,
-                    onExpandedChange = { emojiPresentationExpanded = it },
-                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = presentationLabel(emojiPresentation),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.expansion_presentation_title)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(emojiPresentationExpanded) },
-                        modifier = Modifier.menuAnchor().fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = emojiPresentationExpanded,
-                        onDismissRequest = { emojiPresentationExpanded = false }
-                    ) {
-                        ExpansionPresentation.entries.forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(presentationLabel(option)) },
-                                onClick = {
-                                    emojiPresentation = option
-                                    SettingsManager.setEmojiSymbolsPresentation(context, option)
-                                    emojiPresentationExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-            }
+            SettingsDropdownRow(
+                title = stringResource(R.string.expansion_presentation_title),
+                value = presentationLabel(emojiPresentation),
+                options = ExpansionPresentation.entries,
+                selected = emojiPresentation,
+                optionLabel = { presentationLabel(it) },
+                onSelect = { option ->
+                    emojiPresentation = option
+                    SettingsManager.setEmojiSymbolsPresentation(context, option)
+                },
+                linkId = "text_expansion.emoji_symbols.presentation"
+            )
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_tab_title),
                 linkId = "text_expansion.emoji_symbols.tab",

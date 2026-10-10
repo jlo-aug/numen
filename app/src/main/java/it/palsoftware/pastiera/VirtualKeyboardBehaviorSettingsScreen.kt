@@ -6,9 +6,11 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.Adjust
+import androidx.compose.material.icons.filled.GridOn
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.PictureInPictureAlt
+import androidx.compose.material.icons.filled.Pin
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -22,6 +24,8 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
 import it.palsoftware.pastiera.R
+import androidx.compose.ui.graphics.vector.ImageVector
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
 
 @Composable
 internal fun VirtualKeyboardBehaviorSettingsScreen(
@@ -51,7 +55,6 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
     var rightModifierKey by remember {
         mutableStateOf(SettingsManager.getSoftwareKeyboardRightModifierKey(context))
     }
-    var showSoftwareKeyboardLayoutStyleMenu by remember { mutableStateOf(false) }
 
     DisposableEffect(context) {
         val prefs = SettingsManager.getPreferences(context)
@@ -128,76 +131,42 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
                     stringResource(R.string.software_keyboard_layout_style_full_iso)
             }
 
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(82.dp)
-                    .settingRow("on_screen.layout_style") { showSoftwareKeyboardLayoutStyleMenu = true }
-            ) {
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Keyboard,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Column(modifier = Modifier.weight(1f)) {
-                        Text(
-                            text = stringResource(R.string.software_keyboard_layout_style_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = stringResource(
-                                R.string.software_keyboard_layout_style_description,
-                                softwareKeyboardLayoutStyleLabel
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
+            SettingsDropdownRow(
+                title = stringResource(R.string.software_keyboard_layout_style_title),
+                value = stringResource(
+                    R.string.software_keyboard_layout_style_description,
+                    softwareKeyboardLayoutStyleLabel
+                ),
+                options = listOf(
+                    SettingsManager.SoftwareKeyboardLayoutStyle.COMPACT,
+                    SettingsManager.SoftwareKeyboardLayoutStyle.EXTENDED_ISO,
+                    SettingsManager.SoftwareKeyboardLayoutStyle.FULL_ANSI,
+                    SettingsManager.SoftwareKeyboardLayoutStyle.FULL_ISO
+                ),
+                selected = softwareKeyboardLayoutStyle,
+                optionLabel = { style ->
+                    when (style) {
+                        SettingsManager.SoftwareKeyboardLayoutStyle.COMPACT ->
+                            stringResource(R.string.software_keyboard_layout_style_compact)
+                        SettingsManager.SoftwareKeyboardLayoutStyle.EXTENDED_ISO ->
+                            stringResource(R.string.software_keyboard_layout_style_extended_iso)
+                        SettingsManager.SoftwareKeyboardLayoutStyle.FULL_ANSI ->
+                            stringResource(R.string.software_keyboard_layout_style_full_ansi)
+                        SettingsManager.SoftwareKeyboardLayoutStyle.FULL_ISO ->
+                            stringResource(R.string.software_keyboard_layout_style_full_iso)
                     }
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-
-                DropdownMenu(
-                    expanded = showSoftwareKeyboardLayoutStyleMenu,
-                    onDismissRequest = { showSoftwareKeyboardLayoutStyleMenu = false }
-                ) {
-                    listOf(
-                        SettingsManager.SoftwareKeyboardLayoutStyle.COMPACT to stringResource(R.string.software_keyboard_layout_style_compact),
-                        SettingsManager.SoftwareKeyboardLayoutStyle.EXTENDED_ISO to stringResource(R.string.software_keyboard_layout_style_extended_iso),
-                        SettingsManager.SoftwareKeyboardLayoutStyle.FULL_ANSI to stringResource(R.string.software_keyboard_layout_style_full_ansi),
-                        SettingsManager.SoftwareKeyboardLayoutStyle.FULL_ISO to stringResource(R.string.software_keyboard_layout_style_full_iso)
-                    ).forEach { (style, title) ->
-                        DropdownMenuItem(
-                            text = { Text(title) },
-                            onClick = {
-                                softwareKeyboardLayoutStyle = style
-                                SettingsManager.setSoftwareKeyboardLayoutStyle(context, style)
-                                showSoftwareKeyboardLayoutStyleMenu = false
-                            },
-                            leadingIcon = {
-                                if (softwareKeyboardLayoutStyle == style) {
-                                    Icon(Icons.Default.Check, contentDescription = null)
-                                }
-                            }
-                        )
-                    }
-                }
-            }
+                },
+                onSelect = { style ->
+                    softwareKeyboardLayoutStyle = style
+                    SettingsManager.setSoftwareKeyboardLayoutStyle(context, style)
+                },
+                icon = Icons.Filled.GridOn,
+                linkId = "on_screen.layout_style"
+            )
 
             ModifierTapLatchRow(
                 title = stringResource(R.string.software_keyboard_number_row_title),
+                icon = Icons.Filled.Pin,
                 linkId = "on_screen.number_row",
                 description = stringResource(R.string.software_keyboard_number_row_description),
                 checked = numberRowEnabled,
@@ -215,38 +184,30 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
                 modifier = Modifier.padding(start = 52.dp, end = 16.dp, top = 6.dp, bottom = 6.dp)
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 52.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                SoftwareKeyboardModifierSelection(
-                    title = stringResource(R.string.software_keyboard_left_modifier_key_title),
-                    linkId = "on_screen.left_modifier",
-                    selected = leftModifierKey,
-                    modifier = Modifier.weight(1f),
-                    onSelected = { selected ->
-                        leftModifierKey = selected
-                        SettingsManager.setSoftwareKeyboardLeftModifierKey(context, selected)
-                    }
-                )
-                SoftwareKeyboardModifierSelection(
-                    title = stringResource(R.string.software_keyboard_right_modifier_key_title),
-                    linkId = "on_screen.right_modifier",
-                    selected = rightModifierKey,
-                    modifier = Modifier.weight(1f),
-                    onSelected = { selected ->
-                        rightModifierKey = selected
-                        SettingsManager.setSoftwareKeyboardRightModifierKey(context, selected)
-                    }
-                )
-            }
+            SoftwareKeyboardModifierSelection(
+                title = stringResource(R.string.software_keyboard_left_modifier_key_title),
+                linkId = "on_screen.left_modifier",
+                selected = leftModifierKey,
+                onSelected = { selected ->
+                    leftModifierKey = selected
+                    SettingsManager.setSoftwareKeyboardLeftModifierKey(context, selected)
+                }
+            )
+            SoftwareKeyboardModifierSelection(
+                title = stringResource(R.string.software_keyboard_right_modifier_key_title),
+                linkId = "on_screen.right_modifier",
+                selected = rightModifierKey,
+                onSelected = { selected ->
+                    rightModifierKey = selected
+                    SettingsManager.setSoftwareKeyboardRightModifierKey(context, selected)
+                }
+            )
 
             VirtualKeyboardSectionTitle(stringResource(R.string.on_screen_keyboard_section_touch))
 
             ModifierTapLatchRow(
                 title = stringResource(R.string.software_keyboard_nearest_key_touch_title),
+                icon = Icons.Filled.Adjust,
                 linkId = "on_screen.nearest_key_touch",
                 description = stringResource(R.string.software_keyboard_nearest_key_touch_description),
                 checked = nearestKeyTouchEnabled,
@@ -258,6 +219,7 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
 
             ModifierTapLatchRow(
                 title = stringResource(R.string.software_keyboard_long_press_layer_popup_title),
+                icon = Icons.Filled.PictureInPictureAlt,
                 linkId = "on_screen.layer_popup",
                 description = stringResource(R.string.software_keyboard_long_press_layer_popup_description),
                 checked = longPressLayerPopupEnabled,
@@ -293,7 +255,7 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    Icon(Icons.Filled.Keyboard, null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(24.dp))
+                    it.palsoftware.pastiera.ui.SettingsRowIcon(Icons.Filled.Palette)
                     Column(modifier = Modifier.weight(1f)) {
                         Text(stringResource(R.string.software_keyboard_theme_link_title), style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                         Text(stringResource(R.string.software_keyboard_theme_link_description), style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
@@ -316,72 +278,24 @@ private fun VirtualKeyboardSectionTitle(title: String) {
     )
 }
 
+/** One bottom-row modifier key choice, a sub-row under the "Bottom-row modifier keys" label. */
 @Composable
 private fun SoftwareKeyboardModifierSelection(
     title: String,
     linkId: String? = null,
     selected: SettingsManager.SoftwareKeyboardModifierKey,
-    modifier: Modifier = Modifier,
     onSelected: (SettingsManager.SoftwareKeyboardModifierKey) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Surface(
-        modifier = modifier
-            .height(82.dp)
-            .settingRow(linkId) { expanded = true },
-        shape = MaterialTheme.shapes.medium,
-        tonalElevation = 1.dp
-    ) {
-        Box {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 14.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.Center
-            ) {
-                Text(
-                    text = title,
-                    style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Text(
-                        text = softwareKeyboardModifierKeyLabel(selected),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f)
-                    )
-                    Icon(
-                        imageVector = Icons.Default.ArrowDropDown,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            DropdownMenu(
-                expanded = expanded,
-                onDismissRequest = { expanded = false }
-            ) {
-                SettingsManager.SoftwareKeyboardModifierKey.values().forEach { option ->
-                    DropdownMenuItem(
-                        text = { Text(softwareKeyboardModifierKeyLabel(option)) },
-                        onClick = {
-                            onSelected(option)
-                            expanded = false
-                        },
-                        leadingIcon = {
-                            if (selected == option) {
-                                Icon(Icons.Default.Check, contentDescription = null)
-                            }
-                        }
-                    )
-                }
-            }
-        }
-    }
+    SettingsDropdownRow(
+        title = title,
+        value = softwareKeyboardModifierKeyLabel(selected),
+        options = SettingsManager.SoftwareKeyboardModifierKey.values().toList(),
+        selected = selected,
+        optionLabel = { softwareKeyboardModifierKeyLabel(it) },
+        onSelect = onSelected,
+        linkId = linkId,
+        subRow = true
+    )
 }
 
 @Composable
@@ -399,6 +313,7 @@ private fun softwareKeyboardModifierKeyLabel(
 @Composable
 private fun ModifierTapLatchRow(
     title: String,
+    icon: ImageVector? = null,
     linkId: String? = null,
     description: String,
     checked: Boolean,
@@ -418,7 +333,7 @@ private fun ModifierTapLatchRow(
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
             // A sub-row keeps an empty icon slot so its title sits one step in.
-            it.palsoftware.pastiera.ui.SettingsRowIcon(if (indent) null else Icons.Filled.Keyboard)
+            it.palsoftware.pastiera.ui.SettingsRowIcon(if (indent) null else icon)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,

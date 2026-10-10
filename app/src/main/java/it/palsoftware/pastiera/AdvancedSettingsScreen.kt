@@ -29,13 +29,10 @@ import androidx.compose.material.icons.filled.School
 import androidx.compose.material.icons.filled.ContentPaste
 import androidx.compose.material.icons.filled.Swipe
 import androidx.compose.material.icons.filled.ViewAgenda
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
 import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.ui.SettingsSliderRow
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
-import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.AlertDialog
@@ -65,7 +62,6 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedButton
-import androidx.compose.material3.OutlinedTextField
 import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.backup.BackupManager
 import it.palsoftware.pastiera.backup.RestoreManager
@@ -96,7 +92,6 @@ fun AdvancedSettingsScreen(
     var swipeIncrementalThreshold by remember {
         mutableStateOf(SettingsManager.getSwipeIncrementalThreshold(context))
     }
-    var clipboardRetentionExpanded by remember { mutableStateOf(false) }
     var clipboardRetentionTime by remember {
         mutableStateOf(SettingsManager.getClipboardRetentionTime(context).toString())
     }
@@ -399,67 +394,20 @@ fun AdvancedSettingsScreen(
                 val retentionMinutes = clipboardRetentionTime.toLongOrNull()
                     ?: SettingsManager.getClipboardRetentionTime(context)
                 val retentionChoices = (CLIPBOARD_RETENTION_CHOICES_MINUTES + retentionMinutes).distinct().sorted()
-                Surface(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .settingRow(SettingLinkIds.ADVANCED_CLIPBOARD_RETENTION_TIME)
-                ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 16.dp, vertical = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        SettingsRowIcon(Icons.Filled.ContentPaste)
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.clipboard_retention_time_title),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Medium
-                            )
-                            Text(
-                                text = stringResource(R.string.clipboard_retention_choice_description),
-                                style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            ExposedDropdownMenuBox(
-                                expanded = clipboardRetentionExpanded,
-                                onExpandedChange = { clipboardRetentionExpanded = it },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 8.dp)
-                            ) {
-                                OutlinedTextField(
-                                    value = clipboardRetentionLabel(retentionMinutes),
-                                    onValueChange = {},
-                                    readOnly = true,
-                                    singleLine = true,
-                                    trailingIcon = {
-                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = clipboardRetentionExpanded)
-                                    },
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                                )
-                                ExposedDropdownMenu(
-                                    expanded = clipboardRetentionExpanded,
-                                    onDismissRequest = { clipboardRetentionExpanded = false }
-                                ) {
-                                    retentionChoices.forEach { minutes ->
-                                        DropdownMenuItem(
-                                            text = { Text(clipboardRetentionLabel(minutes)) },
-                                            onClick = {
-                                                clipboardRetentionExpanded = false
-                                                clipboardRetentionTime = minutes.toString()
-                                                SettingsManager.setClipboardRetentionTime(context, minutes)
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                SettingsDropdownRow(
+                    title = stringResource(R.string.clipboard_retention_time_title),
+                    value = clipboardRetentionLabel(retentionMinutes),
+                    description = stringResource(R.string.clipboard_retention_choice_description),
+                    options = retentionChoices,
+                    selected = retentionMinutes,
+                    optionLabel = { clipboardRetentionLabel(it) },
+                    onSelect = { minutes ->
+                        clipboardRetentionTime = minutes.toString()
+                        SettingsManager.setClipboardRetentionTime(context, minutes)
+                    },
+                    icon = Icons.Filled.ContentPaste,
+                    linkId = SettingLinkIds.ADVANCED_CLIPBOARD_RETENTION_TIME
+                )
 
                 if (SettingsManager.getExperimentalCandidatesViewEnabled(context)) { // Numen only offers turning this off, since this mode cannot hide the bar.
                     Surface(

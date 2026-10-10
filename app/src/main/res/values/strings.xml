@@ -35,6 +35,9 @@
     <!-- Smart punctuation Section -->
     <string name="spaced_hyphen_to_en_dash_title">Hyphen to dash</string>
     <string name="spaced_hyphen_to_en_dash_description">Turn a hyphen between spaces into a dash</string>
+    <string name="spaced_hyphen_dash_style_title">Dash to use</string>
+    <string name="dash_style_en">En dash (–)</string>
+    <string name="dash_style_em">Em dash (—)</string>
     <string name="mid_word_quote_to_apostrophe_title">Quotes inside words</string>
     <string name="mid_word_quote_to_apostrophe_description">Turn straight quotes inside words into an apostrophe</string>
     <string name="comma_space_title">Space after comma</string>
@@ -808,6 +811,7 @@ Tap a key below to choose what it does: a key, an action, a Ctrl shortcut or not
     <string name="status_bar_slots_left">Left buttons</string>
     <string name="status_bar_slots_right">Right buttons</string>
     <string name="status_bar_slot_button_label">Button %1$d</string>
+    <string name="status_bar_slot_single_button_label">Button</string>
     <string name="pastierina_status_bar_buttons_title">Compact bar</string>
     <string name="pastierina_status_bar_buttons_description">Choose which buttons appear on the left and right edges of the compact bar</string>
     <string name="status_bar_slot_add">Add keyboard bar button</string>

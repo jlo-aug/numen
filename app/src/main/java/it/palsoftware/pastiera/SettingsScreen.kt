@@ -30,7 +30,7 @@ import androidx.compose.material.icons.filled.SmartButton
 import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.AccessibilityNew
 import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material.icons.filled.Engineering
 import androidx.activity.ComponentActivity
@@ -482,7 +482,7 @@ private fun SettingsMainScreen(
             SettingsGroupDivider(stringResource(R.string.settings_group_system))
 
             SettingsCategoryRow(
-                icon = Icons.Filled.TouchApp,
+                icon = Icons.Filled.AccessibilityNew,
                 title = stringResource(R.string.settings_category_accessibility),
                 description = stringResource(R.string.settings_row_accessibility_description),
                 linkId = SettingLinkIds.MAIN_ACCESSIBILITY,

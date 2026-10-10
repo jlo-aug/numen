@@ -17,6 +17,8 @@ import androidx.compose.material.icons.automirrored.filled.AlignHorizontalRight
 import androidx.compose.material.icons.filled.RoundedCorner
 import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material.icons.filled.Visibility
+import it.palsoftware.pastiera.ui.SettingsDropdownMenuItem
+import it.palsoftware.pastiera.ui.SettingsDropdownRowLayout
 import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.ui.SettingsSliderRow
 import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
@@ -623,23 +625,20 @@ private fun SlotGroup(
     onRemoveSlot: (Int) -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxWidth().settingRow(linkId), color = MaterialTheme.colorScheme.background) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-        SettingsRowIcon(icon, modifier = Modifier.padding(top = 12.dp))
-        Column(modifier = Modifier.weight(1f)) {
+        Column(modifier = Modifier.fillMaxWidth()) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 16.dp, end = 4.dp, top = 4.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                SettingsRowIcon(icon)
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
+                    fontWeight = FontWeight.Medium,
+                    modifier = Modifier.weight(1f)
                 )
                 IconButton(onClick = onAddSlot) {
                     Icon(
@@ -650,38 +649,36 @@ private fun SlotGroup(
                 }
             }
 
+            // Each button of the group is a sub-row dropdown, with its remove button at the end.
             slots.forEachIndexed { index, buttonId ->
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    SlotDropdown(
-                        // "Button 1" only helps when the group has more than one button.
-                        label = if (slots.size > 1) {
-                            stringResource(R.string.status_bar_slot_button_label, index + 1)
-                        } else null,
-                        selectedButton = buttonId,
-                        excludedButtons = emptyList(),
-                        modifier = Modifier.weight(1f),
-                        onButtonSelected = { selected -> onSlotSelected(index, selected) }
-                    )
-                    IconButton(
-                        onClick = { onRemoveSlot(index) },
-                        enabled = slots.size > 1
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.Delete,
-                            contentDescription = stringResource(R.string.status_bar_slot_remove),
-                            tint = if (slots.size > 1) {
-                                MaterialTheme.colorScheme.primary
-                            } else {
-                                MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
-                            }
-                        )
+                SlotDropdown(
+                    // "Button 1" only helps when the group has more than one button.
+                    label = if (slots.size > 1) {
+                        stringResource(R.string.status_bar_slot_button_label, index + 1)
+                    } else {
+                        stringResource(R.string.status_bar_slot_single_button_label)
+                    },
+                    selectedButton = buttonId,
+                    excludedButtons = emptyList(),
+                    onButtonSelected = { selected -> onSlotSelected(index, selected) },
+                    trailing = {
+                        IconButton(
+                            onClick = { onRemoveSlot(index) },
+                            enabled = slots.size > 1
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.Delete,
+                                contentDescription = stringResource(R.string.status_bar_slot_remove),
+                                tint = if (slots.size > 1) {
+                                    MaterialTheme.colorScheme.primary
+                                } else {
+                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
+                                }
+                            )
+                        }
                     }
-                }
+                )
             }
-        }
         }
     }
 }
@@ -816,126 +813,58 @@ private fun SlotPreview(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SlotDropdown(
-    label: String?,
+    label: String,
     selectedButton: String,
     excludedButtons: List<String> = emptyList(),
-    modifier: Modifier = Modifier,
-    onButtonSelected: (String) -> Unit
+    onButtonSelected: (String) -> Unit,
+    trailing: @Composable RowScope.() -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     // Filter out buttons that are already used in other slots (but always keep "none" available)
     val availableButtons = SettingsManager.getAvailableStatusBarButtons()
         .filter { it == SettingsManager.STATUS_BAR_BUTTON_NONE || it !in excludedButtons }
 
-    // Starts on the row's title column (52 dp), like the other settings controls.
-    Surface(
-        modifier = modifier.fillMaxWidth(),
-        color = MaterialTheme.colorScheme.background
+    SettingsDropdownRowLayout(
+        title = label,
+        value = getButtonDisplayName(selectedButton),
+        expanded = expanded,
+        onExpandedChange = { expanded = it },
+        subRow = true,
+        trailing = trailing
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(vertical = 8.dp)
-        ) {
-            if (label != null) {
-                Text(
-                    text = label,
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.primary,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-            }
-
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it }
-            ) {
-                OutlinedTextField(
-                    value = getButtonDisplayName(selectedButton),
-                    onValueChange = {},
-                    readOnly = true,
-                    leadingIcon = {
-                        if (selectedButton == SettingsManager.STATUS_BAR_BUTTON_NONE) {
+        availableButtons.forEach { buttonId ->
+            SettingsDropdownMenuItem(
+                text = getButtonDisplayName(buttonId),
+                supportingText = getButtonDescription(buttonId),
+                selected = buttonId == selectedButton,
+                icon = {
+                    if (buttonId == SettingsManager.STATUS_BAR_BUTTON_NONE) {
+                        Box(
+                            modifier = Modifier.size(24.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Text(
                                 text = "—",
                                 style = MaterialTheme.typography.bodyLarge,
                                 color = MaterialTheme.colorScheme.onSurfaceVariant
                             )
-                        } else {
-                            Icon(
-                                painter = painterResource(id = getButtonIconRes(selectedButton)),
-                                contentDescription = null,
-                                modifier = Modifier.size(24.dp),
-                                tint = MaterialTheme.colorScheme.primary
-                            )
                         }
-                    },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                )
-
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    availableButtons.forEach { buttonId ->
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    if (buttonId == SettingsManager.STATUS_BAR_BUTTON_NONE) {
-                                        Box(
-                                            modifier = Modifier.size(24.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = "—",
-                                                style = MaterialTheme.typography.bodyLarge,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                                            )
-                                        }
-                                    } else {
-                                        Icon(
-                                            painter = painterResource(id = getButtonIconRes(buttonId)),
-                                            contentDescription = null,
-                                            modifier = Modifier.size(24.dp),
-                                            tint = MaterialTheme.colorScheme.primary
-                                        )
-                                    }
-                                    Column {
-                                        Text(
-                                            text = getButtonDisplayName(buttonId),
-                                            style = MaterialTheme.typography.bodyMedium
-                                        )
-                                        Text(
-                                            text = getButtonDescription(buttonId),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                }
-                            },
-                            onClick = {
-                                onButtonSelected(buttonId)
-                                expanded = false
-                            },
-                            contentPadding = ExposedDropdownMenuDefaults.ItemContentPadding
+                    } else {
+                        Icon(
+                            painter = painterResource(id = getButtonIconRes(buttonId)),
+                            contentDescription = null,
+                            modifier = Modifier.size(24.dp),
+                            tint = MaterialTheme.colorScheme.primary
                         )
                     }
+                },
+                onClick = {
+                    onButtonSelected(buttonId)
+                    expanded = false
                 }
-            }
+            )
         }
     }
 }

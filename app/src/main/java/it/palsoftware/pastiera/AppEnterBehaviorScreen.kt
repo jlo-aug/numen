@@ -19,7 +19,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.Chat
 import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
 import androidx.compose.material.icons.automirrored.filled.Send
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
 import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsRowTextInset
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.WarningAmber
@@ -326,122 +328,40 @@ fun AppEnterBehaviorScreen(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EnterPresetSelector(
     preset: String,
     onPresetSelected: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.preset"), color = MaterialTheme.colorScheme.background) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-        SettingsRowIcon(Icons.AutoMirrored.Filled.Chat)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.app_enter_behaviour_preset_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = stringResource(R.string.app_enter_behaviour_preset_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-            ) {
-                OutlinedTextField(
-                    value = getEnterPresetLabel(preset),
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    enterPresetOptions().forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(getEnterPresetLabel(option)) },
-                            onClick = {
-                                expanded = false
-                                onPresetSelected(option)
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }    }
+    SettingsDropdownRow(
+        title = stringResource(R.string.app_enter_behaviour_preset_title),
+        value = getEnterPresetLabel(preset),
+        description = stringResource(R.string.app_enter_behaviour_preset_description),
+        options = enterPresetOptions(),
+        selected = preset,
+        optionLabel = { getEnterPresetLabel(it) },
+        onSelect = onPresetSelected,
+        icon = Icons.AutoMirrored.Filled.Chat,
+        linkId = "app_enter_behavior.preset"
+    )
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun EnterAdditionalSendShortcutSelector(
     shortcut: String,
     onShortcutSelected: (String) -> Unit
 ) {
-    var expanded by remember { mutableStateOf(false) }
-    Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.additional_send_shortcut"), color = MaterialTheme.colorScheme.background) {
-        Row(
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-        SettingsRowIcon(Icons.AutoMirrored.Filled.Send)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = stringResource(R.string.app_enter_behaviour_additional_send_shortcut_label),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = stringResource(R.string.app_enter_behaviour_additional_send_shortcut_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { expanded = it },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 8.dp)
-            ) {
-                OutlinedTextField(
-                    value = getEnterAdditionalSendShortcutLabel(shortcut),
-                    onValueChange = {},
-                    readOnly = true,
-                    trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded) },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { expanded = false }
-                ) {
-                    enterAdditionalSendShortcutOptions().forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(getEnterAdditionalSendShortcutLabel(option)) },
-                            onClick = {
-                                expanded = false
-                                onShortcutSelected(option)
-                            }
-                        )
-                    }
-                }
-            }
-        }
-    }    }
+    SettingsDropdownRow(
+        title = stringResource(R.string.app_enter_behaviour_additional_send_shortcut_label),
+        value = getEnterAdditionalSendShortcutLabel(shortcut),
+        description = stringResource(R.string.app_enter_behaviour_additional_send_shortcut_description),
+        options = enterAdditionalSendShortcutOptions(),
+        selected = shortcut,
+        optionLabel = { getEnterAdditionalSendShortcutLabel(it) },
+        onSelect = onShortcutSelected,
+        icon = Icons.AutoMirrored.Filled.Send,
+        linkId = "app_enter_behavior.additional_send_shortcut"
+    )
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -459,9 +379,6 @@ private fun EnterBehaviorOverrideRow(
     onAdditionalSendShortcutChanged: (String) -> Unit,
     onRemove: () -> Unit
 ) {
-    var behaviorExpanded by remember { mutableStateOf(false) }
-    var strategyExpanded by remember { mutableStateOf(false) }
-    var additionalShortcutExpanded by remember { mutableStateOf(false) }
     var showManualOverrideControls by remember { mutableStateOf(false) }
     val bringIntoViewRequester = remember(app.packageName) { BringIntoViewRequester() }
 
@@ -478,7 +395,15 @@ private fun EnterBehaviorOverrideRow(
             .bringIntoViewRequester(bringIntoViewRequester),
         color = MaterialTheme.colorScheme.background
     ) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+        Column {
+        Column(
+            modifier = Modifier.padding(
+                start = 16.dp,
+                end = 16.dp,
+                top = 10.dp,
+                bottom = if (showManualOverrideControls) 0.dp else 10.dp
+            )
+        ) {
             // App icon on the 24 dp icon column, so the app name starts at the title column.
             Row(verticalAlignment = Alignment.CenterVertically) {
                 AppIcon(app = app, modifier = Modifier.size(24.dp))
@@ -522,7 +447,7 @@ private fun EnterBehaviorOverrideRow(
                 }
             }
 
-            // Details and manual controls start at the title column (16 + 36 = 52 dp).
+            // Details start at the title column (16 + 36 = 52 dp).
             Column(modifier = Modifier.padding(start = 36.dp)) {
             if (!editable) {
                 KnownEnterBehaviorDetails(
@@ -539,120 +464,59 @@ private fun EnterBehaviorOverrideRow(
                     )
                 }
             }
-
-            if (showManualOverrideControls) {
-                ExposedDropdownMenuBox(
-                    expanded = behaviorExpanded,
-                    onExpandedChange = { behaviorExpanded = it },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = getEnterBehaviorLabel(behavior),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.app_enter_behaviour_desired_label)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(behaviorExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = behaviorExpanded,
-                        onDismissRequest = { behaviorExpanded = false }
-                    ) {
-                        enterBehaviorOptions().forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(getEnterBehaviorLabel(option)) },
-                                onClick = {
-                                    behaviorExpanded = false
-                                    onBehaviorChanged(option)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                ExposedDropdownMenuBox(
-                    expanded = strategyExpanded,
-                    onExpandedChange = { strategyExpanded = it },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = getEnterSendStrategyLabel(sendStrategy),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.app_enter_behaviour_strategy_label)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(strategyExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = strategyExpanded,
-                        onDismissRequest = { strategyExpanded = false }
-                    ) {
-                        enterSendStrategyOptions().forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(getEnterSendStrategyLabel(option)) },
-                                onClick = {
-                                    strategyExpanded = false
-                                    onSendStrategyChanged(option)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                ExposedDropdownMenuBox(
-                    expanded = additionalShortcutExpanded,
-                    onExpandedChange = { additionalShortcutExpanded = it },
-                    modifier = Modifier.padding(top = 8.dp)
-                ) {
-                    OutlinedTextField(
-                        value = getEnterAdditionalSendShortcutLabel(additionalSendShortcut),
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.app_enter_behaviour_additional_send_shortcut_label)) },
-                        trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(additionalShortcutExpanded) },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = additionalShortcutExpanded,
-                        onDismissRequest = { additionalShortcutExpanded = false }
-                    ) {
-                        enterAdditionalSendShortcutOptions().forEach { option ->
-                            DropdownMenuItem(
-                                text = { Text(getEnterAdditionalSendShortcutLabel(option)) },
-                                onClick = {
-                                    additionalShortcutExpanded = false
-                                    onAdditionalSendShortcutChanged(option)
-                                }
-                            )
-                        }
-                    }
-                }
-
-                if (editable) {
-                    TextButton(
-                        onClick = onRemove,
-                        colors = ButtonDefaults.textButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        ),
-                        contentPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
-                        modifier = Modifier.padding(top = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = Icons.Filled.DeleteOutline,
-                            contentDescription = null
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text(stringResource(R.string.app_enter_behaviour_remove_app))
-                    }
-                }
             }
+        }
+
+        // Manual controls are sub-rows of the app row, in the settings dropdown style.
+        if (showManualOverrideControls) {
+            SettingsDropdownRow(
+                title = stringResource(R.string.app_enter_behaviour_desired_label),
+                value = getEnterBehaviorLabel(behavior),
+                options = enterBehaviorOptions(),
+                selected = behavior,
+                optionLabel = { getEnterBehaviorLabel(it) },
+                onSelect = onBehaviorChanged,
+                subRow = true
+            )
+            SettingsDropdownRow(
+                title = stringResource(R.string.app_enter_behaviour_strategy_label),
+                value = getEnterSendStrategyLabel(sendStrategy),
+                options = enterSendStrategyOptions(),
+                selected = sendStrategy,
+                optionLabel = { getEnterSendStrategyLabel(it) },
+                onSelect = onSendStrategyChanged,
+                subRow = true
+            )
+            SettingsDropdownRow(
+                title = stringResource(R.string.app_enter_behaviour_additional_send_shortcut_label),
+                value = getEnterAdditionalSendShortcutLabel(additionalSendShortcut),
+                options = enterAdditionalSendShortcutOptions(),
+                selected = additionalSendShortcut,
+                optionLabel = { getEnterAdditionalSendShortcutLabel(it) },
+                onSelect = onAdditionalSendShortcutChanged,
+                subRow = true
+            )
+
+            if (editable) {
+                TextButton(
+                    onClick = onRemove,
+                    colors = ButtonDefaults.textButtonColors(
+                        contentColor = MaterialTheme.colorScheme.error
+                    ),
+                    contentPadding = PaddingValues(horizontal = 0.dp, vertical = 8.dp),
+                    modifier = Modifier.padding(start = SettingsRowTextInset, bottom = 6.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.DeleteOutline,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text(stringResource(R.string.app_enter_behaviour_remove_app))
+                }
+            } else {
+                Spacer(modifier = Modifier.height(10.dp))
             }
+        }
         }
     }
 }

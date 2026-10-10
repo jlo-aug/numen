@@ -24,22 +24,24 @@ import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.automirrored.filled.Launch
 import androidx.compose.material.icons.filled.Animation
-import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.FilterList
-import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material.icons.filled.Palette
 import androidx.compose.material.icons.filled.Spellcheck
 import androidx.compose.material.icons.filled.ViewCompact
 import androidx.compose.material.icons.filled.WidthNormal
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.material.icons.filled.FormatColorFill
+import androidx.compose.material.icons.filled.KeyboardCommandKey
+import androidx.compose.material.icons.filled.Language
+import androidx.compose.material.icons.filled.Style
+import androidx.compose.material.icons.filled.TravelExplore
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
 import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.ui.SettingsSliderRow
 import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
 import androidx.compose.material.icons.automirrored.filled.Help
 import androidx.compose.material.icons.automirrored.filled.Shortcut
 import androidx.compose.material.icons.filled.FindReplace
-import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LineWeight
 import androidx.compose.material.icons.filled.Edit
@@ -611,14 +613,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
 
             StarterLauncherNavigationRow(
                 flat = true,
-                icon = {
-                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ManageSearch,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
+                icon = { SettingsRowIcon(Icons.Filled.Style) },
                 linkId = "quick_launcher.appearance",
                 title = stringResource(R.string.quick_launcher_cosmetic_title),
                 description = stringResource(R.string.quick_launcher_cosmetic_description),
@@ -627,7 +622,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
 
             StarterLauncherNavigationRow(
                 flat = true,
-                icon = { SettingsRowIcon(Icons.Filled.Keyboard) },
+                icon = { SettingsRowIcon(Icons.Filled.KeyboardCommandKey) },
                 linkId = "quick_launcher.assignments",
                 title = stringResource(R.string.launcher_shortcuts_configure),
                 description = if (quickLauncherShortcutKey != null) {
@@ -663,7 +658,6 @@ private fun StarterLauncherBehaviorScreen(
     onQuickLauncherAnimationDurationChanged: (Int) -> Unit
 ) {
     var showRankingInfo by remember { mutableStateOf(false) }
-    var behaviorMenuExpanded by remember { mutableStateOf(false) }
     // Numen's layout is always QWERTY, so this switch changes nothing unless it was
     // turned off; it stays visible (for this visit) only then, to allow setting it back.
     val showRespectKeyboardLayout = remember { !quickLauncherRespectKeyboardLayout }
@@ -678,50 +672,17 @@ private fun StarterLauncherBehaviorScreen(
         title = stringResource(R.string.quick_launcher_behaviour_title),
         onBack = onBack
     ) {
-        LauncherSettingBlock(icon = Icons.Filled.Apps, linkId = "quick_launcher.provider") {
-            Text(
-                text = stringResource(R.string.quick_launcher_provider_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
-            Text(
-                text = stringResource(R.string.quick_launcher_provider_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-            ExposedDropdownMenuBox(
-                expanded = behaviorMenuExpanded,
-                onExpandedChange = { behaviorMenuExpanded = !behaviorMenuExpanded }
-            ) {
-                OutlinedTextField(
-                    value = quickLauncherBehaviorLabel(quickLauncherBehavior),
-                    onValueChange = {},
-                    readOnly = true,
-                    singleLine = true,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = behaviorMenuExpanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                    modifier = Modifier
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                        .fillMaxWidth()
-                )
-                ExposedDropdownMenu(
-                    expanded = behaviorMenuExpanded,
-                    onDismissRequest = { behaviorMenuExpanded = false }
-                ) {
-                    behaviorOptions.forEach { behavior ->
-                        DropdownMenuItem(
-                            text = { Text(quickLauncherBehaviorLabel(behavior)) },
-                            onClick = {
-                                behaviorMenuExpanded = false
-                                onQuickLauncherBehaviorChanged(behavior)
-                            }
-                        )
-                    }
-                }
-            }
-        }
+        SettingsDropdownRow(
+            title = stringResource(R.string.quick_launcher_provider_title),
+            value = quickLauncherBehaviorLabel(quickLauncherBehavior),
+            description = stringResource(R.string.quick_launcher_provider_description),
+            options = behaviorOptions,
+            selected = quickLauncherBehavior,
+            optionLabel = { quickLauncherBehaviorLabel(it) },
+            onSelect = onQuickLauncherBehaviorChanged,
+            icon = Icons.Filled.TravelExplore,
+            linkId = "quick_launcher.provider"
+        )
         LauncherShortcutTriggerRow(
             icon = { SettingsRowIcon(Icons.AutoMirrored.Filled.Launch) },
             linkId = "quick_launcher.auto_start_single",
@@ -740,7 +701,7 @@ private fun StarterLauncherBehaviorScreen(
         )
         if (showRespectKeyboardLayout) {
             LauncherShortcutTriggerRow(
-                icon = { SettingsRowIcon(Icons.Filled.Keyboard) },
+                icon = { SettingsRowIcon(Icons.Filled.Language) },
                 linkId = "quick_launcher.respect_keyboard_layout",
                 title = stringResource(R.string.quick_launcher_respect_keyboard_layout_title),
                 description = stringResource(R.string.quick_launcher_respect_keyboard_layout_description),
@@ -792,7 +753,7 @@ private fun StarterLauncherBehaviorScreen(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            SettingsRowIcon(Icons.Filled.SpaceBar)
+            SettingsRowIcon(Icons.Filled.Search)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(R.string.quick_launcher_text_field_shortcuts_title),
@@ -1380,7 +1341,7 @@ private fun QuickLauncherFavoriteAppearanceSection(
     onStaticTopHighlightColorChanged: (Int) -> Unit
 ) {
     LauncherGroupHeaderRow(
-        icon = Icons.Filled.Palette,
+        icon = Icons.Filled.FormatColorFill,
         title = stringResource(R.string.quick_launcher_entry_appearance_title),
         description = stringResource(R.string.quick_launcher_entry_appearance_description)
     )
@@ -1679,28 +1640,6 @@ private fun StarterLauncherSubScreen(
                 .padding(vertical = 8.dp),
             content = content
         )
-    }
-}
-
-/** A flat settings row whose body is free-form (a slider, a dropdown, a list of switches). */
-@Composable
-private fun LauncherSettingBlock(
-    icon: ImageVector?,
-    linkId: String? = null,
-    content: @Composable ColumnScope.() -> Unit
-) {
-    Surface(modifier = Modifier.fillMaxWidth().settingRow(linkId)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SettingsRowIcon(icon, modifier = Modifier.padding(top = 2.dp))
-            Column(
-                modifier = Modifier.weight(1f),
-                verticalArrangement = Arrangement.spacedBy(6.dp),
-                content = content
-            )
-        }
     }
 }
 

@@ -17,7 +17,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
-import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.automirrored.filled.Message
 import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material.icons.filled.Keyboard
@@ -26,12 +25,11 @@ import androidx.compose.material.icons.filled.KeyboardCapslock
 import androidx.compose.material.icons.filled.KeyboardControlKey
 import androidx.compose.material.icons.filled.KeyboardOptionKey
 import androidx.compose.material.icons.filled.Mic
-import androidx.compose.material.icons.filled.SpaceBar
-import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.LockOpen
+import androidx.compose.material.icons.filled.Autorenew
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Timer
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -53,6 +51,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
 import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.ui.SettingsSliderRow
 import it.palsoftware.pastiera.ui.SettingsRowStartInset
@@ -79,8 +78,6 @@ fun ModifierSettingsScreen(
     var ctrlTapLatches by remember { mutableStateOf(SettingsManager.getCtrlTapLatches(context)) }
     var ctrlLatchStaysOnSpace by remember { mutableStateOf(SettingsManager.getCtrlLatchStaysOnSpace(context)) }
     var modifierIndicators by remember { mutableStateOf(SettingsManager.getModifierIndicators(context)) }
-    var longPressExpanded by remember { mutableStateOf(false) }
-    var altBindingExpanded by remember { mutableStateOf(false) }
 
     // On the Titan 2 Elite, Alt types what is printed on the key. The choice stays
     // only for users who changed it, so they can set it back (decided once per visit).
@@ -133,19 +130,17 @@ fun ModifierSettingsScreen(
             modifier = modifier.fillMaxWidth().padding(paddingValues).verticalScroll(rememberScrollState())
         ) {
             SettingsSectionDivider(stringResource(R.string.modifiers_section_long_press))
-            ModifierDropdownRow(
+            SettingsDropdownRow(
                 title = stringResource(R.string.long_press_modifier_title),
                 icon = Icons.Filled.TouchApp,
                 value = longPressOptions.firstOrNull { it.first == longPressModifier }?.second.orEmpty(),
                 linkId = SettingLinkIds.MODIFIERS_LONG_PRESS_MODIFIER,
-                expanded = longPressExpanded,
-                onExpand = { longPressExpanded = true },
-                onDismiss = { longPressExpanded = false },
-                options = longPressOptions,
-                onSelected = { value ->
+                options = longPressOptions.map { it.first },
+                selected = longPressModifier,
+                optionLabel = { id -> longPressOptions.first { it.first == id }.second },
+                onSelect = { value ->
                     longPressModifier = value
                     SettingsManager.setLongPressModifier(context, value)
-                    longPressExpanded = false
                 }
             )
             ModifierLongPressThresholdRow(
@@ -192,7 +187,7 @@ fun ModifierSettingsScreen(
             }
             ModifierSwitchRow(
                 title = stringResource(R.string.clear_alt_on_space_title),
-                icon = Icons.Filled.SpaceBar,
+                icon = Icons.Filled.LockOpen,
                 description = stringResource(R.string.clear_alt_on_space_description),
                 checked = clearAltOnSpace,
                 linkId = SettingLinkIds.TEXT_INPUT_CLEAR_ALT_ON_SPACE
@@ -225,21 +220,19 @@ fun ModifierSettingsScreen(
                 SettingsManager.setAltCtrlSpeechShortcutEnabled(context, it)
             }
             if (showAltBinding) {
-                ModifierDropdownRow(
+                SettingsDropdownRow(
                     title = stringResource(R.string.alt_binding_title),
                     icon = Icons.Filled.KeyboardAlt,
                     description = stringResource(R.string.alt_binding_description),
                     value = altBindingOptions.firstOrNull { it.first == altBinding }?.second
                         ?: altBindingOptions.first().second,
                     linkId = SettingLinkIds.MODIFIERS_ALT_BINDING,
-                    expanded = altBindingExpanded,
-                    onExpand = { altBindingExpanded = true },
-                    onDismiss = { altBindingExpanded = false },
-                    options = altBindingOptions,
-                    onSelected = { value ->
+                    options = altBindingOptions.map { it.first },
+                    selected = altBinding,
+                    optionLabel = { id -> altBindingOptions.first { it.first == id }.second },
+                    onSelect = { value ->
                         altBinding = value
                         SettingsManager.setAltModifierBinding(context, value)
-                        altBindingExpanded = false
                     }
                 )
             }
@@ -369,7 +362,7 @@ private fun OtherKeyboardsSection(
     if (showSwitching) {
         ModifierSwitchRow(
             title = stringResource(R.string.keyboard_switching_auto_title),
-            icon = Icons.Filled.SwapHoriz,
+            icon = Icons.Filled.Autorenew,
             description = stringResource(R.string.keyboard_switching_auto_description),
             checked = automaticSwitching,
             linkId = SettingLinkIds.KEYBOARDS_DEVICES_KEYBOARD_SWITCHING_AUTO
@@ -398,7 +391,7 @@ private fun OtherKeyboardsSection(
     }
     if (showOnScreen) {
         ModifierNavigationRow(
-            iconRes = R.drawable.modifier_keys_24,
+            icon = Icons.Filled.Keyboard,
             title = stringResource(R.string.on_screen_keyboard_title),
             description = stringResource(R.string.other_keyboards_on_screen_description),
             linkId = SettingLinkIds.KEYBOARDS_DEVICES_ON_SCREEN_KEYBOARD,
@@ -407,7 +400,7 @@ private fun OtherKeyboardsSection(
     }
     if (showBuiltIn) {
         ModifierNavigationRow(
-            iconRes = R.drawable.modifier_keys_24,
+            icon = Icons.Filled.Devices,
             title = stringResource(R.string.built_in_keyboards_title),
             description = stringResource(R.string.other_keyboards_built_in_description),
             linkId = SettingLinkIds.KEYBOARDS_DEVICES_BUILT_IN_KEYBOARDS,
@@ -447,7 +440,8 @@ private fun ModifierLongPressThresholdRow(
 
 @Composable
 private fun ModifierNavigationRow(
-    iconRes: Int,
+    iconRes: Int? = null,
+    icon: ImageVector? = null,
     title: String,
     description: String,
     linkId: String? = null,
@@ -459,12 +453,11 @@ private fun ModifierNavigationRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                painter = painterResource(iconRes),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
+            if (iconRes != null) {
+                SettingsRowIcon(painterResource(iconRes))
+            } else {
+                SettingsRowIcon(icon)
+            }
             Column(modifier = Modifier.weight(1f)) {
                 Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                 Text(
@@ -478,43 +471,6 @@ private fun ModifierNavigationRow(
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant
             )
-        }
-    }
-}
-
-@Composable
-private fun <T> ModifierDropdownRow(
-    title: String,
-    icon: ImageVector?,
-    value: String,
-    linkId: String? = null,
-    expanded: Boolean,
-    onExpand: () -> Unit,
-    onDismiss: () -> Unit,
-    options: List<Pair<T, String>>,
-    onSelected: (T) -> Unit,
-    description: String? = null
-) {
-    Surface(modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).settingRow(linkId, onExpand)) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SettingsRowIcon(icon)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
-                description?.let {
-                    Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-                }
-                Text(value, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
-            }
-            Icon(Icons.Filled.ArrowDropDown, null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
-            DropdownMenu(expanded = expanded, onDismissRequest = onDismiss) {
-                options.forEach { (id, label) ->
-                    DropdownMenuItem(text = { Text(label) }, onClick = { onSelected(id) })
-                }
-            }
         }
     }
 }

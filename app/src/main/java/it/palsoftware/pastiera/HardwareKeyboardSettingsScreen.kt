@@ -14,16 +14,14 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material.icons.filled.PhoneAndroid
+import androidx.compose.material.icons.filled.Straighten
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
+import it.palsoftware.pastiera.ui.SettingsRowIcon
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.ExposedDropdownMenuBox
-import androidx.compose.material3.ExposedDropdownMenuDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.MenuAnchorType
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SegmentedButton
 import androidx.compose.material3.SegmentedButtonDefaults
@@ -68,7 +66,6 @@ fun HardwareKeyboardSettingsScreen(
     var selectedProfile by remember {
         mutableStateOf(SettingsManager.getPhysicalKeyboardProfileOverride(context))
     }
-    var profileMenuExpanded by remember { mutableStateOf(false) }
     var titan2LayoutEnabled by remember {
         mutableStateOf(SettingsManager.isTitan2LayoutEnabled(context))
     }
@@ -121,44 +118,21 @@ fun HardwareKeyboardSettingsScreen(
                     .firstOrNull { it.first == selectedProfile }
                     ?.let { stringResource(it.second) }
                     ?: stringResource(R.string.keyboard_profile_option_auto)
-                ExposedDropdownMenuBox(
-                    expanded = profileMenuExpanded,
-                    onExpandedChange = { profileMenuExpanded = it },
-                    modifier = Modifier.settingRow("hardware.profile").padding(horizontal = 16.dp, vertical = 4.dp)
-                ) {
-                    OutlinedTextField(
-                        value = selectedProfileLabel,
-                        onValueChange = {},
-                        readOnly = true,
-                        label = { Text(stringResource(R.string.hardware_keyboard_profile_select_label)) },
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = profileMenuExpanded)
-                        },
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                    )
-                    ExposedDropdownMenu(
-                        expanded = profileMenuExpanded,
-                        onDismissRequest = { profileMenuExpanded = false }
-                    ) {
-                        hardwareKeyboardProfiles.forEach { (profile, labelRes) ->
-                            DropdownMenuItem(
-                                text = { Text(stringResource(labelRes)) },
-                                onClick = {
-                                    selectedProfile = profile
-                                    SettingsManager.setPhysicalKeyboardProfileOverride(context, profile)
-                                    profileMenuExpanded = false
-                                }
-                            )
-                        }
-                    }
-                }
-                Text(
-                    text = stringResource(R.string.keyboard_profile_override_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                SettingsDropdownRow(
+                    title = stringResource(R.string.hardware_keyboard_profile_select_label),
+                    value = selectedProfileLabel,
+                    description = stringResource(R.string.keyboard_profile_override_description),
+                    options = hardwareKeyboardProfiles.map { it.first },
+                    selected = selectedProfile,
+                    optionLabel = { profile ->
+                        stringResource(hardwareKeyboardProfiles.first { it.first == profile }.second)
+                    },
+                    onSelect = { profile ->
+                        selectedProfile = profile
+                        SettingsManager.setPhysicalKeyboardProfileOverride(context, profile)
+                    },
+                    icon = Icons.Filled.PhoneAndroid,
+                    linkId = "hardware.profile"
                 )
             }
 
@@ -230,12 +204,7 @@ private fun HardwareKeyboardSwitchRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.Keyboard,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
+            SettingsRowIcon(Icons.Filled.Straighten)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,

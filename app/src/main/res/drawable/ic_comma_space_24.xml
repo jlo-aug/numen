@@ -1,0 +1,14 @@
+<!-- A comma followed by a space bar, for the "Space after comma" setting. The comma is the
+     glyph of ic_apostrophe_24, scaled down and set on the baseline. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M3.6,19H5.4L6.6,16.6V13H3V16.6H4.8Z" />
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M20,13v4h-9v-4h-2v6h13v-6z" />
+</vector>

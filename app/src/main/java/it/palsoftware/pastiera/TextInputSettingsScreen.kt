@@ -10,7 +10,6 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
 import androidx.compose.material.icons.automirrored.filled.Backspace
 import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
-import androidx.compose.material.icons.automirrored.filled.Segment
 import androidx.compose.material.icons.automirrored.filled.ShortText
 import androidx.compose.material.icons.automirrored.filled.KeyboardBackspace
 import androidx.compose.material.icons.automirrored.filled.TrendingFlat
@@ -21,6 +20,7 @@ import androidx.compose.material.icons.filled.TextFormat
 import androidx.compose.material.icons.filled.Title
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
 import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.ui.SettingsRowStartInset
 import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
@@ -85,7 +85,6 @@ fun TextInputSettingsScreen(
         mutableStateOf(SettingsManager.getSpacedHyphenDashStyle(context))
     }
 
-    var spacedHyphenDashExpanded by remember { mutableStateOf(false) }
 
     var midWordQuoteToApostrophe by remember {
         mutableStateOf(SettingsManager.getMidWordQuoteToApostrophe(context))
@@ -382,7 +381,7 @@ fun TextInputSettingsScreen(
             )
             SettingsSwitchRow(
                 title = stringResource(R.string.comma_space_title),
-                icon = Icons.AutoMirrored.Filled.Segment,
+                icon = ImageVector.vectorResource(R.drawable.ic_comma_space_24),
                 description = stringResource(R.string.comma_space_description),
                 checked = commaSpace,
                 linkId = SettingLinkIds.TEXT_INPUT_COMMA_SPACE,
@@ -393,7 +392,7 @@ fun TextInputSettingsScreen(
             )
 
             SettingsSectionHeader(text = stringResource(R.string.text_input_section_typography))
-            SettingsDropdownSwitchRow(
+            SettingsSwitchRow(
                 title = stringResource(R.string.spaced_hyphen_to_en_dash_title),
                 icon = Icons.AutoMirrored.Filled.TrendingFlat,
                 description = stringResource(R.string.spaced_hyphen_to_en_dash_description),
@@ -402,21 +401,23 @@ fun TextInputSettingsScreen(
                 onCheckedChange = { enabled ->
                     spacedHyphenToEnDash = enabled
                     SettingsManager.setSpacedHyphenToEnDash(context, enabled)
-                    if (!enabled) {
-                        spacedHyphenDashExpanded = false
-                    }
-                },
-                expanded = spacedHyphenDashExpanded,
-                onExpandedChange = { spacedHyphenDashExpanded = it },
-                value = dashStyleLabel(spacedHyphenDashStyle),
-                options = dashStyleOptions(),
-                optionLabel = ::dashStyleLabel,
-                onOptionSelected = { style ->
-                    spacedHyphenDashStyle = style
-                    SettingsManager.setSpacedHyphenDashStyle(context, style)
-                    spacedHyphenDashExpanded = false
                 }
             )
+            // The dash choice only matters while the switch above is on.
+            if (spacedHyphenToEnDash) {
+                SettingsDropdownRow(
+                    title = stringResource(R.string.spaced_hyphen_dash_style_title),
+                    value = dashStyleLabel(spacedHyphenDashStyle),
+                    options = dashStyleOptions(),
+                    selected = spacedHyphenDashStyle,
+                    optionLabel = { dashStyleLabel(it) },
+                    onSelect = { style ->
+                        spacedHyphenDashStyle = style
+                        SettingsManager.setSpacedHyphenDashStyle(context, style)
+                    },
+                    subRow = true
+                )
+            }
             SettingsSwitchRow(
                 title = stringResource(R.string.mid_word_quote_to_apostrophe_title),
                 icon = ImageVector.vectorResource(R.drawable.ic_apostrophe_24),
@@ -577,79 +578,6 @@ private fun SettingsNavigationRow(
     }
 }
 
-@Composable
-@OptIn(ExperimentalMaterial3Api::class)
-private fun SettingsDropdownSwitchRow(
-    title: String,
-    icon: ImageVector?,
-    description: String,
-    checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
-    expanded: Boolean,
-    onExpandedChange: (Boolean) -> Unit,
-    value: String,
-    options: List<String>,
-    optionLabel: (String) -> String,
-    onOptionSelected: (String) -> Unit,
-    linkId: String? = null
-) {
-    SettingsRowFrame(
-        modifier = Modifier.settingRow(linkId),
-        minHeight = 72.dp
-    ) {
-        SettingsRowIcon(icon)
-        Column(modifier = Modifier.weight(1f)) {
-            Text(
-                text = title,
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
-            // Off: just say what it does. On: let the user pick the dash.
-            if (!checked) {
-                Text(
-                    text = description,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            } else ExposedDropdownMenuBox(
-                expanded = expanded,
-                onExpandedChange = { onExpandedChange(!expanded) }
-            ) {
-                OutlinedTextField(
-                    value = value,
-                    onValueChange = {},
-                    readOnly = true,
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.bodySmall,
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
-                    },
-                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(48.dp)
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                )
-                ExposedDropdownMenu(
-                    expanded = expanded,
-                    onDismissRequest = { onExpandedChange(false) }
-                ) {
-                    options.forEach { option ->
-                        DropdownMenuItem(
-                            text = { Text(optionLabel(option)) },
-                            onClick = { onOptionSelected(option) }
-                        )
-                    }
-                }
-            }
-        }
-        Switch(
-            checked = checked,
-            onCheckedChange = onCheckedChange
-        )
-    }
-}
-
 private fun dashStyleOptions(): List<String> {
     return listOf(
         SettingsManager.DASH_STYLE_EN,
@@ -657,10 +585,11 @@ private fun dashStyleOptions(): List<String> {
     )
 }
 
+@Composable
 private fun dashStyleLabel(style: String): String {
     return when (style) {
-        SettingsManager.DASH_STYLE_EM -> "—"
-        else -> "–"
+        SettingsManager.DASH_STYLE_EM -> stringResource(R.string.dash_style_em)
+        else -> stringResource(R.string.dash_style_en)
     }
 }
 

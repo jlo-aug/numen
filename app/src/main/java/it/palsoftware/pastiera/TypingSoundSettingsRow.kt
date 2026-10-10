@@ -7,19 +7,12 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.ArrowDropDown
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Equalizer
 import androidx.compose.material.icons.filled.Vibration
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Slider
 import androidx.compose.material3.Surface
@@ -37,6 +30,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import it.palsoftware.pastiera.inputmethod.NotificationHelper
+import it.palsoftware.pastiera.ui.SettingsDropdownMenuItem
+import it.palsoftware.pastiera.ui.SettingsDropdownRow
+import it.palsoftware.pastiera.ui.SettingsDropdownRowLayout
 import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.ui.SettingsSliderRow
 import it.palsoftware.pastiera.ui.SettingsSubRowTextInset
@@ -60,7 +56,6 @@ fun TypingSoundSettingsRow() {
         mutableStateOf(SettingsManager.getTapHapticDurationMs(context).toFloat())
     }
     var showTypingSoundMenu by remember { mutableStateOf(false) }
-    var showOutputMenu by remember { mutableStateOf(false) }
 
     val typingSoundImportLauncher = rememberLauncherForActivityResult(
         contract = ActivityResultContracts.OpenDocument()
@@ -77,156 +72,66 @@ fun TypingSoundSettingsRow() {
         }
     }
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 64.dp)
-            .settingRow("sounds.typing_mode") { showTypingSoundMenu = true }
+    SettingsDropdownRowLayout(
+        title = stringResource(R.string.typing_sound_title),
+        value = typingSoundModeLabel(typingSoundMode, customTypingSoundName),
+        expanded = showTypingSoundMenu,
+        onExpandedChange = { showTypingSoundMenu = it },
+        icon = Icons.AutoMirrored.Filled.VolumeUp,
+        linkId = "sounds.typing_mode"
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
-        ) {
-            SettingsRowIcon(Icons.AutoMirrored.Filled.VolumeUp)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.typing_sound_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = typingSoundModeLabel(typingSoundMode, customTypingSoundName),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
+        listOf(
+            SettingsManager.TYPING_SOUND_MODE_OFF to R.string.typing_sound_off,
+            SettingsManager.TYPING_SOUND_MODE_CLICK to R.string.typing_sound_click,
+            SettingsManager.TYPING_SOUND_MODE_TYPEWRITER to R.string.typing_sound_typewriter
+        ).forEach { (mode, labelRes) ->
+            SettingsDropdownMenuItem(
+                text = stringResource(labelRes),
+                selected = typingSoundMode == mode,
+                onClick = {
+                    typingSoundMode = mode
+                    SettingsManager.setTypingSoundMode(context, typingSoundMode)
+                    showTypingSoundMenu = false
+                }
+            )
+        }
+        // Custom asks for a sound pack first; the mode changes only once one is imported.
+        SettingsDropdownMenuItem(
+            text = stringResource(R.string.typing_sound_custom),
+            selected = typingSoundMode == SettingsManager.TYPING_SOUND_MODE_CUSTOM,
+            onClick = {
+                showTypingSoundMenu = false
+                typingSoundImportLauncher.launch(
+                    arrayOf(
+                        "application/zip",
+                        "application/x-zip-compressed",
+                        "application/octet-stream"
+                    )
                 )
             }
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-
-        DropdownMenu(
-            expanded = showTypingSoundMenu,
-            onDismissRequest = { showTypingSoundMenu = false }
-        ) {
-            TypingSoundDropdownItem(
-                text = stringResource(R.string.typing_sound_off),
-                selected = typingSoundMode == SettingsManager.TYPING_SOUND_MODE_OFF,
-                onClick = {
-                    typingSoundMode = SettingsManager.TYPING_SOUND_MODE_OFF
-                    SettingsManager.setTypingSoundMode(context, typingSoundMode)
-                    showTypingSoundMenu = false
-                }
-            )
-            TypingSoundDropdownItem(
-                text = stringResource(R.string.typing_sound_click),
-                selected = typingSoundMode == SettingsManager.TYPING_SOUND_MODE_CLICK,
-                onClick = {
-                    typingSoundMode = SettingsManager.TYPING_SOUND_MODE_CLICK
-                    SettingsManager.setTypingSoundMode(context, typingSoundMode)
-                    showTypingSoundMenu = false
-                }
-            )
-            TypingSoundDropdownItem(
-                text = stringResource(R.string.typing_sound_typewriter),
-                selected = typingSoundMode == SettingsManager.TYPING_SOUND_MODE_TYPEWRITER,
-                onClick = {
-                    typingSoundMode = SettingsManager.TYPING_SOUND_MODE_TYPEWRITER
-                    SettingsManager.setTypingSoundMode(context, typingSoundMode)
-                    showTypingSoundMenu = false
-                }
-            )
-            TypingSoundDropdownItem(
-                text = stringResource(R.string.typing_sound_custom),
-                selected = typingSoundMode == SettingsManager.TYPING_SOUND_MODE_CUSTOM,
-                onClick = {
-                    showTypingSoundMenu = false
-                    typingSoundImportLauncher.launch(
-                        arrayOf(
-                            "application/zip",
-                            "application/x-zip-compressed",
-                            "application/octet-stream"
-                        )
-                    )
-                }
-            )
-        }
+        )
     }
 
     // The volume choice only matters while typing sounds are on.
     if (typingSoundMode != SettingsManager.TYPING_SOUND_MODE_OFF) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .heightIn(min = 64.dp)
-                .settingRow("sounds.output") { showOutputMenu = true }
-        ) {
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                SettingsRowIcon(Icons.Filled.Equalizer)
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.typing_sound_output_title),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    // The option labels say which volumes follow silent mode, so one line is enough.
-                    Text(
-                        text = typingSoundOutputModeLabel(typingSoundOutputMode),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-                Icon(
-                    imageVector = Icons.Default.ArrowDropDown,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-            }
-
-            DropdownMenu(
-                expanded = showOutputMenu,
-                onDismissRequest = { showOutputMenu = false }
-            ) {
-                TypingSoundDropdownItem(
-                    text = stringResource(R.string.typing_sound_output_media),
-                    selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_MEDIA,
-                    onClick = {
-                        typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_MEDIA
-                        SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
-                        showOutputMenu = false
-                    }
-                )
-                TypingSoundDropdownItem(
-                    text = stringResource(R.string.typing_sound_output_system),
-                    selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_SYSTEM,
-                    onClick = {
-                        typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_SYSTEM
-                        SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
-                        showOutputMenu = false
-                    }
-                )
-                TypingSoundDropdownItem(
-                    text = stringResource(R.string.typing_sound_output_notification),
-                    selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION,
-                    onClick = {
-                        typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION
-                        SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
-                        showOutputMenu = false
-                    }
-                )
-            }
-        }
+        // The option labels say which volumes follow silent mode, so one line is enough.
+        SettingsDropdownRow(
+            title = stringResource(R.string.typing_sound_output_title),
+            value = typingSoundOutputModeLabel(typingSoundOutputMode),
+            options = listOf(
+                SettingsManager.TYPING_SOUND_OUTPUT_MEDIA,
+                SettingsManager.TYPING_SOUND_OUTPUT_SYSTEM,
+                SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION
+            ),
+            selected = typingSoundOutputMode,
+            optionLabel = { typingSoundOutputModeLabel(it) },
+            onSelect = { mode ->
+                typingSoundOutputMode = mode
+                SettingsManager.setTypingSoundOutputMode(context, mode)
+            },
+            icon = Icons.Filled.Equalizer,
+            linkId = "sounds.output"
+        )
     }
 
     Surface(
@@ -291,23 +196,6 @@ fun TypingSoundSettingsRow() {
             )
         }
     }
-}
-
-@Composable
-private fun TypingSoundDropdownItem(
-    text: String,
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    DropdownMenuItem(
-        text = { Text(text) },
-        onClick = onClick,
-        leadingIcon = {
-            if (selected) {
-                Icon(Icons.Default.Check, contentDescription = null)
-            }
-        }
-    )
 }
 
 @Composable
