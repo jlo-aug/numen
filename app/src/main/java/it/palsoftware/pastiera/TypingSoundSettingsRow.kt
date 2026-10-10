@@ -14,7 +14,9 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.filled.Equalizer
+import androidx.compose.material.icons.filled.Vibration
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
@@ -35,6 +37,9 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import it.palsoftware.pastiera.inputmethod.NotificationHelper
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSliderRow
+import it.palsoftware.pastiera.ui.SettingsSubRowTextInset
 
 @Composable
 fun TypingSoundSettingsRow() {
@@ -85,24 +90,17 @@ fun TypingSoundSettingsRow() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.Keyboard,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
+            SettingsRowIcon(Icons.AutoMirrored.Filled.VolumeUp)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(R.string.typing_sound_title),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = typingSoundModeLabel(typingSoundMode, customTypingSoundName),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Icon(
@@ -160,83 +158,74 @@ fun TypingSoundSettingsRow() {
         }
     }
 
-    Surface(
-        modifier = Modifier
-            .fillMaxWidth()
-            .heightIn(min = 88.dp)
-            .settingRow("sounds.output") { showOutputMenu = true }
-    ) {
-        Row(
+    // The volume choice only matters while typing sounds are on.
+    if (typingSoundMode != SettingsManager.TYPING_SOUND_MODE_OFF) {
+        Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                .heightIn(min = 64.dp)
+                .settingRow("sounds.output") { showOutputMenu = true }
         ) {
-            Icon(
-                imageVector = Icons.Filled.Keyboard,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = stringResource(R.string.typing_sound_output_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
-                )
-                Text(
-                    text = typingSoundOutputModeLabel(typingSoundOutputMode),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-                Text(
-                    text = stringResource(R.string.typing_sound_output_dnd_hint),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                SettingsRowIcon(Icons.Filled.Equalizer)
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(
+                        text = stringResource(R.string.typing_sound_output_title),
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Medium
+                    )
+                    // The option labels say which volumes follow silent mode, so one line is enough.
+                    Text(
+                        text = typingSoundOutputModeLabel(typingSoundOutputMode),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+                Icon(
+                    imageVector = Icons.Default.ArrowDropDown,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Icon(
-                imageVector = Icons.Default.ArrowDropDown,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
 
-        DropdownMenu(
-            expanded = showOutputMenu,
-            onDismissRequest = { showOutputMenu = false }
-        ) {
-            TypingSoundDropdownItem(
-                text = stringResource(R.string.typing_sound_output_media),
-                selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_MEDIA,
-                onClick = {
-                    typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_MEDIA
-                    SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
-                    showOutputMenu = false
-                }
-            )
-            TypingSoundDropdownItem(
-                text = stringResource(R.string.typing_sound_output_system),
-                selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_SYSTEM,
-                onClick = {
-                    typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_SYSTEM
-                    SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
-                    showOutputMenu = false
-                }
-            )
-            TypingSoundDropdownItem(
-                text = stringResource(R.string.typing_sound_output_notification),
-                selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION,
-                onClick = {
-                    typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION
-                    SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
-                    showOutputMenu = false
-                }
-            )
+            DropdownMenu(
+                expanded = showOutputMenu,
+                onDismissRequest = { showOutputMenu = false }
+            ) {
+                TypingSoundDropdownItem(
+                    text = stringResource(R.string.typing_sound_output_media),
+                    selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_MEDIA,
+                    onClick = {
+                        typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_MEDIA
+                        SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
+                        showOutputMenu = false
+                    }
+                )
+                TypingSoundDropdownItem(
+                    text = stringResource(R.string.typing_sound_output_system),
+                    selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_SYSTEM,
+                    onClick = {
+                        typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_SYSTEM
+                        SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
+                        showOutputMenu = false
+                    }
+                )
+                TypingSoundDropdownItem(
+                    text = stringResource(R.string.typing_sound_output_notification),
+                    selected = typingSoundOutputMode == SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION,
+                    onClick = {
+                        typingSoundOutputMode = SettingsManager.TYPING_SOUND_OUTPUT_NOTIFICATION
+                        SettingsManager.setTypingSoundOutputMode(context, typingSoundOutputMode)
+                        showOutputMenu = false
+                    }
+                )
+            }
         }
     }
 
@@ -252,24 +241,17 @@ fun TypingSoundSettingsRow() {
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Icon(
-                imageVector = Icons.Filled.Keyboard,
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(24.dp)
-            )
+            SettingsRowIcon(Icons.Filled.Vibration)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = stringResource(R.string.tap_haptic_system_title),
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = stringResource(R.string.tap_haptic_system_description),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Switch(
@@ -283,45 +265,30 @@ fun TypingSoundSettingsRow() {
     }
 
     if (!tapHapticUseSystem) {
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth().settingRow("sounds.haptic_duration")
-                .height(104.dp)
+        // Sub-row of the switch above; grows with the font size instead of a fixed height.
+        SettingsSliderRow(
+            icon = null,
+            title = stringResource(R.string.tap_haptic_duration_label),
+            value = stringResource(R.string.settings_value_milliseconds, tapHapticDurationMs.toInt()),
+            description = stringResource(R.string.tap_haptic_duration_description),
+            subRow = true,
+            modifier = Modifier.settingRow("sounds.haptic_duration")
         ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.tap_haptic_duration_title, tapHapticDurationMs.toInt()),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
-                )
-                Text(
-                    text = stringResource(R.string.tap_haptic_duration_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
-                )
-                Slider(
-                    value = tapHapticDurationMs,
-                    onValueChange = { value ->
-                        val rounded = (value / 5f).toInt() * 5L
-                        if (rounded == tapHapticDurationMs.toLong()) {
-                            return@Slider
-                        }
-                        tapHapticDurationMs = rounded.toFloat()
-                        SettingsManager.setTapHapticDurationMs(context, rounded)
-                        NotificationHelper.triggerFixedDurationHapticFeedback(context, rounded)
-                    },
-                    valueRange = SettingsManager.getMinTapHapticDurationMs().toFloat()..
-                        SettingsManager.getMaxTapHapticDurationMs().toFloat(),
-                    steps = 14
-                )
-            }
+            Slider(
+                value = tapHapticDurationMs,
+                onValueChange = { value ->
+                    val rounded = (value / 5f).toInt() * 5L
+                    if (rounded == tapHapticDurationMs.toLong()) {
+                        return@Slider
+                    }
+                    tapHapticDurationMs = rounded.toFloat()
+                    SettingsManager.setTapHapticDurationMs(context, rounded)
+                    NotificationHelper.triggerFixedDurationHapticFeedback(context, rounded)
+                },
+                valueRange = SettingsManager.getMinTapHapticDurationMs().toFloat()..
+                    SettingsManager.getMaxTapHapticDurationMs().toFloat(),
+                steps = 14
+            )
         }
     }
 }

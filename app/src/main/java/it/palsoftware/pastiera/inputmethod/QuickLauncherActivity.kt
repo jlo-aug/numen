@@ -955,7 +955,7 @@ private fun QuickLauncherEntryContextMenu(
                 value = aliasText,
                 onValueChange = { aliasText = it },
                 singleLine = true,
-                label = { Text("Search alias") },
+                label = { Text(stringResource(R.string.quick_launcher_nickname)) },
                 modifier = Modifier.fillMaxWidth()
             )
             Row(
@@ -1035,13 +1035,13 @@ private fun QuickLauncherEntryContextMenu(
             }
         )
         DropdownMenuItem(
-            text = { Text("Dynamic entry color") },
+            text = { Text(stringResource(R.string.quick_launcher_color_automatic_menu)) },
             onClick = {
                 onCustomizationChanged(customization.copy(color = null))
             }
         )
         Text(
-            text = "Entry color",
+            text = stringResource(R.string.quick_launcher_color_heading),
             style = MaterialTheme.typography.labelMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)

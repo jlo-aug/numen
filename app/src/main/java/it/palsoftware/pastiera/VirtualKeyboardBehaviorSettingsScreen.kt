@@ -151,8 +151,7 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
                         Text(
                             text = stringResource(R.string.software_keyboard_layout_style_title),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
+                            fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = stringResource(
@@ -160,8 +159,7 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
                                 softwareKeyboardLayoutStyleLabel
                             ),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Icon(
@@ -214,13 +212,13 @@ internal fun VirtualKeyboardBehaviorSettingsScreen(
                 style = MaterialTheme.typography.titleSmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                modifier = Modifier.padding(start = 52.dp, end = 16.dp, top = 6.dp, bottom = 6.dp)
             )
 
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 6.dp),
+                    .padding(start = 52.dp, end = 16.dp, top = 6.dp, bottom = 6.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 SoftwareKeyboardModifierSelection(
@@ -344,8 +342,7 @@ private fun SoftwareKeyboardModifierSelection(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.labelLarge,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -355,8 +352,7 @@ private fun SoftwareKeyboardModifierSelection(
                         text = softwareKeyboardModifierKeyLabel(selected),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold,
-                        modifier = Modifier.weight(1f),
-                        maxLines = 1
+                        modifier = Modifier.weight(1f)
                     )
                     Icon(
                         imageVector = Icons.Default.ArrowDropDown,
@@ -421,26 +417,18 @@ private fun ModifierTapLatchRow(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (!indent) {
-                Icon(
-                    imageVector = Icons.Filled.Keyboard,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
-            }
+            // A sub-row keeps an empty icon slot so its title sits one step in.
+            it.palsoftware.pastiera.ui.SettingsRowIcon(if (indent) null else Icons.Filled.Keyboard)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Switch(

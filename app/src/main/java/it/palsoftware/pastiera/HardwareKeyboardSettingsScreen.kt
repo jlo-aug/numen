@@ -15,16 +15,19 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Keyboard
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExposedDropdownMenuBox
 import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SegmentedButton
+import androidx.compose.material3.SegmentedButtonDefaults
+import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
@@ -38,8 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import it.palsoftware.pastiera.inputmethod.DeviceSpecific
 
 private val hardwareKeyboardProfiles = listOf(
     "auto" to R.string.keyboard_profile_option_auto,
@@ -48,43 +51,27 @@ private val hardwareKeyboardProfiles = listOf(
     "titan2elite_qwerty" to R.string.keyboard_profile_option_titan2elite_qwerty
 )
 
+/**
+ * Built-in keyboard settings for other devices. Reached from Keys & modifiers only while
+ * one of them differs from its default; each row likewise shows only if it was changed
+ * when the screen opened, so the user can set it back.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun HardwareKeyboardSettingsScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit
 ) {
-    HardwareKeyboardListScreen(modifier = modifier, onBack = onBack)
-}
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-private fun HardwareKeyboardListScreen(
-    modifier: Modifier = Modifier,
-    onBack: () -> Unit
-) {
     val context = LocalContext.current
+    val showProfile = remember { HiddenKeyboardSettings.keyboardProfileChanged(context) }
+    val showTitan2Layout = remember { HiddenKeyboardSettings.titan2LayoutChanged(context) }
     var selectedProfile by remember {
         mutableStateOf(SettingsManager.getPhysicalKeyboardProfileOverride(context))
     }
     var profileMenuExpanded by remember { mutableStateOf(false) }
-    var currencySymbol by remember {
-        mutableStateOf(SettingsManager.getPhysicalKeyboardCurrencySymbol(context))
-    }
     var titan2LayoutEnabled by remember {
         mutableStateOf(SettingsManager.isTitan2LayoutEnabled(context))
     }
-    val detectedProfiles = remember { DeviceSpecific.detectedInputProfiles() }
-    val detectedProfileLabels = detectedProfiles
-        .map { it.profileId }
-        .ifEmpty { listOf(DeviceSpecific.physicalKeyboardName()) }
-        .map { profileId ->
-            hardwareKeyboardProfiles
-                .firstOrNull { it.first.equals(profileId, ignoreCase = true) }
-                ?.let { stringResource(it.second) }
-                ?: profileId
-        }
-    val detectedProfile = detectedProfileLabels.joinToString(", ")
-
 
     Scaffold(
         topBar = {
@@ -123,152 +110,108 @@ private fun HardwareKeyboardListScreen(
                 .verticalScroll(rememberScrollState())
         ) {
             Text(
-                text = stringResource(R.string.hardware_keyboards_description),
+                text = stringResource(R.string.other_keyboards_note),
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
             )
 
-            HardwareKeyboardSectionDivider(stringResource(R.string.hardware_keyboard_detected_device_title))
-
-            Text(
-                text = stringResource(R.string.hardware_keyboard_detected_device_summary, DeviceSpecific.deviceName(), detectedProfile),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
-            Text(
-                text = stringResource(R.string.hardware_keyboard_device_bound),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
-
-            HardwareKeyboardSectionDivider(stringResource(R.string.hardware_keyboard_curated_profiles_title))
-
-            val selectedProfileLabel = hardwareKeyboardProfiles
-                .firstOrNull { it.first == selectedProfile }
-                ?.let { stringResource(it.second) }
-                ?: stringResource(R.string.keyboard_profile_option_auto)
-            ExposedDropdownMenuBox(
-                expanded = profileMenuExpanded,
-                onExpandedChange = { profileMenuExpanded = it },
-                modifier = Modifier.settingRow("hardware.profile").padding(horizontal = 16.dp, vertical = 4.dp)
-            ) {
-                OutlinedTextField(
-                    value = selectedProfileLabel,
-                    onValueChange = {},
-                    readOnly = true,
-                    label = { Text(stringResource(R.string.hardware_keyboard_profile_select_label)) },
-                    trailingIcon = {
-                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = profileMenuExpanded)
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                )
-                ExposedDropdownMenu(
+            if (showProfile) {
+                val selectedProfileLabel = hardwareKeyboardProfiles
+                    .firstOrNull { it.first == selectedProfile }
+                    ?.let { stringResource(it.second) }
+                    ?: stringResource(R.string.keyboard_profile_option_auto)
+                ExposedDropdownMenuBox(
                     expanded = profileMenuExpanded,
-                    onDismissRequest = { profileMenuExpanded = false }
+                    onExpandedChange = { profileMenuExpanded = it },
+                    modifier = Modifier.settingRow("hardware.profile").padding(horizontal = 16.dp, vertical = 4.dp)
                 ) {
-                    hardwareKeyboardProfiles.forEach { (profile, labelRes) ->
-                        DropdownMenuItem(
-                            text = { Text(stringResource(labelRes)) },
-                            onClick = {
-                                selectedProfile = profile
-                                SettingsManager.setPhysicalKeyboardProfileOverride(context, profile)
-                                profileMenuExpanded = false
-                            }
-                        )
+                    OutlinedTextField(
+                        value = selectedProfileLabel,
+                        onValueChange = {},
+                        readOnly = true,
+                        label = { Text(stringResource(R.string.hardware_keyboard_profile_select_label)) },
+                        trailingIcon = {
+                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = profileMenuExpanded)
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                    )
+                    ExposedDropdownMenu(
+                        expanded = profileMenuExpanded,
+                        onDismissRequest = { profileMenuExpanded = false }
+                    ) {
+                        hardwareKeyboardProfiles.forEach { (profile, labelRes) ->
+                            DropdownMenuItem(
+                                text = { Text(stringResource(labelRes)) },
+                                onClick = {
+                                    selectedProfile = profile
+                                    SettingsManager.setPhysicalKeyboardProfileOverride(context, profile)
+                                    profileMenuExpanded = false
+                                }
+                            )
+                        }
                     }
                 }
+                Text(
+                    text = stringResource(R.string.keyboard_profile_override_description),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
             }
 
-            Text(
-                text = if (selectedProfile == "auto") {
-                    stringResource(R.string.keyboard_profile_override_auto_description, detectedProfile)
-                } else {
-                    stringResource(R.string.keyboard_profile_override_manual_description)
-                },
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
-
-
-            HardwareKeyboardSectionDivider(stringResource(R.string.hardware_keyboard_behavior_title))
-
-            HardwareKeyboardSwitchRow(
-                title = stringResource(R.string.titan2_layout_title),
-                linkId = "hardware.titan2_layout",
-                description = stringResource(R.string.titan2_layout_description),
-                checked = titan2LayoutEnabled,
-                onCheckedChange = { enabled ->
-                    titan2LayoutEnabled = enabled
-                    SettingsManager.setTitan2LayoutEnabled(context, enabled)
-                }
-            )
-
-            HardwareKeyboardSectionTitle(stringResource(R.string.keyboard_currency_symbol_title))
-            Text(
-                text = stringResource(R.string.keyboard_currency_symbol_description),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
-            )
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .settingRow("hardware.currency").padding(horizontal = 12.dp, vertical = 8.dp),
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                SettingsManager.physicalKeyboardCurrencySymbols().forEach { symbol ->
-                    Surface(
-                        modifier = Modifier
-                            .weight(1f)
-                            .clickable {
-                                currencySymbol = symbol
-                                SettingsManager.setPhysicalKeyboardCurrencySymbol(context, symbol)
-                            },
-                        color = if (currencySymbol == symbol) {
-                            MaterialTheme.colorScheme.primaryContainer
-                        } else {
-                            MaterialTheme.colorScheme.surface
-                        },
-                        shape = MaterialTheme.shapes.small
-                    ) {
-                        Text(
-                            text = symbol,
-                            style = MaterialTheme.typography.titleMedium,
-                            color = if (currencySymbol == symbol) {
-                                MaterialTheme.colorScheme.onPrimaryContainer
-                            } else {
-                                MaterialTheme.colorScheme.onSurface
-                            },
-                            modifier = Modifier.padding(vertical = 12.dp),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
+            if (showTitan2Layout) {
+                HardwareKeyboardSwitchRow(
+                    title = stringResource(R.string.titan2_layout_title),
+                    linkId = "hardware.titan2_layout",
+                    description = stringResource(R.string.titan2_layout_description),
+                    checked = titan2LayoutEnabled,
+                    onCheckedChange = { enabled ->
+                        titan2LayoutEnabled = enabled
+                        SettingsManager.setTitan2LayoutEnabled(context, enabled)
                     }
-                }
+                )
             }
         }
     }
 }
 
+/**
+ * Chooses the symbol the currency key types (read by DeviceSymMappingRepository).
+ * Shown in Keys & modifiers.
+ */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-private fun HardwareKeyboardSectionTitle(text: String) {
-    Text(
-        text = text,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        fontWeight = FontWeight.Medium,
-        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
-    )
-}
-
-@Composable
-private fun HardwareKeyboardSectionDivider(text: String) {
-    it.palsoftware.pastiera.ui.SettingsSectionLabel(text)
+internal fun CurrencySymbolPicker(modifier: Modifier = Modifier) {
+    val context = LocalContext.current
+    var currencySymbol by remember {
+        mutableStateOf(SettingsManager.getPhysicalKeyboardCurrencySymbol(context))
+    }
+    // Same segmented style as the other single-choice settings (e.g. Full bar / Compact bar);
+    // no check mark, so eight symbols fit on one line.
+    val symbols = SettingsManager.physicalKeyboardCurrencySymbols()
+    SingleChoiceSegmentedButtonRow(modifier = modifier.fillMaxWidth()) {
+        symbols.forEachIndexed { index, symbol ->
+            SegmentedButton(
+                selected = currencySymbol == symbol,
+                onClick = {
+                    currencySymbol = symbol
+                    SettingsManager.setPhysicalKeyboardCurrencySymbol(context, symbol)
+                },
+                shape = SegmentedButtonDefaults.itemShape(index, symbols.size),
+                icon = {}
+            ) {
+                Text(
+                    text = symbol,
+                    style = MaterialTheme.typography.titleMedium,
+                    maxLines = 1,
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    }
 }
 
 @Composable

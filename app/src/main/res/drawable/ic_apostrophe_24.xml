@@ -1,0 +1,11 @@
+<!-- A single closing quote (’), half of the Material "format quote" glyph, for the
+     "Quotes inside words" setting (straight ' inside a word becomes an apostrophe). -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="24"
+    android:viewportHeight="24">
+    <path
+        android:fillColor="#FF000000"
+        android:pathData="M10,17h3l2,-4V7H9v6h3z" />
+</vector>

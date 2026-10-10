@@ -15,9 +15,14 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Bolt
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Spellcheck
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material3.AlertDialog
@@ -87,7 +92,8 @@ fun SetupStatusCard(
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        color = if (ready) MaterialTheme.colorScheme.surfaceContainerHigh else MaterialTheme.colorScheme.secondaryContainer
+        // Home cards share one fill (surfaceContainer); the button carries the emphasis.
+        color = MaterialTheme.colorScheme.surfaceContainer
     ) {
         Row(
             modifier = Modifier.padding(start = 16.dp, end = 12.dp, top = 10.dp, bottom = 10.dp),
@@ -97,7 +103,7 @@ fun SetupStatusCard(
                 imageVector = if (ready) Icons.Filled.CheckCircle else Icons.Filled.Keyboard,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(24.dp)
             )
             Spacer(Modifier.width(12.dp))
             Column(modifier = Modifier.weight(1f)) {
@@ -118,7 +124,7 @@ fun SetupStatusCard(
                             if (!isEnabled) R.string.home_setup_enable_body else R.string.home_setup_select_body
                         ),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
@@ -150,13 +156,13 @@ fun TypingStatsCard(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxWidth(),
         shape = MaterialTheme.shapes.large,
-        color = MaterialTheme.colorScheme.primaryContainer
+        color = MaterialTheme.colorScheme.surfaceContainer
     ) {
         if (summary.words == 0L) {
             Text(
                 text = stringResource(R.string.home_stats_empty),
                 style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onPrimaryContainer,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(16.dp)
             )
             return@Surface
@@ -172,7 +178,7 @@ fun TypingStatsCard(modifier: Modifier = Modifier) {
                     text = summary.favoriteWord?.let { stringResource(R.string.home_stats_favorite, it) }
                         ?: stringResource(R.string.home_stats_favorite_pending),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onPrimaryContainer,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                     modifier = Modifier.weight(1f)
@@ -207,14 +213,13 @@ private fun StatTile(value: String, label: String, modifier: Modifier = Modifier
             text = value,
             style = MaterialTheme.typography.headlineSmall,
             fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onPrimaryContainer,
+            color = MaterialTheme.colorScheme.primary,
             maxLines = 1
         )
         Text(
             text = label,
             style = MaterialTheme.typography.labelMedium,
-            color = MaterialTheme.colorScheme.onPrimaryContainer.copy(alpha = 0.8f),
-            maxLines = 1
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -241,20 +246,23 @@ fun QuickSettingsCard(modifier: Modifier = Modifier) {
         Column(modifier = Modifier.padding(vertical = 4.dp)) {
             QuickSwitchRow(
                 title = stringResource(R.string.auto_correct_auto_replace_title),
-                subtitle = stringResource(R.string.home_autocorrect_description),
+                icon = Icons.Filled.Spellcheck,
+                subtitle = stringResource(R.string.auto_correct_auto_replace_description),
                 checked = autocorrectOn,
                 enabled = correctionAvailable,
                 onCheckedChange = { SettingsManager.setAutoReplaceOnSpaceEnter(context, it) }
             )
             QuickSwitchRow(
                 title = stringResource(R.string.auto_correct_aggressive_title),
-                subtitle = stringResource(R.string.home_aggressive_description),
+                icon = Icons.Filled.Bolt,
+                subtitle = stringResource(R.string.auto_correct_aggressive_description),
                 checked = autocorrectOn && state.aggressive,
                 enabled = autocorrectOn,
                 onCheckedChange = { SettingsManager.setAggressiveAutoReplace(context, it) }
             )
             QuickSwitchRow(
                 title = stringResource(R.string.auto_correct_context_aware_title),
+                icon = Icons.Filled.Psychology,
                 subtitle = stringResource(R.string.auto_correct_context_aware_description),
                 checked = autocorrectOn && state.sentenceAware,
                 enabled = autocorrectOn,
@@ -262,6 +270,7 @@ fun QuickSettingsCard(modifier: Modifier = Modifier) {
             )
             QuickSwitchRow(
                 title = stringResource(R.string.auto_show_keyboard_title),
+                icon = Icons.Filled.Visibility,
                 subtitle = stringResource(R.string.home_auto_show_description),
                 checked = state.autoShowKeyboard,
                 enabled = true,
@@ -274,6 +283,7 @@ fun QuickSettingsCard(modifier: Modifier = Modifier) {
 @Composable
 private fun QuickSwitchRow(
     title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     subtitle: String,
     checked: Boolean,
     enabled: Boolean,
@@ -286,25 +296,27 @@ private fun QuickSwitchRow(
             // One accessible switch for the whole row (title, subtitle and state read together).
             .toggleable(value = checked, enabled = enabled, role = Role.Switch, onValueChange = onCheckedChange)
             .padding(horizontal = 16.dp, vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
     ) {
+        // Same icon column as the settings rows.
+        SettingsRowIcon(
+            icon,
+            tint = if (enabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+        )
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
-                style = MaterialTheme.typography.bodyLarge,
-                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium,
+                color = if (enabled) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
             )
             Text(
                 text = subtitle,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.38f),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
+                color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = if (enabled) 1f else 0.38f)
             )
         }
-        Spacer(Modifier.width(12.dp))
         Switch(checked = checked, onCheckedChange = null, enabled = enabled)
     }
 }

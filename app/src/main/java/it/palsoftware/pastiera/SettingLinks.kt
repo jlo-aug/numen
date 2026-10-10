@@ -108,7 +108,7 @@ object SettingLinkIds {
     // About screen
     const val ABOUT_SUPPORT_KO_FI = "about.support_ko_fi"
 
-    // Keyboard theme editor (customization sub-screen): behaviour toggles and
+    // Keyboard theme editor (customization sub-screen): behavior toggles and
     // the aggregated LED colors. Individual color picker fields stay
     // unregistered by design.
     const val KEYBOARD_THEME_TOGGLE_SHOW_LEDS = "keyboard_theme.toggle_show_leds"
@@ -207,12 +207,15 @@ object SettingLinkRegistry {
         unavailableFallbackId = unavailableFallbackId
     )
 
-    val entries: List<SettingEntry> = listOf(
+    val entries: List<SettingEntry> = (listOf(
+        // Keyboard & Devices left the settings tree; its leftovers sit at the end of
+        // Keys & modifiers while one of them differs from the default.
         entry(
             SettingLinkIds.MAIN_KEYBOARDS_DEVICES,
-            R.string.keyboards_devices_title,
-            destination = SettingsDestination.KeyboardsDevices
-        ),
+            R.string.other_keyboards_title,
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.MAIN_MODIFIERS
+        ).copy(availabilityCheck = HiddenKeyboardSettings::anyChanged),
         entry(
             SettingLinkIds.MAIN_MODIFIERS,
             R.string.modifiers_title,
@@ -235,6 +238,17 @@ object SettingLinkRegistry {
             destination = SettingsDestination.Customization,
             customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME
         ),
+        // The theme preview's viewport slider is gone; old links open the theme page.
+        SettingEntry(
+            id = "keyboard_theme.preview_viewport",
+            titleRes = R.string.setting_link_theme_preview_viewport,
+            route = SettingRoute(
+                destination = SettingsDestination.Customization,
+                customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME
+            ),
+            unavailableFallbackId = SettingLinkIds.MAIN_KEYBOARD_THEME,
+            availabilityCheck = { false }
+        ),
         entry(
             SettingLinkIds.MAIN_STATUS_BAR_BUTTONS,
             R.string.status_bar_buttons_title,
@@ -242,11 +256,14 @@ object SettingLinkRegistry {
             destination = SettingsDestination.Customization,
             customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
         ),
+        // Same screen as customization.sounds; only that one is listed in search.
         entry(
             SettingLinkIds.MAIN_CUSTOMIZATION,
-            R.string.settings_category_customization,
-            destination = SettingsDestination.Customization
-        ),
+            R.string.settings_category_sounds,
+            R.string.settings_sounds_description,
+            destination = SettingsDestination.Customization,
+            unavailableFallbackId = "customization.sounds"
+        ).copy(availabilityCheck = { false }),
         entry(
             SettingLinkIds.MAIN_LAUNCHER_SHORTCUTS,
             R.string.starter_launcher_shortcuts_title,
@@ -262,8 +279,8 @@ object SettingLinkRegistry {
         ),
         entry(
             SettingLinkIds.MAIN_APP_ENTER_BEHAVIOR,
-            R.string.app_enter_behaviour_title,
-            R.string.app_enter_behaviour_description,
+            R.string.settings_category_enter_key,
+            R.string.settings_row_enter_description,
             destination = SettingsDestination.Customization,
             customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_APP_ENTER_BEHAVIOR
         ),
@@ -350,23 +367,25 @@ object SettingLinkRegistry {
             R.string.smart_quotes_title,
             destination = SettingsDestination.TextInput
         ),
+        // These three moved; their IDs keep the old prefix because links must not change.
         entry(
             SettingLinkIds.TEXT_INPUT_CLEAR_ALT_ON_SPACE,
             R.string.clear_alt_on_space_title,
             R.string.clear_alt_on_space_description,
-            destination = SettingsDestination.TextInput
+            destination = SettingsDestination.Modifiers
         ),
         entry(
             SettingLinkIds.TEXT_INPUT_AUTO_SHOW_KEYBOARD,
             R.string.auto_show_keyboard_title,
             R.string.auto_show_keyboard_description,
-            destination = SettingsDestination.KeyboardsDevices
+            destination = SettingsDestination.Customization,
+            customizationDestination = SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS
         ),
         entry(
             SettingLinkIds.TEXT_INPUT_ALT_CTRL_SPEECH_SHORTCUT,
             R.string.alt_ctrl_speech_shortcut_title,
             R.string.alt_ctrl_speech_shortcut_description,
-            destination = SettingsDestination.TextInput
+            destination = SettingsDestination.Modifiers
         ),
         entry(
             SettingLinkIds.TEXT_INPUT_SHIFT_BACKSPACE_DELETE,
@@ -383,41 +402,52 @@ object SettingLinkRegistry {
             R.string.backspace_at_start_delete_title,
             destination = SettingsDestination.TextInput
         ),
+        // The Delete section no longer links to Nav mode; old links land on the Delete section.
         entry(
             SettingLinkIds.TEXT_INPUT_DELETE_NAV_MODE,
             R.string.delete_alternatives_nav_mode_title,
             R.string.settings_nav_mode_configure,
-            destination = SettingsDestination.TextInput
-        ),
+            destination = SettingsDestination.TextInput,
+            unavailableFallbackId = SettingLinkIds.TEXT_INPUT_SHIFT_BACKSPACE_DELETE
+        ).copy(availabilityCheck = { false }),
 
+        // Former Keyboard & Devices rows: shown in Keys & modifiers only while changed
+        // from the default; otherwise links land on Keys & modifiers.
         entry(
             SettingLinkIds.KEYBOARDS_DEVICES_KEYBOARD_SWITCHING_AUTO,
             R.string.keyboard_switching_auto_title,
             R.string.keyboard_switching_auto_description,
-            destination = SettingsDestination.KeyboardsDevices
-        ),
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.MAIN_MODIFIERS
+        ).copy(availabilityCheck = HiddenKeyboardSettings::keyboardSwitchingChanged),
+        // The Ctrl+B mapping itself lives in Nav Mode.
         entry(
             SettingLinkIds.KEYBOARDS_DEVICES_KEYBOARD_SWITCHING_SHORTCUT,
             R.string.settings_nav_mode_configure,
-            R.string.keyboard_switching_override_description,
-            destination = SettingsDestination.KeyboardsDevices
-        ),
+            destination = SettingsDestination.NavMode,
+            unavailableFallbackId = SettingLinkIds.MAIN_NAV_MODE
+        ).copy(availabilityCheck = { false }),
         entry(
             SettingLinkIds.KEYBOARDS_DEVICES_TOGGLE_TOASTS,
             R.string.software_keyboard_mode_toggle_toasts_title,
             R.string.software_keyboard_mode_toggle_toasts_description,
-            destination = SettingsDestination.KeyboardsDevices
-        ),
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.MAIN_MODIFIERS
+        ).copy(availabilityCheck = HiddenKeyboardSettings::switchMessageChanged),
         entry(
             SettingLinkIds.KEYBOARDS_DEVICES_ON_SCREEN_KEYBOARD,
             R.string.on_screen_keyboard_title,
-            destination = SettingsDestination.KeyboardsDevices
-        ),
+            R.string.other_keyboards_on_screen_description,
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.MAIN_MODIFIERS
+        ).copy(availabilityCheck = HiddenKeyboardSettings::onScreenKeyboardChanged),
         entry(
             SettingLinkIds.KEYBOARDS_DEVICES_BUILT_IN_KEYBOARDS,
             R.string.built_in_keyboards_title,
-            destination = SettingsDestination.KeyboardsDevices
-        ),
+            R.string.other_keyboards_built_in_description,
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.MAIN_MODIFIERS
+        ).copy(availabilityCheck = HiddenKeyboardSettings::builtInKeyboardChanged),
 
         entry(
             SettingLinkIds.AUTO_CORRECTION_TEXT_REPLACEMENTS,
@@ -498,8 +528,14 @@ object SettingLinkRegistry {
         entry(
             SettingLinkIds.ACCESSIBILITY_SUGGESTIONS_DELAY,
             R.string.settings_accessibility_suggestions_delay_title,
-            destination = SettingsDestination.Accessibility
-        ),
+            destination = SettingsDestination.Accessibility,
+            unavailableFallbackId = SettingLinkIds.ACCESSIBILITY_LIVE_READ
+        ).copy(availabilityCheck = { context ->
+            // Shown while suggestions are read aloud, or while the delay differs from the default.
+            SettingsManager.getAccessibilityLiveAnnouncementsEnabled(context) ||
+                SettingsManager.getAccessibilitySuggestionsAnnouncementDelayMs(context) !=
+                SettingsManager.getDefaultAccessibilitySuggestionsAnnouncementDelayMs()
+        }),
         entry(
             SettingLinkIds.ACCESSIBILITY_BOUNCE_KEYS,
             R.string.settings_accessibility_bounce_keys_title,
@@ -563,7 +599,7 @@ object SettingLinkRegistry {
         entry(
             SettingLinkIds.ADVANCED_CLIPBOARD_RETENTION_TIME,
             R.string.clipboard_retention_time_title,
-            R.string.clipboard_retention_time_description,
+            R.string.clipboard_retention_choice_description,
             destination = SettingsDestination.Advanced
         ),
         entry(
@@ -609,24 +645,30 @@ object SettingLinkRegistry {
             R.string.sym_customization_description,
             destination = SettingsDestination.Modifiers
         ),
+        // App shortcuts now opens only from the main list; old links land on that row.
         entry(
             SettingLinkIds.MODIFIERS_SYM_SHORTCUTS,
-            R.string.power_shortcuts_title,
-            R.string.power_shortcuts_description,
-            destination = SettingsDestination.Modifiers
-        ),
+            R.string.starter_launcher_shortcuts_title,
+            R.string.modifiers_app_shortcuts_description,
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.MAIN_LAUNCHER_SHORTCUTS
+        ).copy(availabilityCheck = { false }),
+        // Shown only while changed from the default (Alt types what is printed on the key).
         entry(
             SettingLinkIds.MODIFIERS_ALT_BINDING,
             R.string.alt_binding_title,
             R.string.alt_binding_description,
-            destination = SettingsDestination.Modifiers
-        ),
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.MAIN_MODIFIERS
+        ).copy(availabilityCheck = { SettingsManager.getAltModifierBinding(it) != AltModifierBinding.DeviceSym }),
+        // The Alt shortcuts link was a duplicate; links land on the switch in App shortcuts.
         entry(
             SettingLinkIds.MODIFIERS_ALT_KEY_SHORTCUTS,
             R.string.alt_key_shortcuts_title,
-            R.string.alt_key_shortcuts_modifier_link_description,
-            destination = SettingsDestination.Modifiers
-        ),
+            R.string.alt_key_shortcuts_description,
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = "quick_launcher.alt_shortcuts"
+        ).copy(availabilityCheck = { false }),
         entry(
             SettingLinkIds.MODIFIERS_CONTROL_NAV_MODE,
             R.string.modifier_control_nav_mode_title,
@@ -649,8 +691,9 @@ object SettingLinkRegistry {
             SettingLinkIds.MODIFIERS_ALT_LATCH_STAYS_ON_SPACE,
             R.string.alt_latch_stays_on_space_title,
             R.string.alt_latch_stays_on_space_description,
-            destination = SettingsDestination.Modifiers
-        ),
+            destination = SettingsDestination.Modifiers,
+            unavailableFallbackId = SettingLinkIds.TEXT_INPUT_CLEAR_ALT_ON_SPACE
+        ).copy(availabilityCheck = { SettingsManager.getClearAltOnSpace(it) }),
         entry(
             SettingLinkIds.MODIFIERS_CTRL_TAP_LATCHES,
             R.string.ctrl_tap_latches_title,
@@ -759,7 +802,27 @@ object SettingLinkRegistry {
             R.string.modifier_indicators_status_bar_description,
             destination = SettingsDestination.Modifiers
         )
-    ) + customizationSettingEntries() + inputDeviceSettingEntries() + systemSettingEntries()
+    ) + customizationSettingEntries() + inputDeviceSettingEntries() + systemSettingEntries())
+        .map(::hideOnScreenThemeRows)
+
+    /**
+     * On-screen keyboard theme rows only show when the theme page opens for the on-screen
+     * keyboard, so search and links offer them only while that keyboard is in use.
+     */
+    private fun hideOnScreenThemeRows(entry: SettingEntry): SettingEntry =
+        if (entry.route.keyboardThemeTarget != SettingsManager.KeyboardThemeTarget.SOFTWARE ||
+            entry.availabilityCheck != null
+        ) {
+            entry
+        } else {
+            entry.copy(
+                availabilityCheck = { context ->
+                    SettingsManager.getSoftwareKeyboardMode(context) == SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL ||
+                        HiddenKeyboardSettings.onScreenKeyboardChanged(context)
+                },
+                unavailableFallbackId = entry.unavailableFallbackId ?: SettingLinkIds.MAIN_KEYBOARD_THEME
+            )
+        }
 
     private val entriesById: Map<String, SettingEntry> =
         entries.associateBy { it.id }
@@ -777,7 +840,7 @@ object SettingLinkRegistry {
         SettingLinkIds.MAIN_TEXT_INPUT to R.string.kw_main_text_input,
         SettingLinkIds.MAIN_AUTO_CORRECTION to R.string.kw_main_auto_correction,
         SettingLinkIds.MAIN_KEYBOARD_THEME to R.string.kw_main_keyboard_theme,
-        SettingLinkIds.MAIN_CUSTOMIZATION to R.string.kw_main_customization,
+        "customization.sounds" to R.string.kw_main_customization,
         SettingLinkIds.MAIN_ADVANCED to R.string.kw_main_advanced,
         SettingLinkIds.MAIN_ACCESSIBILITY to R.string.kw_main_accessibility,
         SettingLinkIds.MAIN_ABOUT to R.string.kw_main_about,
@@ -857,11 +920,12 @@ object SettingLinkRegistry {
      */
     val destinationTitles: Map<SettingsDestination, Int> = mapOf(
         SettingsDestination.Main to R.string.settings_title,
-        SettingsDestination.KeyboardsDevices to R.string.keyboards_devices_title,
+        // Its remaining pages open from Keys & modifiers.
+        SettingsDestination.KeyboardsDevices to R.string.modifiers_title,
         SettingsDestination.TextInput to R.string.settings_category_text_input,
         SettingsDestination.Accessibility to R.string.settings_category_accessibility,
         SettingsDestination.AutoCorrection to R.string.settings_category_auto_correction,
-        SettingsDestination.Customization to R.string.settings_category_customization,
+        SettingsDestination.Customization to R.string.settings_category_sounds,
         SettingsDestination.NavMode to R.string.nav_mode_title,
         SettingsDestination.Advanced to R.string.settings_category_advanced,
         SettingsDestination.About to R.string.about_title,
@@ -873,13 +937,22 @@ object SettingLinkRegistry {
         KeyboardsDevicesDestination.BuiltIn to R.string.built_in_keyboards_title
     )
 
+    /** Screens one level below a main-list page get that page in their breadcrumb. */
+    val customizationParents: Map<String, Int> = mapOf(
+        "launcher_shortcut_behavior" to R.string.starter_launcher_shortcuts_title,
+        "launcher_shortcut_cosmetic" to R.string.starter_launcher_shortcuts_title,
+        "launcher_shortcut_assignments" to R.string.starter_launcher_shortcuts_title,
+        SettingsActivity.CUSTOMIZATION_DESTINATION_VARIATIONS to R.string.status_bar_buttons_title,
+        "keyboard_theme_assignment" to R.string.keyboard_theme_title
+    )
+
     val customizationSubtitles: Map<String, Int> = mapOf(
         SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS to
             R.string.status_bar_buttons_title,
         SettingsActivity.CUSTOMIZATION_DESTINATION_LAUNCHER_SHORTCUTS to
             R.string.starter_launcher_shortcuts_title,
         SettingsActivity.CUSTOMIZATION_DESTINATION_APP_ENTER_BEHAVIOR to
-            R.string.app_enter_behaviour_title,
+            R.string.settings_category_enter_key,
         SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME to
             R.string.keyboard_theme_title
     ) + customizationSettingSubtitles()

@@ -12,7 +12,13 @@ import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Code
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.automirrored.filled.MenuBook
+import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.Lightbulb
+import androidx.compose.material.icons.filled.Psychology
+import androidx.compose.material.icons.filled.Spellcheck
+import androidx.compose.material.icons.filled.SwapHoriz
+import androidx.compose.material.icons.filled.Translate
 import androidx.compose.material.icons.filled.Clear
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
@@ -25,6 +31,9 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
+import it.palsoftware.pastiera.ui.SettingsSubRowTextInset
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.windowInsetsPadding
@@ -150,14 +159,12 @@ fun AutoCorrectionCategoryScreen(
                                             Text(
                                                 text = stringResource(R.string.experimental_suggestions_title),
                                                 style = MaterialTheme.typography.titleMedium,
-                                                fontWeight = FontWeight.Medium,
-                                                maxLines = 1
+                                                fontWeight = FontWeight.Medium
                                             )
                                             Text(
                                                 text = stringResource(R.string.experimental_suggestions_subtitle),
                                                 style = MaterialTheme.typography.bodySmall,
-                                                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                                maxLines = 2
+                                                color = MaterialTheme.colorScheme.onSurfaceVariant
                                             )
                                         }
                                         Switch(
@@ -190,7 +197,7 @@ fun AutoCorrectionCategoryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.TextFields,
+                                    imageVector = Icons.Filled.Spellcheck,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
@@ -199,14 +206,12 @@ fun AutoCorrectionCategoryScreen(
                                     Text(
                                         text = stringResource(R.string.auto_correct_auto_replace_title),
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
+                                        fontWeight = FontWeight.Medium
                                     )
                                     Text(
                                         text = stringResource(R.string.auto_correct_auto_replace_description),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 2
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 Switch(
@@ -223,16 +228,16 @@ fun AutoCorrectionCategoryScreen(
                         // Max auto-replace distance slider (only shown when automatic correction is enabled)
                         // Aggressive autocorrect sets its own distance (1, or 2 for long words).
                         if (autoReplaceOnSpaceEnter && !aggressiveAutoReplace) {
+                            // Sub-row of automatic correction: starts at the sub-row title column.
                             Surface(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp)
                                     .settingRow(SettingLinkIds.AUTO_CORRECTION_MAX_DISTANCE)
                             ) {
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 8.dp, vertical = 12.dp),
+                                        .padding(start = SettingsSubRowTextInset, end = 16.dp, top = 8.dp, bottom = 8.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     Row(
@@ -242,7 +247,7 @@ fun AutoCorrectionCategoryScreen(
                                     ) {
                                         Text(
                                             text = stringResource(R.string.auto_correct_max_distance_title),
-                                            style = MaterialTheme.typography.bodyMedium,
+                                            style = MaterialTheme.typography.titleMedium,
                                             fontWeight = FontWeight.Medium
                                         )
                                         Text(
@@ -290,7 +295,7 @@ fun AutoCorrectionCategoryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.TextFields,
+                                    imageVector = Icons.Filled.Bolt,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
@@ -299,14 +304,12 @@ fun AutoCorrectionCategoryScreen(
                                     Text(
                                         text = stringResource(R.string.auto_correct_aggressive_title),
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
+                                        fontWeight = FontWeight.Medium
                                     )
                                     Text(
                                         text = stringResource(R.string.auto_correct_aggressive_description),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 2
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 Switch(
@@ -334,7 +337,7 @@ fun AutoCorrectionCategoryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.TextFields,
+                                    imageVector = Icons.Filled.Psychology,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
@@ -343,14 +346,12 @@ fun AutoCorrectionCategoryScreen(
                                     Text(
                                         text = stringResource(R.string.auto_correct_context_aware_title),
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
+                                        fontWeight = FontWeight.Medium
                                     )
                                     Text(
                                         text = stringResource(R.string.auto_correct_context_aware_description),
                                         style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 2
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 Switch(
@@ -378,7 +379,7 @@ fun AutoCorrectionCategoryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.TextFields,
+                                    imageVector = Icons.Filled.Lightbulb,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
@@ -386,11 +387,15 @@ fun AutoCorrectionCategoryScreen(
                                 Column(modifier = Modifier.weight(1f)) {
                                     Text(
                                         text = stringResource(R.string.auto_correct_suggestions_toggle_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1
-                                        )
-                                    }
+                                        style = MaterialTheme.typography.titleMedium,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.auto_correct_suggestions_toggle_description),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                                    )
+                                }
                                     Switch(
                                         checked = suggestionsEnabled,
                                         onCheckedChange = { enabled ->
@@ -416,7 +421,7 @@ fun AutoCorrectionCategoryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.TextFields,
+                                    imageVector = Icons.Filled.Translate,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
@@ -425,8 +430,12 @@ fun AutoCorrectionCategoryScreen(
                                     Text(
                                         text = stringResource(R.string.auto_correct_accent_matching_title),
                                         style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                    Text(
+                                        text = stringResource(R.string.auto_correct_accent_matching_description),
+                                        style = MaterialTheme.typography.bodySmall,
+                                        color = MaterialTheme.colorScheme.onSurfaceVariant
                                     )
                                 }
                                 Switch(
@@ -456,7 +465,7 @@ fun AutoCorrectionCategoryScreen(
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
                                     Icon(
-                                        imageVector = Icons.Filled.Add,
+                                        imageVector = Icons.AutoMirrored.Filled.MenuBook,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.primary,
                                         modifier = Modifier.size(24.dp)
@@ -465,14 +474,12 @@ fun AutoCorrectionCategoryScreen(
                                         Text(
 	                                        text = stringResource(R.string.auto_correct_manage_user_dict_title),
 	                                        style = MaterialTheme.typography.titleMedium,
-	                                        fontWeight = FontWeight.Medium,
-	                                        maxLines = 1
+	                                        fontWeight = FontWeight.Medium
 	                                    )
 	                                    Text(
 	                                        text = stringResource(R.string.auto_correct_manage_user_dict_description),
 	                                        style = MaterialTheme.typography.bodySmall,
-	                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-	                                        maxLines = 2
+	                                        color = MaterialTheme.colorScheme.onSurfaceVariant
 	                                    )
 	                                }
                                     Icon(
@@ -498,7 +505,7 @@ fun AutoCorrectionCategoryScreen(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
                                 Icon(
-                                    imageVector = Icons.Filled.TextFields,
+                                    imageVector = Icons.Filled.SwapHoriz,
                                     contentDescription = null,
                                     tint = MaterialTheme.colorScheme.primary,
                                     modifier = Modifier.size(24.dp)
@@ -507,14 +514,12 @@ fun AutoCorrectionCategoryScreen(
 	                                    Text(
 	                                        text = stringResource(R.string.auto_correct_title),
 	                                        style = MaterialTheme.typography.titleMedium,
-	                                        fontWeight = FontWeight.Medium,
-	                                        maxLines = 1
+	                                        fontWeight = FontWeight.Medium
 	                                    )
 	                                    Text(
 	                                        text = stringResource(R.string.auto_correct_title_description),
 	                                        style = MaterialTheme.typography.bodySmall,
-	                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-	                                        maxLines = 2
+	                                        color = MaterialTheme.colorScheme.onSurfaceVariant
 	                                    )
 	                                }
                                 Switch(
@@ -537,31 +542,25 @@ fun AutoCorrectionCategoryScreen(
                                         navigateTo(AutoCorrectionDestination.Edit)
                                     }
                             ) {
+                                // Sub-row of text replacements: indented, empty icon slot.
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 10.dp),
+                                        .padding(start = SettingsSubRowStartInset, end = 16.dp, top = 10.dp, bottom = 10.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                                 ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Edit,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
+                                    SettingsRowIcon(null)
 	                                    Column(modifier = Modifier.weight(1f)) {
 	                                        Text(
 	                                            text = stringResource(R.string.auto_correct_languages_title),
 	                                            style = MaterialTheme.typography.titleMedium,
-	                                            fontWeight = FontWeight.Medium,
-	                                            maxLines = 1
+	                                            fontWeight = FontWeight.Medium
 	                                        )
 	                                        Text(
 	                                            text = stringResource(R.string.auto_correct_languages_description),
 	                                            style = MaterialTheme.typography.bodySmall,
-	                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-	                                            maxLines = 2
+	                                            color = MaterialTheme.colorScheme.onSurfaceVariant
 	                                        )
 	                                    }
                                     Icon(
@@ -799,7 +798,7 @@ private fun UserDictionaryScreen(
                                 editingEntry = entry
                                 dialogWord = entry.word
                             }) {
-                                Icon(imageVector = Icons.Filled.Edit, contentDescription = null)
+                                Icon(imageVector = Icons.Filled.Edit, contentDescription = stringResource(R.string.user_dict_edit_title))
                             }
                             IconButton(onClick = {
                                 when (entry.source) {
@@ -809,7 +808,7 @@ private fun UserDictionaryScreen(
                                 refreshEntries()
                                 notifyDictionaryUpdated()
                             }) {
-                                Icon(imageVector = Icons.Filled.Delete, contentDescription = null)
+                                Icon(imageVector = Icons.Filled.Delete, contentDescription = stringResource(R.string.auto_correct_delete))
                             }
                         }
                     }

@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.Settings
+import it.palsoftware.pastiera.R
 
 class DeviceControlCommandSource : CommandSource {
     override val id = CommandSourceId.DeviceControl
@@ -12,9 +13,9 @@ class DeviceControlCommandSource : CommandSource {
     override fun getCommands(context: Context): List<CommandTarget> {
         return buildList {
             add(deviceAction("device.home", "Home screen", "System", ACTION_HOME_SCREEN))
-            add(deviceAction("device.media.play_pause", "Play / pause", "Media", ACTION_MEDIA_PLAY_PAUSE))
-            add(deviceAction("device.media.previous", "Previous track", "Media", ACTION_MEDIA_PREVIOUS))
-            add(deviceAction("device.media.next", "Next track", "Media", ACTION_MEDIA_NEXT))
+            add(deviceAction("device.media.play_pause", context.getString(R.string.nav_mode_action_media_play_pause), "Media", ACTION_MEDIA_PLAY_PAUSE))
+            add(deviceAction("device.media.previous", context.getString(R.string.nav_mode_action_media_previous), "Media", ACTION_MEDIA_PREVIOUS))
+            add(deviceAction("device.media.next", context.getString(R.string.nav_mode_action_media_next), "Media", ACTION_MEDIA_NEXT))
             add(deviceAction("device.volume.up", "Volume up", "Audio", ACTION_VOLUME_UP))
             add(deviceAction("device.volume.down", "Volume down", "Audio", ACTION_VOLUME_DOWN))
             add(deviceAction("device.volume.mute", "Mute volume", "Audio", ACTION_VOLUME_MUTE))

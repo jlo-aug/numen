@@ -12,7 +12,7 @@ class AppActionCommandSource : CommandSource {
         return listOf(
             context.appIntentCommand(
                 id = COMMAND_SEARCH,
-                label = "Niagara Search",
+                label = "Niagara search",
                 subtitle = "Niagara Launcher",
                 uri = "niagara://search",
                 packageName = NIAGARA_PACKAGE,
@@ -20,7 +20,7 @@ class AppActionCommandSource : CommandSource {
             ),
             context.appIntentCommand(
                 id = COMMAND_AGENDA,
-                label = "Niagara Agenda",
+                label = "Niagara agenda",
                 subtitle = "Niagara Launcher",
                 uri = "niagara://agenda",
                 packageName = NIAGARA_PACKAGE,
@@ -28,7 +28,7 @@ class AppActionCommandSource : CommandSource {
             ),
             context.appIntentCommand(
                 id = "tasker.select_task",
-                label = "Tasker Select Task",
+                label = "Tasker select task",
                 subtitle = "Tasker",
                 action = "net.dinglisch.android.tasker.ACTION_TASK_SELECT",
                 packageName = TASKER_PACKAGE,
@@ -36,7 +36,7 @@ class AppActionCommandSource : CommandSource {
             ),
             context.appIntentCommand(
                 id = "tasker.preferences",
-                label = "Tasker Preferences",
+                label = "Tasker preferences",
                 subtitle = "Tasker",
                 action = "net.dinglisch.android.tasker.ACTION_OPEN_PREFS",
                 packageName = TASKER_PACKAGE,
@@ -44,7 +44,7 @@ class AppActionCommandSource : CommandSource {
             ),
             context.appIntentCommand(
                 id = "tasker.create_shortcut",
-                label = "Tasker Create Shortcut",
+                label = "Tasker create shortcut",
                 subtitle = "Tasker",
                 action = Intent.ACTION_CREATE_SHORTCUT,
                 packageName = TASKER_PACKAGE,
@@ -52,7 +52,7 @@ class AppActionCommandSource : CommandSource {
             ),
             context.appIntentCommand(
                 id = "homeassistant.navigate",
-                label = "Home Assistant Navigate",
+                label = "Home Assistant navigate",
                 subtitle = "Home Assistant",
                 uri = "homeassistant://navigate",
                 packageName = HOME_ASSISTANT_PACKAGE,
@@ -60,7 +60,7 @@ class AppActionCommandSource : CommandSource {
             ),
             context.appIntentCommand(
                 id = "homeassistant.assist",
-                label = "Home Assistant Assist",
+                label = "Home Assistant assist",
                 subtitle = "Home Assistant",
                 action = Intent.ACTION_ASSIST,
                 packageName = HOME_ASSISTANT_PACKAGE,
@@ -68,7 +68,7 @@ class AppActionCommandSource : CommandSource {
             ),
             context.appIntentCommand(
                 id = "homeassistant.voice_command",
-                label = "Home Assistant Voice Command",
+                label = "Home Assistant voice command",
                 subtitle = "Home Assistant",
                 action = Intent.ACTION_VOICE_COMMAND,
                 packageName = HOME_ASSISTANT_PACKAGE,

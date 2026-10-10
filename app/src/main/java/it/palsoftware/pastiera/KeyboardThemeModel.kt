@@ -2,6 +2,7 @@ package it.palsoftware.pastiera
 
 import it.palsoftware.pastiera.inputmethod.aospkeyboard.AospKeyboardView
 import it.palsoftware.pastiera.inputmethod.ui.KeyboardThemeColors
+import java.util.Locale
 
 internal data class KeyboardThemePreset(
     val name: String,
@@ -196,6 +197,19 @@ internal fun SettingsManager.NamedKeyboardTheme.toKeyboardThemeOption(): Keyboar
         resetPreset = preset,
         userSaved = true
     )
+}
+
+private val builtInKeyboardThemeNames: Set<String> by lazy { keyboardThemePresets().map { it.name }.toSet() }
+
+/**
+ * Label shown for a theme. Built-in preset names ("High Contrast") stay stable identifiers;
+ * only their label is in sentence case ("High contrast"). Saved names show as typed.
+ */
+internal fun keyboardThemeLabel(name: String): String {
+    val label = Branding.themeLabel(name)
+    if (name !in builtInKeyboardThemeNames) return label
+    val words = label.split(' ')
+    return (listOf(words.first()) + words.drop(1).map { it.lowercase(Locale.ROOT) }).joinToString(" ")
 }
 
 internal fun keyboardThemeSwatches(): List<Int> = keyboardThemePresets()

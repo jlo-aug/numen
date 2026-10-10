@@ -1,5 +1,6 @@
 package it.palsoftware.pastiera
 
+import android.content.Context
 import android.graphics.Color as AndroidColor
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.Canvas
@@ -9,11 +10,13 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.snapping.SnapPosition
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,13 +36,19 @@ import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.filled.BrightnessMedium
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.RestartAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Slider
@@ -71,8 +80,12 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSectionLabel
 import java.util.Locale
 import kotlin.math.PI
 import kotlin.math.abs
@@ -103,8 +116,14 @@ fun KeyboardThemeScreen(
         val softwarePreset = it.withSoftwareKeyboardDefaults()
         KeyboardThemeOption("builtin:${it.name}", softwarePreset, softwarePreset)
     } + savedThemes
+    // Numen has a physical keyboard, so this page themes the bar (page 0). The on-screen keyboard
+    // page, with its key colors and key settings, only shows while that keyboard is forced on or
+    // one of its hidden settings differs from the default.
+    val onScreenPreviewAvailable = remember { onScreenKeyboardThemeAvailable(context) }
     val initialPreviewPage = remember {
-        if (initialTarget == SettingsManager.KeyboardThemeTarget.SOFTWARE) {
+        if (!onScreenPreviewAvailable) {
+            0
+        } else if (initialTarget == SettingsManager.KeyboardThemeTarget.SOFTWARE) {
             1
         } else if (
             initialTarget == null &&
@@ -116,7 +135,10 @@ fun KeyboardThemeScreen(
             0
         }
     }
-    val previewPagerState = rememberPagerState(initialPage = initialPreviewPage, pageCount = { 2 })
+    val previewPagerState = rememberPagerState(
+        initialPage = initialPreviewPage,
+        pageCount = { if (onScreenPreviewAvailable) 2 else 1 }
+    )
     var customizationTab by remember {
         mutableStateOf(if (initialTab == KeyboardThemeEditorTab.Keys) 1 else 0)
     }
@@ -132,8 +154,9 @@ fun KeyboardThemeScreen(
     var softwareTheme by remember { mutableStateOf(softwarePreset) }
     var hardwareSelectionKey by remember { mutableStateOf(matchKeyboardThemeOption(hardwareThemeOptions, initialHardwarePreset) ?: "custom:hardware") }
     var softwareSelectionKey by remember { mutableStateOf(matchKeyboardThemeOption(softwareThemeOptions, initialSoftwarePreset) ?: "custom:software") }
-    var softwarePreviewViewportScale by remember {
-        mutableStateOf(SettingsManager.getKeyboardThemePreviewViewportScale(context))
+    // Read-only here: the viewport slider is gone, a saved value still sizes the on-screen preview.
+    val softwarePreviewViewportScale = remember {
+        SettingsManager.getKeyboardThemePreviewViewportScale(context)
     }
     var hardwareAssignmentMode by remember {
         mutableStateOf(SettingsManager.getKeyboardThemeAssignmentMode(context, SettingsManager.KeyboardThemeTarget.HARDWARE))
@@ -206,7 +229,9 @@ fun KeyboardThemeScreen(
             draftEditorName = null
             val target = route.keyboardThemeTarget
             if (target != null) {
-                previewPagerState.scrollToPage(if (target == SettingsManager.KeyboardThemeTarget.SOFTWARE) 1 else 0)
+                previewPagerState.scrollToPage(
+                    if (target == SettingsManager.KeyboardThemeTarget.SOFTWARE && onScreenPreviewAvailable) 1 else 0
+                )
             }
             route.keyboardThemeTab?.let { customizationTab = if (it == KeyboardThemeEditorTab.Keys) 1 else 0 }
             assignmentScreenTarget = if (route.customizationDestination == "keyboard_theme_assignment") {
@@ -251,7 +276,13 @@ fun KeyboardThemeScreen(
         }
         val targetIndex = draftIndex
             ?: activeThemeOptions.indexOfFirst { it.key == activeSelectionKey }.takeIf { it >= 0 }
-        if (targetIndex != null) {
+        val layoutInfo = presetListState.layoutInfo
+        val fullyVisible = layoutInfo.visibleItemsInfo.any { item ->
+            item.index == targetIndex &&
+                item.offset >= layoutInfo.viewportStartOffset &&
+                item.offset + item.size <= layoutInfo.viewportEndOffset
+        }
+        if (targetIndex != null && !fullyVisible) {
             presetListState.animateScrollToItem(targetIndex)
         }
         draftListFocusName = null
@@ -331,8 +362,9 @@ fun KeyboardThemeScreen(
         themeDrafts.firstOrNull { it.name.equals(name, ignoreCase = true) }
     }
     val draftPreset = editedDraft?.theme?.toKeyboardThemePreset(editedDraft.name)
+    val draftRequiredFields = keyboardThemeDraftRequiredFields(onScreen = onScreenPreviewAvailable)
     val draftMissingFields = editedDraft?.let { draft ->
-        KEYBOARD_THEME_DRAFT_REQUIRED_FIELDS - draft.populatedFields
+        draftRequiredFields - draft.populatedFields
     }.orEmpty()
     val draftComplete = editedDraft != null && draftMissingFields.isEmpty()
 
@@ -457,117 +489,142 @@ fun KeyboardThemeScreen(
                 )
                 return@Column
             }
-            Text(
-                text = stringResource(R.string.keyboard_theme_preset_title),
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.SemiBold,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            )
-            LazyRow(
-                state = presetListState,
+            SettingsSectionLabel(stringResource(R.string.keyboard_theme_preset_title))
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(104.dp),
-                contentPadding = PaddingValues(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(horizontal = 16.dp)
             ) {
-                items(
-                    count = activeThemeOptions.size + themeDrafts.size,
-                    key = { index ->
+                // Three equal cards fill the row and the list snaps to a card edge, so no card is
+                // cut off at either side. Names wrap to two lines at large font sizes.
+                val cardWidth = (maxWidth - 16.dp) / 3
+                LazyRow(
+                    state = presetListState,
+                    flingBehavior = rememberSnapFlingBehavior(presetListState, SnapPosition.Start),
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    items(
+                        count = activeThemeOptions.size + themeDrafts.size,
+                        key = { index ->
+                            if (index < activeThemeOptions.size) {
+                                activeThemeOptions[index].key
+                            } else {
+                                "draft:${themeDrafts[index - activeThemeOptions.size].name}"
+                            }
+                        }
+                    ) { index ->
                         if (index < activeThemeOptions.size) {
-                            activeThemeOptions[index].key
+                            val option = activeThemeOptions[index]
+                            KeyboardThemePresetCard(
+                                preset = option.preset,
+                                selected = activeSelectionKey == option.key,
+                                onClick = { applyPreset(option) },
+                                modifier = Modifier.width(cardWidth)
+                            )
                         } else {
-                            "draft:${themeDrafts[index - activeThemeOptions.size].name}"
+                            val draft = themeDrafts[index - activeThemeOptions.size]
+                            KeyboardThemeDraftCard(
+                                draft = draft,
+                                editing = editedDraft?.name.equals(draft.name, ignoreCase = true),
+                                requiredFields = draftRequiredFields,
+                                onClick = {
+                                    draftEditingGuard.value = true
+                                    draftEditorName = draft.name
+                                },
+                                modifier = Modifier.width(cardWidth)
+                            )
                         }
                     }
-                ) { index ->
-                    if (index < activeThemeOptions.size) {
-                        val option = activeThemeOptions[index]
-                        KeyboardThemePresetCard(
-                            preset = option.preset,
-                            selected = activeSelectionKey == option.key,
-                            onClick = { applyPreset(option) }
-                        )
-                    } else {
-                        val draft = themeDrafts[index - activeThemeOptions.size]
-                        KeyboardThemeDraftCard(
-                            draft = draft,
-                            editing = editedDraft?.name.equals(draft.name, ignoreCase = true),
-                            onClick = {
-                                draftEditingGuard.value = true
-                                draftEditorName = draft.name
-                            }
-                        )
-                    }
                 }
             }
+            // One filled action; the rest are outlined or in the overflow menu.
+            val savedName = activeSelectionKey.removePrefix("saved:")
+                .takeIf { activeSelectionKey.startsWith("saved:") }
+            var actionsMenuExpanded by remember { mutableStateOf(false) }
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Button(
-                    onClick = { showNewDraftDialog = true },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.keyboard_theme_action_new))
-                }
-                Button(
-                    onClick = { showImportDialog = true },
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.keyboard_theme_action_import))
-                }
-            }
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(start = 16.dp, end = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 Button(
                     onClick = { showSaveAsDialog = true },
                     modifier = Modifier.weight(1f)
                 ) {
                     Text(
-                        stringResource(
+                        text = stringResource(
                             if (editedDraft != null) {
                                 R.string.keyboard_theme_action_duplicate_draft
                             } else {
                                 R.string.keyboard_theme_action_save_as
                             }
-                        )
+                        ),
+                        textAlign = TextAlign.Center
                     )
                 }
-                Button(
-                    onClick = { exportTheme = draftPreset ?: activeTheme },
-                    enabled = editedDraft == null || draftComplete,
+                OutlinedButton(
+                    onClick = { showNewDraftDialog = true },
                     modifier = Modifier.weight(1f)
                 ) {
-                    Text(stringResource(R.string.keyboard_theme_action_export))
+                    Text(
+                        text = stringResource(R.string.keyboard_theme_action_new),
+                        textAlign = TextAlign.Center
+                    )
                 }
-                val savedName = activeSelectionKey.removePrefix("saved:")
-                    .takeIf { activeSelectionKey.startsWith("saved:") }
-                Button(
-                    onClick = {
-                        if (editedDraft != null) {
-                            deleteDraftRequest = editedDraft.name
-                        } else if (savedName != null) {
-                            deleteThemeRequest = savedName
-                        }
-                    },
-                    enabled = editedDraft != null || savedName != null,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = MaterialTheme.colorScheme.errorContainer,
-                        contentColor = MaterialTheme.colorScheme.onErrorContainer,
-                        disabledContainerColor = MaterialTheme.colorScheme.surfaceVariant,
-                        disabledContentColor = MaterialTheme.colorScheme.onSurfaceVariant
-                    ),
-                    modifier = Modifier.weight(1f)
-                ) {
-                    Text(stringResource(R.string.keyboard_theme_action_delete))
+                Box {
+                    IconButton(onClick = { actionsMenuExpanded = true }) {
+                        Icon(
+                            imageVector = Icons.Filled.MoreVert,
+                            contentDescription = stringResource(R.string.keyboard_theme_more_actions)
+                        )
+                    }
+                    DropdownMenu(
+                        expanded = actionsMenuExpanded,
+                        onDismissRequest = { actionsMenuExpanded = false }
+                    ) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.keyboard_theme_action_import)) },
+                            onClick = {
+                                actionsMenuExpanded = false
+                                showImportDialog = true
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.keyboard_theme_action_export)) },
+                            enabled = editedDraft == null || draftComplete,
+                            onClick = {
+                                actionsMenuExpanded = false
+                                exportTheme = draftPreset ?: activeTheme
+                            }
+                        )
+                        val deleteEnabled = editedDraft != null || savedName != null
+                        DropdownMenuItem(
+                            text = {
+                                Text(
+                                    text = stringResource(
+                                        if (editedDraft != null) {
+                                            R.string.keyboard_theme_delete_draft
+                                        } else {
+                                            R.string.keyboard_theme_action_delete
+                                        }
+                                    ),
+                                    color = if (deleteEnabled) MaterialTheme.colorScheme.error else Color.Unspecified
+                                )
+                            },
+                            enabled = deleteEnabled,
+                            onClick = {
+                                actionsMenuExpanded = false
+                                if (editedDraft != null) {
+                                    deleteDraftRequest = editedDraft.name
+                                } else if (savedName != null) {
+                                    deleteThemeRequest = savedName
+                                }
+                            }
+                        )
+                    }
                 }
             }
 
@@ -577,54 +634,23 @@ fun KeyboardThemeScreen(
                     mode = activeAssignmentMode,
                     lightThemeName = themeDisplayName(activeThemeOptions, activeLightTheme),
                     darkThemeName = themeDisplayName(activeThemeOptions, activeDarkTheme),
-                    modifier = Modifier.padding(horizontal = 16.dp),
                     onClick = { openSettingsChild(context, "theme_assignment", activeTarget.name) }
                 )
             }
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 6.dp, end = 16.dp),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.keyboard_theme_preview_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f)
-                )
-                if (editedDraft != null) {
-                    Text(
-                        text = stringResource(R.string.keyboard_theme_editing_draft),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-            }
-            if (previewPagerState.currentPage == 1) {
-                KeyboardThemeSliderRow(
-                    label = stringResource(R.string.setting_link_theme_preview_viewport),
-                    linkId = "keyboard_theme.preview_viewport",
-                    value = softwarePreviewViewportScale,
-                    presetValue = SettingsManager.KEYBOARD_THEME_PREVIEW_VIEWPORT_SCALE_MIN,
-                    valueRange = SettingsManager.KEYBOARD_THEME_PREVIEW_VIEWPORT_SCALE_MIN..
-                        SettingsManager.KEYBOARD_THEME_PREVIEW_VIEWPORT_SCALE_MAX,
-                    modifier = Modifier.padding(horizontal = 16.dp),
-                    onValueChanged = { value ->
-                        softwarePreviewViewportScale = value
-                        SettingsManager.setKeyboardThemePreviewViewportScale(context, value)
-                    }
-                )
-            }
+            KeyboardThemeSectionHeader(
+                title = stringResource(R.string.keyboard_theme_preview_title),
+                trailing = if (editedDraft != null) stringResource(R.string.keyboard_theme_editing_draft) else null
+            )
             val previewTheme = draftPreset ?: activePreviewTheme
             KeyboardThemePreviewCarousel(
                 theme = previewTheme,
                 currentPage = previewPagerState.currentPage,
+                showPageDots = onScreenPreviewAvailable,
                 pageContent = {
                     HorizontalPager(
                         state = previewPagerState,
+                        userScrollEnabled = onScreenPreviewAvailable,
                         modifier = Modifier.fillMaxWidth()
                     ) { page ->
                         when (page) {
@@ -652,30 +678,21 @@ fun KeyboardThemeScreen(
                 }
             )
 
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 16.dp, top = 6.dp, end = 16.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.keyboard_theme_customize_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.weight(1f)
-                )
-                if (editedDraft != null) {
-                    Text(
-                        text = stringResource(R.string.keyboard_theme_required_missing, draftMissingFields.size),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = if (draftMissingFields.isEmpty()) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        }
-                    )
+            KeyboardThemeSectionHeader(
+                title = stringResource(R.string.keyboard_theme_customize_title),
+                trailing = if (editedDraft != null) {
+                    stringResource(R.string.keyboard_theme_required_missing, draftMissingFields.size)
+                } else {
+                    null
+                },
+                trailingColor = if (draftMissingFields.isEmpty()) {
+                    MaterialTheme.colorScheme.primary
+                } else {
+                    MaterialTheme.colorScheme.error
                 }
-            }
+            )
+            // Drafts can become either theme, so they follow whether the on-screen keyboard is in use.
+            val showOnScreenFields = if (editedDraft != null) onScreenPreviewAvailable else activePreviewPage == 1
             TabRow(
                 selectedTabIndex = customizationTab,
                 modifier = Modifier.padding(horizontal = 16.dp)
@@ -683,45 +700,53 @@ fun KeyboardThemeScreen(
                 Tab(
                     selected = customizationTab == 0,
                     onClick = { customizationTab = 0 },
-                    text = { Text(stringResource(R.string.keyboard_theme_tab_colors)) }
+                    text = { Text(stringResource(R.string.keyboard_theme_tab_colors), textAlign = TextAlign.Center) }
                 )
                 Tab(
                     selected = customizationTab == 1,
                     onClick = { customizationTab = 1 },
-                    text = { Text(stringResource(R.string.keyboard_theme_tab_keys)) }
+                    text = {
+                        Text(
+                            text = stringResource(
+                                if (showOnScreenFields) R.string.keyboard_theme_tab_keys else R.string.keyboard_theme_tab_bar_shape
+                            ),
+                            textAlign = TextAlign.Center
+                        )
+                    }
                 )
             }
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
-                    .heightIn(max = 360.dp)
-                    .verticalScroll(rememberScrollState())
             ) {
+                // Flows with the page scroll (no nested scroll area), so nothing gets cut off.
                 if (editedDraft != null && draftPreset != null && customizationTab == 0) {
                     KeyboardThemeDraftColorsEditor(
                         theme = draftPreset,
                         populatedFields = editedDraft.populatedFields,
+                        onScreen = showOnScreenFields,
                         onFieldChanged = ::updateDraft
                     )
                 } else if (editedDraft != null && draftPreset != null) {
                     KeyboardThemeDraftKeysEditor(
                         theme = draftPreset,
                         populatedFields = editedDraft.populatedFields,
+                        onScreen = showOnScreenFields,
                         onFieldChanged = ::updateDraft
                     )
                 } else if (customizationTab == 0) {
                     KeyboardThemeColorsEditor(
                         theme = activeTheme,
                         preset = activePreset,
-                        isSoftware = activePreviewPage == 1,
+                        isSoftware = showOnScreenFields,
                         onThemeChanged = ::updateActiveTheme
                     )
                 } else {
                     KeyboardThemeKeysEditor(
                         theme = activeTheme,
                         preset = activePreset,
-                        isSoftware = activePreviewPage == 1,
+                        isSoftware = showOnScreenFields,
                         onThemeChanged = ::updateActiveTheme
                     )
                 }
@@ -770,7 +795,7 @@ fun KeyboardThemeScreen(
         val importingTheme = pendingImportedTheme
         val duplicatingDraft = importingTheme == null && editedDraft != null
         KeyboardThemeNameDialog(
-            initialName = importingTheme?.name ?: draftPreset?.name ?: Branding.themeLabel(activeTheme.name),
+            initialName = importingTheme?.name ?: draftPreset?.name ?: keyboardThemeLabel(activeTheme.name),
             existingNames = (savedThemes.map { it.preset.name } + themeDrafts.map { it.name }).toSet(),
             title = stringResource(
                 when {
@@ -850,8 +875,8 @@ fun KeyboardThemeScreen(
     deleteThemeRequest?.let { name ->
         AlertDialog(
             onDismissRequest = { deleteThemeRequest = null },
-            title = { Text("Delete theme?") },
-            text = { Text("Delete ‘$name’? The currently applied colors will be kept.") },
+            title = { Text(stringResource(R.string.keyboard_theme_delete_theme_title)) },
+            text = { Text(stringResource(R.string.keyboard_theme_delete_theme_confirmation, name)) },
             confirmButton = {
                 TextButton(
                     onClick = {
@@ -859,12 +884,12 @@ fun KeyboardThemeScreen(
                         deleteSavedTheme(name)
                     }
                 ) {
-                    Text("Delete", color = MaterialTheme.colorScheme.error)
+                    Text(stringResource(R.string.delete), color = MaterialTheme.colorScheme.error)
                 }
             },
             dismissButton = {
                 TextButton(onClick = { deleteThemeRequest = null }) {
-                    Text("Cancel")
+                    Text(stringResource(R.string.cancel))
                 }
             }
         )
@@ -932,46 +957,45 @@ fun KeyboardThemeScreen(
     }
 }
 
+/**
+ * Preset cards stack the swatch over the name, so a two-line name at a large font size still
+ * fits. Every card reserves two name lines and a status line, so cards in a row match in height.
+ */
 @Composable
 private fun KeyboardThemePresetCard(
     preset: KeyboardThemePreset,
     selected: Boolean,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     Surface(
-        modifier = Modifier
-            .width(176.dp)
-            .heightIn(min = 88.dp)
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier,
         shape = MaterialTheme.shapes.medium,
         color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (selected) 0.9f else 0.45f),
         border = BorderStroke(
             width = if (selected) 2.dp else 1.dp,
-            color = if (selected) Color(preset.accent) else MaterialTheme.colorScheme.outlineVariant
+            color = if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
         )
     ) {
-        Row(
+        Column(
             modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            KeyboardThemeMiniPreview(preset)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = Branding.themeLabel(preset.name),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2
-                )
-                if (selected) {
-                    Text(
-                        text = stringResource(R.string.keyboard_theme_selected),
-                        style = MaterialTheme.typography.labelSmall,
-                        color = Color(preset.accent),
-                        maxLines = 1
-                    )
-                }
-            }
+            KeyboardThemeMiniPreview(preset, modifier = Modifier.fillMaxWidth())
+            Text(
+                text = keyboardThemeLabel(preset.name),
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = if (selected) stringResource(R.string.keyboard_theme_selected) else "",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -980,45 +1004,46 @@ private fun KeyboardThemePresetCard(
 private fun KeyboardThemeDraftCard(
     draft: SettingsManager.KeyboardThemeDraft,
     editing: Boolean,
-    onClick: () -> Unit
+    requiredFields: Set<String>,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val preset = draft.theme.toKeyboardThemePreset(draft.name)
     Surface(
-        modifier = Modifier
-            .width(176.dp)
-            .heightIn(min = 88.dp)
-            .clickable(onClick = onClick),
+        onClick = onClick,
+        modifier = modifier,
         shape = MaterialTheme.shapes.medium,
-        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f),
-        border = BorderStroke(1.dp, MaterialTheme.colorScheme.outlineVariant)
+        color = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = if (editing) 0.9f else 0.45f),
+        border = BorderStroke(
+            width = if (editing) 2.dp else 1.dp,
+            color = if (editing) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
+        )
     ) {
-        Row(
+        Column(
             modifier = Modifier.padding(8.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            KeyboardThemeMiniPreview(preset)
-            Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = draft.name,
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 2
-                )
-                Text(
-                    text = if (editing) {
-                        stringResource(R.string.keyboard_theme_editing_draft)
-                    } else {
-                        stringResource(
-                            R.string.keyboard_theme_required_missing,
-                            (KEYBOARD_THEME_DRAFT_REQUIRED_FIELDS - draft.populatedFields).size
-                        )
-                    },
-                    style = MaterialTheme.typography.labelSmall,
-                    color = MaterialTheme.colorScheme.primary,
-                    maxLines = 1
-                )
-            }
+            KeyboardThemeMiniPreview(preset, modifier = Modifier.fillMaxWidth())
+            Text(
+                text = draft.name,
+                style = MaterialTheme.typography.labelLarge,
+                fontWeight = FontWeight.SemiBold,
+                minLines = 2,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = if (editing) {
+                    stringResource(R.string.keyboard_theme_editing_draft)
+                } else {
+                    stringResource(
+                        R.string.keyboard_theme_required_missing,
+                        (requiredFields - draft.populatedFields).size
+                    )
+                },
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
@@ -1098,6 +1123,41 @@ internal const val DRAFT_POPUP_TAIL = "popup_tail"
 internal const val DRAFT_PREVIEW_ON_HOLD = "preview_on_hold"
 internal const val DRAFT_CHARACTER_PICKER = "character_picker"
 
+/** Draft values only the on-screen keyboard reads; the bar and SYM pages never use them. */
+private val KEYBOARD_THEME_ON_SCREEN_ONLY_DRAFT_FIELDS = setOf(
+    DRAFT_SPECIAL_KEY,
+    DRAFT_KEY_POPUP_SELECTED,
+    DRAFT_KEY_ROUNDING,
+    DRAFT_KEY_HEIGHT,
+    DRAFT_NUMBER_ROW_HEIGHT,
+    DRAFT_KEY_WIDTH,
+    DRAFT_ROW_SPACING,
+    DRAFT_SHOW_LEDS,
+    DRAFT_DISTRIBUTE_SPACING,
+    DRAFT_ORTHOLINEAR,
+    DRAFT_ATTACH_POPUP,
+    DRAFT_POPUP_TAIL,
+    DRAFT_PREVIEW_ON_HOLD,
+    DRAFT_CHARACTER_PICKER
+)
+
+/** Without the on-screen keyboard, its values keep their defaults and are not asked for. */
+private fun keyboardThemeDraftRequiredFields(onScreen: Boolean): Set<String> =
+    if (onScreen) {
+        KEYBOARD_THEME_DRAFT_REQUIRED_FIELDS
+    } else {
+        KEYBOARD_THEME_DRAFT_REQUIRED_FIELDS - KEYBOARD_THEME_ON_SCREEN_ONLY_DRAFT_FIELDS
+    }
+
+/**
+ * The on-screen keyboard theme only shows while that keyboard is forced on (saved or toggled)
+ * or one of its hidden settings was changed, matching the links in [SettingLinkRegistry].
+ */
+private fun onScreenKeyboardThemeAvailable(context: Context): Boolean =
+    SettingsManager.getSoftwareKeyboardMode(context) == SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL ||
+        SettingsManager.getSoftwareKeyboardModeRuntimeOverride(context) == SettingsManager.SoftwareKeyboardMode.FORCE_VIRTUAL ||
+        HiddenKeyboardSettings.onScreenKeyboardChanged(context)
+
 private data class KeyboardThemePickerRequest(
     val target: SettingsManager.KeyboardThemeTarget,
     val dark: Boolean
@@ -1167,27 +1227,29 @@ private fun KeyboardThemeAssignmentSection(
     }
 }
 
+/** Opens the light and dark mode page; laid out like the other settings navigation rows. */
 @Composable
 private fun KeyboardThemeAssignmentSummaryRow(
     target: SettingsManager.KeyboardThemeTarget,
     mode: String,
     lightThemeName: String,
     darkThemeName: String,
-    modifier: Modifier = Modifier,
     onClick: () -> Unit
 ) {
     Surface(
-        modifier = modifier
+        modifier = Modifier
             .fillMaxWidth()
-            .settingRow(if (target == SettingsManager.KeyboardThemeTarget.SOFTWARE) "keyboard_theme.software.assignment" else "keyboard_theme.hardware.assignment", onClick),
-        tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.medium
+            .heightIn(min = 72.dp)
+            .settingRow(if (target == SettingsManager.KeyboardThemeTarget.SOFTWARE) "keyboard_theme.software.assignment" else "keyboard_theme.hardware.assignment", onClick)
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 8.dp),
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            SettingsRowIcon(Icons.Filled.BrightnessMedium)
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = if (target == SettingsManager.KeyboardThemeTarget.SOFTWARE) {
@@ -1195,9 +1257,8 @@ private fun KeyboardThemeAssignmentSummaryRow(
                     } else {
                         stringResource(R.string.keyboard_theme_assignment_hardware_title)
                     },
-                    style = MaterialTheme.typography.titleSmall,
-                    fontWeight = FontWeight.SemiBold,
-                    maxLines = 1
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = if (mode == SettingsManager.KEYBOARD_THEME_ASSIGNMENT_MODE_FOLLOW_SYSTEM) {
@@ -1206,11 +1267,40 @@ private fun KeyboardThemeAssignmentSummaryRow(
                         stringResource(R.string.keyboard_theme_assignment_fixed)
                     },
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            Text("›", style = MaterialTheme.typography.titleLarge)
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
+    }
+}
+
+/** Standard section label (52 dp, primary color), with an optional status on the right. */
+@Composable
+private fun KeyboardThemeSectionHeader(
+    title: String,
+    trailing: String? = null,
+    trailingColor: Color = MaterialTheme.colorScheme.primary
+) {
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.Bottom
+    ) {
+        SettingsSectionLabel(title, modifier = Modifier.weight(1f))
+        if (trailing != null) {
+            Text(
+                text = trailing,
+                style = MaterialTheme.typography.labelMedium,
+                color = trailingColor,
+                textAlign = TextAlign.End,
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .padding(end = 16.dp, bottom = 4.dp)
+            )
         }
     }
 }
@@ -1231,7 +1321,7 @@ private fun KeyboardThemeModeButton(
             ButtonDefaults.filledTonalButtonColors()
         }
     ) {
-        Text(label, maxLines = 1)
+        Text(label, textAlign = TextAlign.Center)
     }
 }
 
@@ -1258,17 +1348,19 @@ private fun KeyboardThemePickerRow(
                 Text(
                     text = label,
                     style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 1
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     text = value,
                     style = MaterialTheme.typography.bodyMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    fontWeight = FontWeight.Medium
                 )
             }
-            Text("›", style = MaterialTheme.typography.titleLarge)
+            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
@@ -1316,8 +1408,8 @@ private fun themeDisplayName(
     options.firstOrNull { keyboardThemesEquivalent(it.preset.toSettingsTheme(), theme.toSettingsTheme()) }
         ?.preset
         ?.name
-        ?.let(Branding::themeLabel)
-        ?: Branding.themeLabel(theme.name)
+        ?.let(::keyboardThemeLabel)
+        ?: keyboardThemeLabel(theme.name)
 
 @Composable
 private fun KeyboardThemePreviewPickerRow(
@@ -1340,18 +1432,16 @@ private fun KeyboardThemePreviewPickerRow(
         ) {
             KeyboardThemeMiniPreview(preset)
             Text(
-                text = Branding.themeLabel(preset.name),
+                text = keyboardThemeLabel(preset.name),
                 style = MaterialTheme.typography.bodyMedium,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f),
-                maxLines = 1
+                modifier = Modifier.weight(1f)
             )
             if (selected) {
                 Text(
                     text = stringResource(R.string.keyboard_theme_selected),
                     style = MaterialTheme.typography.labelSmall,
-                    color = Color(preset.accent),
-                    maxLines = 1
+                    color = MaterialTheme.colorScheme.primary
                 )
             }
         }
@@ -1414,7 +1504,7 @@ private fun KeyboardThemeExportDialog(
     }
     AlertDialog(
         onDismissRequest = onDismiss,
-        title = { Text("Export theme") },
+        title = { Text(stringResource(R.string.keyboard_theme_export_title)) },
         text = {
             OutlinedTextField(
                 value = exportString,
@@ -1432,12 +1522,12 @@ private fun KeyboardThemeExportDialog(
                     onDismiss()
                 }
             ) {
-                Text("Copy")
+                Text(stringResource(R.string.copy))
             }
         },
         dismissButton = {
             TextButton(onClick = onDismiss) {
-                Text("Close")
+                Text(stringResource(R.string.close))
             }
         }
     )
@@ -1555,20 +1645,21 @@ private data class KeyboardThemeDraftColorItem(
 private fun KeyboardThemeDraftColorsEditor(
     theme: KeyboardThemePreset,
     populatedFields: Set<String>,
+    onScreen: Boolean,
     onFieldChanged: (String, KeyboardThemePreset) -> Unit
 ) {
-    val items = listOf(
+    val items = listOfNotNull(
         KeyboardThemeDraftColorItem(DRAFT_BACKGROUND, stringResource(R.string.keyboard_theme_background), theme.background) { theme.copy(background = it) },
         KeyboardThemeDraftColorItem(DRAFT_DIVIDER, stringResource(R.string.keyboard_theme_dividers), theme.divider) { theme.copy(divider = it) },
-        KeyboardThemeDraftColorItem(DRAFT_NORMAL_KEY, stringResource(R.string.keyboard_theme_normal_keys), theme.normalKey) { theme.copy(normalKey = it) },
-        KeyboardThemeDraftColorItem(DRAFT_SPECIAL_KEY, stringResource(R.string.keyboard_theme_special_keys), theme.specialKey) { theme.copy(specialKey = it) },
+        KeyboardThemeDraftColorItem(DRAFT_NORMAL_KEY, stringResource(if (onScreen) R.string.keyboard_theme_normal_keys else R.string.keyboard_theme_sym_keys), theme.normalKey) { theme.copy(normalKey = it) },
+        KeyboardThemeDraftColorItem(DRAFT_SPECIAL_KEY, stringResource(R.string.keyboard_theme_special_keys), theme.specialKey) { theme.copy(specialKey = it) }.takeIf { onScreen },
         KeyboardThemeDraftColorItem(DRAFT_TEXT_ICONS, stringResource(R.string.keyboard_theme_text_icons), theme.textAndIcons) { theme.copy(textAndIcons = it) },
         KeyboardThemeDraftColorItem(DRAFT_ACCENT, stringResource(R.string.keyboard_theme_accent), theme.accent) { theme.copy(accent = it) },
         KeyboardThemeDraftColorItem(DRAFT_SUGGESTION, stringResource(R.string.keyboard_theme_suggestions), theme.suggestion) { theme.copy(suggestion = it) },
         KeyboardThemeDraftColorItem(DRAFT_STATUS_BUTTON, stringResource(R.string.keyboard_theme_status_bar_buttons), theme.statusBarButton) { theme.copy(statusBarButton = it) },
         KeyboardThemeDraftColorItem(DRAFT_CURSOR_SWIPE, stringResource(R.string.keyboard_theme_cursor_swipe), theme.cursorSwipe) { theme.copy(cursorSwipe = it) },
-        KeyboardThemeDraftColorItem(DRAFT_KEY_POPUP, stringResource(R.string.keyboard_theme_key_popup), theme.keyPopup) { theme.copy(keyPopup = it) },
-        KeyboardThemeDraftColorItem(DRAFT_KEY_POPUP_SELECTED, stringResource(R.string.keyboard_theme_key_popup_selected), theme.keyPopupSelected) { theme.copy(keyPopupSelected = it) },
+        KeyboardThemeDraftColorItem(DRAFT_KEY_POPUP, stringResource(if (onScreen) R.string.keyboard_theme_key_popup else R.string.keyboard_theme_emoji_popup), theme.keyPopup) { theme.copy(keyPopup = it) },
+        KeyboardThemeDraftColorItem(DRAFT_KEY_POPUP_SELECTED, stringResource(R.string.keyboard_theme_key_popup_selected), theme.keyPopupSelected) { theme.copy(keyPopupSelected = it) }.takeIf { onScreen },
         KeyboardThemeDraftColorItem(DRAFT_LED_INACTIVE, stringResource(R.string.keyboard_theme_led_inactive), theme.ledInactive) { theme.copy(ledInactive = it) },
         KeyboardThemeDraftColorItem(DRAFT_LED_ACTIVE, stringResource(R.string.keyboard_theme_led_active), theme.ledActive) { theme.copy(ledActive = it) },
         KeyboardThemeDraftColorItem(DRAFT_LED_LOCKED, stringResource(R.string.keyboard_theme_led_locked), theme.ledLocked) { theme.copy(ledLocked = it) }
@@ -1603,9 +1694,17 @@ private fun KeyboardThemeDraftColorsEditor(
 private fun KeyboardThemeDraftKeysEditor(
     theme: KeyboardThemePreset,
     populatedFields: Set<String>,
+    onScreen: Boolean,
     onFieldChanged: (String, KeyboardThemePreset) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+        if (!onScreen) {
+            // The bar only reads its rounding and row heights.
+            KeyboardThemeDraftSliderRow(DRAFT_CHROME_ROUNDING, stringResource(R.string.keyboard_theme_chrome_rounding), theme.chromeCornerRadiusRatio, 0f..0.35f, populatedFields, linkId = "keyboard_theme.hardware.chrome_rounding") { onFieldChanged(DRAFT_CHROME_ROUNDING, theme.copy(chromeCornerRadiusRatio = it)) }
+            KeyboardThemeDraftSliderRow(DRAFT_SUGGESTIONS_HEIGHT, stringResource(R.string.keyboard_theme_suggestions_height), theme.suggestionsHeightScale, 0.65f..1.6f, populatedFields, linkId = "keyboard_theme.hardware.suggestions_height") { onFieldChanged(DRAFT_SUGGESTIONS_HEIGHT, theme.copy(suggestionsHeightScale = it)) }
+            KeyboardThemeDraftSliderRow(DRAFT_VARIATIONS_HEIGHT, stringResource(R.string.keyboard_theme_variations_height), theme.variationsHeightScale, 0.65f..1.6f, populatedFields, linkId = "keyboard_theme.hardware.variations_height") { onFieldChanged(DRAFT_VARIATIONS_HEIGHT, theme.copy(variationsHeightScale = it)) }
+            return@Column
+        }
         KeyboardThemeDraftSliderRow(DRAFT_KEY_ROUNDING, stringResource(R.string.keyboard_theme_key_rounding), theme.keyCornerRadiusRatio, 0f..0.35f, populatedFields, linkId = "keyboard_theme.software.key_rounding") { onFieldChanged(DRAFT_KEY_ROUNDING, theme.copy(keyCornerRadiusRatio = it)) }
         KeyboardThemeDraftSliderRow(DRAFT_CHROME_ROUNDING, stringResource(R.string.keyboard_theme_chrome_rounding), theme.chromeCornerRadiusRatio, 0f..0.35f, populatedFields, linkId = "keyboard_theme.software.chrome_rounding") { onFieldChanged(DRAFT_CHROME_ROUNDING, theme.copy(chromeCornerRadiusRatio = it)) }
         KeyboardThemeDraftSliderRow(DRAFT_KEY_HEIGHT, stringResource(R.string.keyboard_theme_key_height), theme.keyHeightScale, 0.72f..1.9f, populatedFields, linkId = "keyboard_theme.software.key_height") { onFieldChanged(DRAFT_KEY_HEIGHT, theme.copy(keyHeightScale = it)) }
@@ -1645,7 +1744,7 @@ private fun KeyboardThemeDraftColorRow(
             modifier = Modifier.padding(8.dp),
             verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
-            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium, maxLines = 1)
+            Text(label, style = MaterialTheme.typography.labelLarge, fontWeight = FontWeight.Medium)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -1660,8 +1759,7 @@ private fun KeyboardThemeDraftColorRow(
                     text = if (populated) color.toHexColorLabel() else stringResource(R.string.keyboard_theme_required),
                     style = MaterialTheme.typography.bodySmall,
                     color = if (populated) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.error,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1
+                    modifier = Modifier.weight(1f)
                 )
             }
         }
@@ -1762,22 +1860,36 @@ private fun KeyboardThemeColorsEditor(
                 onColorChanged = { onThemeChanged(theme.copy(divider = it)) }
             )
         )
-        add(
-            KeyboardThemeColorEditorItem(
-                label = stringResource(R.string.keyboard_theme_normal_keys),
-                color = theme.normalKey,
-                presetColor = preset.normalKey,
-                onColorChanged = { onThemeChanged(theme.copy(normalKey = it, suggestion = it)) }
+        if (isSoftware) {
+            add(
+                KeyboardThemeColorEditorItem(
+                    label = stringResource(R.string.keyboard_theme_normal_keys),
+                    color = theme.normalKey,
+                    presetColor = preset.normalKey,
+                    onColorChanged = { onThemeChanged(theme.copy(normalKey = it, suggestion = it)) }
+                )
             )
-        )
-        add(
-            KeyboardThemeColorEditorItem(
-                label = stringResource(R.string.keyboard_theme_special_keys),
-                color = theme.specialKey,
-                presetColor = preset.specialKey,
-                onColorChanged = { onThemeChanged(theme.copy(specialKey = it, statusBarButton = it)) }
+            add(
+                KeyboardThemeColorEditorItem(
+                    label = stringResource(R.string.keyboard_theme_special_keys),
+                    color = theme.specialKey,
+                    presetColor = preset.specialKey,
+                    onColorChanged = { onThemeChanged(theme.copy(specialKey = it, statusBarButton = it)) }
+                )
             )
-        )
+        } else {
+            // The bar reads the normal key color for SYM page keys and accent row keys only;
+            // suggestions and bar buttons have their own colors below. Special keys are
+            // on-screen only.
+            add(
+                KeyboardThemeColorEditorItem(
+                    label = stringResource(R.string.keyboard_theme_sym_keys),
+                    color = theme.normalKey,
+                    presetColor = preset.normalKey,
+                    onColorChanged = { onThemeChanged(theme.copy(normalKey = it)) }
+                )
+            )
+        }
         add(
             KeyboardThemeColorEditorItem(
                 label = stringResource(R.string.keyboard_theme_text_icons),
@@ -1788,7 +1900,7 @@ private fun KeyboardThemeColorsEditor(
         )
         add(
             KeyboardThemeColorEditorItem(
-                label = "Suggestions",
+                label = stringResource(R.string.keyboard_theme_suggestions),
                 color = theme.suggestion,
                 presetColor = preset.suggestion,
                 onColorChanged = { onThemeChanged(theme.copy(suggestion = it)) }
@@ -1796,7 +1908,7 @@ private fun KeyboardThemeColorsEditor(
         )
         add(
             KeyboardThemeColorEditorItem(
-                label = "Keyboard bar buttons",
+                label = stringResource(R.string.keyboard_theme_status_bar_buttons),
                 color = theme.statusBarButton,
                 presetColor = preset.statusBarButton,
                 onColorChanged = { onThemeChanged(theme.copy(statusBarButton = it)) }
@@ -1804,24 +1916,25 @@ private fun KeyboardThemeColorsEditor(
         )
         add(
             KeyboardThemeColorEditorItem(
-                label = "Cursor swipe",
+                label = stringResource(R.string.keyboard_theme_cursor_swipe),
                 color = theme.cursorSwipe,
                 presetColor = preset.cursorSwipe,
                 onColorChanged = { onThemeChanged(theme.copy(cursorSwipe = it)) }
             )
         )
+        add(
+            KeyboardThemeColorEditorItem(
+                // On the bar this is the emoji picker's popup (skin tones).
+                label = stringResource(if (isSoftware) R.string.keyboard_theme_key_popup else R.string.keyboard_theme_emoji_popup),
+                color = theme.keyPopup,
+                presetColor = preset.keyPopup,
+                onColorChanged = { onThemeChanged(theme.copy(keyPopup = it)) }
+            )
+        )
         if (isSoftware) {
             add(
                 KeyboardThemeColorEditorItem(
-                    label = "Key popup",
-                    color = theme.keyPopup,
-                    presetColor = preset.keyPopup,
-                    onColorChanged = { onThemeChanged(theme.copy(keyPopup = it)) }
-                )
-            )
-            add(
-                KeyboardThemeColorEditorItem(
-                    label = "Selected popup key",
+                    label = stringResource(R.string.keyboard_theme_key_popup_selected),
                     color = theme.keyPopupSelected,
                     presetColor = preset.keyPopupSelected,
                     onColorChanged = { onThemeChanged(theme.copy(keyPopupSelected = it)) }
@@ -1938,7 +2051,7 @@ private fun KeyboardThemeKeysEditor(
         )
         if (isSoftware) {
             KeyboardThemeSwitchRow(
-                label = "Show LEDs",
+                label = stringResource(R.string.keyboard_theme_show_leds),
                 checked = theme.showLeds,
                 presetChecked = preset.showLeds,
                 onCheckedChanged = { onThemeChanged(theme.copy(showLeds = it)) },
@@ -1977,42 +2090,42 @@ private fun KeyboardThemeKeysEditor(
                 onValueChanged = { onThemeChanged(theme.copy(rowGapScale = it)) }
             )
             KeyboardThemeSwitchRow(
-                label = "Distribute spacing",
+                label = stringResource(R.string.keyboard_theme_distribute_spacing),
                 checked = theme.distributeHorizontalSpacing,
                 presetChecked = preset.distributeHorizontalSpacing,
                 onCheckedChanged = { onThemeChanged(theme.copy(distributeHorizontalSpacing = it)) },
                 linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_DISTRIBUTE_SPACING
             )
             KeyboardThemeSwitchRow(
-                label = "Ortholinear",
+                label = stringResource(R.string.keyboard_theme_ortholinear),
                 checked = theme.ortholinear,
                 presetChecked = preset.ortholinear,
                 onCheckedChanged = { onThemeChanged(theme.copy(ortholinear = it)) },
                 linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_ORTHOLINEAR
             )
             KeyboardThemeSwitchRow(
-                label = "Attach popup to key",
+                label = stringResource(R.string.keyboard_theme_attach_popup),
                 checked = theme.keyPopupAttached,
                 presetChecked = preset.keyPopupAttached,
                 onCheckedChanged = { onThemeChanged(theme.copy(keyPopupAttached = it)) },
                 linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_ATTACH_POPUP
             )
             KeyboardThemeSwitchRow(
-                label = "Popup tail connector",
+                label = stringResource(R.string.keyboard_theme_popup_tail),
                 checked = theme.keyPopupTailEnabled,
                 presetChecked = preset.keyPopupTailEnabled,
                 onCheckedChanged = { onThemeChanged(theme.copy(keyPopupTailEnabled = it)) },
                 linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_POPUP_TAIL
             )
             KeyboardThemeSwitchRow(
-                label = "Show key preview only on hold",
+                label = stringResource(R.string.keyboard_theme_preview_on_hold),
                 checked = theme.keyPreviewAfterLongPress,
                 presetChecked = preset.keyPreviewAfterLongPress,
                 onCheckedChanged = { onThemeChanged(theme.copy(keyPreviewAfterLongPress = it)) },
                 linkId = SettingLinkIds.KEYBOARD_THEME_TOGGLE_PREVIEW_ON_HOLD
             )
             KeyboardThemeSwitchRow(
-                label = "Long-press character picker",
+                label = stringResource(R.string.keyboard_theme_character_picker),
                 checked = theme.keyAlternatesPopupEnabled,
                 presetChecked = preset.keyAlternatesPopupEnabled,
                 onCheckedChanged = { onThemeChanged(theme.copy(keyAlternatesPopupEnabled = it)) },
@@ -2023,12 +2136,14 @@ private fun KeyboardThemeKeysEditor(
 }
 
 @Composable
-private fun KeyboardThemeMiniPreview(preset: KeyboardThemePreset) {
+private fun KeyboardThemeMiniPreview(
+    preset: KeyboardThemePreset,
+    modifier: Modifier = Modifier.width(56.dp)
+) {
     val keyShape = MaterialTheme.shapes.extraSmall
     val dividerColor = Color(preset.divider)
     Column(
-        modifier = Modifier
-            .width(56.dp)
+        modifier = modifier
             .height(42.dp)
             .background(Color(preset.background), keyShape)
             .border(1.dp, dividerColor, keyShape)
@@ -2071,6 +2186,7 @@ private fun KeyboardThemeMiniPreview(preset: KeyboardThemePreset) {
 private fun KeyboardThemePreviewCarousel(
     theme: KeyboardThemePreset,
     currentPage: Int,
+    showPageDots: Boolean,
     pageContent: @Composable () -> Unit
 ) {
     if (currentPage == 1) {
@@ -2084,7 +2200,9 @@ private fun KeyboardThemePreviewCarousel(
         return
     }
     Surface(
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
         shape = MaterialTheme.shapes.medium,
         color = Color(theme.background),
         border = BorderStroke(1.dp, Color(theme.divider))
@@ -2093,7 +2211,7 @@ private fun KeyboardThemePreviewCarousel(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             pageContent()
-            Row(
+            if (showPageDots) Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(bottom = 8.dp),
@@ -2137,8 +2255,7 @@ private fun KeyboardThemeColorRow(
             Text(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1
+                fontWeight = FontWeight.Medium
             )
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -2149,8 +2266,7 @@ private fun KeyboardThemeColorRow(
                 Text(
                     text = color.toHexColorLabel(),
                     style = MaterialTheme.typography.bodySmall,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1
+                    modifier = Modifier.weight(1f)
                 )
                 IconButton(
                     onClick = { onColorChanged(presetColor) },
@@ -2195,8 +2311,7 @@ private fun KeyboardThemeSliderRow(
                     text = label,
                     style = MaterialTheme.typography.labelLarge,
                     fontWeight = FontWeight.Medium,
-                    modifier = Modifier.weight(1f),
-                    maxLines = 1
+                    modifier = Modifier.weight(1f)
                 )
                 IconButton(
                     onClick = { onValueChanged(presetValue) },
@@ -2243,8 +2358,7 @@ private fun KeyboardThemeSwitchRow(
                 text = label,
                 style = MaterialTheme.typography.labelLarge,
                 fontWeight = FontWeight.Medium,
-                modifier = Modifier.weight(1f),
-                maxLines = 1
+                modifier = Modifier.weight(1f)
             )
             IconButton(
                 onClick = { onCheckedChanged(presetChecked) },
@@ -2360,7 +2474,7 @@ private fun KeyboardThemeColorPickerDialog(
                     verticalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
                     Text(
-                        text = "Presets",
+                        text = stringResource(R.string.keyboard_theme_color_presets),
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.SemiBold
                     )
@@ -2412,7 +2526,7 @@ private fun KeyboardThemeColorPickerDialog(
                         },
                         modifier = Modifier.fillMaxWidth(),
                         singleLine = true,
-                        label = { Text("Hex color") },
+                        label = { Text(stringResource(R.string.keyboard_theme_hex_color)) },
                         isError = hexValue.isNotEmpty() && parseKeyboardThemeHexColor(hexValue) == null
                     )
                     Row(
@@ -2423,7 +2537,7 @@ private fun KeyboardThemeColorPickerDialog(
                             enabled = parseKeyboardThemeHexColor(hexValue) != null,
                             onClick = { onColorSelected(color) }
                         ) {
-                            Text("Apply")
+                            Text(stringResource(R.string.apply))
                         }
                     }
                 }

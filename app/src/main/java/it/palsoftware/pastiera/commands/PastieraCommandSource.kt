@@ -21,7 +21,7 @@ class PastieraCommandSource : CommandSource {
                 launch = CommandLaunchSpec.InternalAction(ACTION_OPEN_QUICK_LAUNCHER),
                 capabilities = setOf(CommandCapability.LaunchesActivity),
                 defaultSurfaces = setOf(CommandSurface.AssignedKey, CommandSurface.NavMode),
-                searchTokens = listOf("Pastiera", "QuickLauncher", "Numen", "KeyLaunches", "Search")
+                searchTokens = listOf("Numen", "App search", "Apps", "KeyLaunches", "Search")
             ),
             CommandTarget(
                 id = COMMAND_MAIN_ACTIVITY,
@@ -33,14 +33,14 @@ class PastieraCommandSource : CommandSource {
                 launch = CommandLaunchSpec.InternalAction(ACTION_OPEN_MAIN_ACTIVITY),
                 capabilities = setOf(CommandCapability.LaunchesActivity),
                 defaultSurfaces = setOf(CommandSurface.AssignedKey, CommandSurface.NavMode),
-                searchTokens = listOf("Pastiera", "Settings")
+                searchTokens = listOf("Numen", "Settings")
             ),
             CommandTarget(
                 id = COMMAND_TOGGLE_SOFTWARE_KEYBOARD_MODE,
                 source = id,
                 kind = CommandKind.PastieraAction,
-                label = "Toggle Keyboard Mode",
-                subtitle = "Switch Virtual / Hardware",
+                label = "Switch keyboard",
+                subtitle = "Switch between built-in and on-screen keyboard",
                 icon = CommandIcon.DrawableIcon(ContextCompat.getDrawable(context, R.drawable.expansion_panels_24)),
                 launch = CommandLaunchSpec.InternalAction(ACTION_TOGGLE_SOFTWARE_KEYBOARD_MODE),
                 capabilities = setOf(CommandCapability.AdjustsDeviceState),

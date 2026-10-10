@@ -8,6 +8,6 @@ class FlavorBuildConfigTest {
     @Test
     fun numenIsItsOwnApp() {
         assertEquals("app.numen.keyboard", BuildConfig.APPLICATION_ID)
-        assertEquals("Ver. ${BuildConfig.VERSION_NAME}", BuildInfo.getBuildInfoString())
+        assertEquals("Version ${BuildConfig.VERSION_NAME}", BuildInfo.getBuildInfoString())
     }
 }

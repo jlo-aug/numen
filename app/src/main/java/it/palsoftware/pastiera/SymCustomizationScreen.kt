@@ -29,11 +29,16 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.compose.ui.zIndex
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CloseFullscreen
+import androidx.compose.material.icons.filled.Height
+import androidx.compose.material.icons.filled.KeyboardAlt
+import androidx.compose.material.icons.filled.Reorder
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.DragHandle
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material.icons.filled.Keyboard
 import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.animation.*
@@ -322,19 +327,21 @@ fun SymCustomizationScreen(
             modifier = Modifier.settingRow("sym.pages")
                 .fillMaxWidth()
         ) {
+            // Page cards sit 8 dp in from the edges so their drag handles take the 24 dp icon
+            // column (16 dp) and the page names start on the title column (52 dp).
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
+                    .padding(horizontal = 8.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Keyboard,
+                        imageVector = Icons.Filled.Reorder,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
@@ -343,14 +350,12 @@ fun SymCustomizationScreen(
                         Text(
                             text = stringResource(R.string.sym_swap_pages_title),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
+                            fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = stringResource(R.string.sym_swap_pages_description),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                 }
@@ -378,14 +383,15 @@ fun SymCustomizationScreen(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(horizontal = 12.dp, vertical = 8.dp),
+                                .padding(end = 8.dp, top = 4.dp, bottom = 4.dp),
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // The handle drags on first touch; a finger-sized target around the icon.
+                            // The handle drags on first touch; a finger-sized target around the icon,
+                            // which sits on the 24 dp icon column (card at 8 dp + 8 dp).
                             Box(
-                                contentAlignment = Alignment.Center,
-                                modifier = Modifier.size(40.dp).pointerInput(pageId, normalizedSymPageOrder) {
+                                contentAlignment = Alignment.CenterStart,
+                                modifier = Modifier.width(36.dp).height(48.dp).pointerInput(pageId, normalizedSymPageOrder) {
                                     detectDragGestures(
                                         onDragStart = {
                                             draggingPageId = pageId
@@ -410,7 +416,8 @@ fun SymCustomizationScreen(
                                 Icon(
                                     imageVector = Icons.Filled.DragHandle,
                                     contentDescription = null,
-                                    tint = if (isDragging) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant
+                                    tint = if (isDragging) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                                    modifier = Modifier.padding(start = 8.dp).size(24.dp)
                                 )
                             }
                             Column(modifier = Modifier.weight(1f)) {
@@ -446,7 +453,8 @@ fun SymCustomizationScreen(
                                 }) {
                                     Icon(
                                         Icons.Filled.Edit,
-                                        contentDescription = stringResource(R.string.sym_edit_layer_content_description)
+                                        contentDescription = stringResource(R.string.sym_edit_layer_content_description),
+                                        tint = MaterialTheme.colorScheme.primary
                                     )
                                 }
                             }
@@ -472,7 +480,11 @@ fun SymCustomizationScreen(
             }
         }
 
-        Surface(
+        // "What Alt types" is only offered to users who changed it (see ModifierSettingsScreen).
+        val showAltBindingLink = remember {
+            SettingsManager.getAltModifierBinding(context) != AltModifierBinding.DeviceSym
+        }
+        if (showAltBindingLink) Surface(
             modifier = Modifier
                 .fillMaxWidth()
                 .clickable {
@@ -489,7 +501,7 @@ fun SymCustomizationScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(Icons.Filled.Keyboard, null, tint = MaterialTheme.colorScheme.primary)
+                SettingsRowIcon(Icons.Filled.KeyboardAlt)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         stringResource(R.string.alt_binding_title),
@@ -502,7 +514,11 @@ fun SymCustomizationScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Icon(Icons.AutoMirrored.Filled.ArrowForward, null)
+                Icon(
+                    Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 
@@ -523,7 +539,7 @@ fun SymCustomizationScreen(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Keyboard,
+                    imageVector = Icons.Filled.CloseFullscreen,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(24.dp)
@@ -532,14 +548,12 @@ fun SymCustomizationScreen(
                     Text(
                         text = stringResource(R.string.sym_auto_close_title),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = stringResource(R.string.sym_auto_close_description),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Switch(
@@ -560,10 +574,11 @@ fun SymCustomizationScreen(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
+                    .padding(start = SettingsSubRowStartInset, end = 16.dp, top = 8.dp, bottom = 8.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                SettingsRowIcon(null)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.sym_auto_close_touch_title),
@@ -573,14 +588,12 @@ fun SymCustomizationScreen(
                             MaterialTheme.colorScheme.onSurface
                         } else {
                             MaterialTheme.colorScheme.onSurfaceVariant
-                        },
-                        maxLines = 1
+                        }
                     )
                     Text(
                         text = stringResource(R.string.sym_auto_close_touch_description),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Switch(
@@ -593,8 +606,6 @@ fun SymCustomizationScreen(
                 )
             }
         }
-
-        HorizontalDivider()
 
         }
 
@@ -678,24 +689,17 @@ fun SymCustomizationScreen(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Keyboard,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
+                SettingsRowIcon(Icons.Filled.Height)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.emoji_picker_expanded_height_title),
                         style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium,
-                        maxLines = 1
+                        fontWeight = FontWeight.Medium
                     )
                     Text(
                         text = stringResource(R.string.emoji_picker_expanded_height_description),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 Switch(
@@ -708,7 +712,7 @@ fun SymCustomizationScreen(
             }
         }
 
-        HorizontalDivider()
+        Spacer(modifier = Modifier.height(16.dp))
 
         }
 

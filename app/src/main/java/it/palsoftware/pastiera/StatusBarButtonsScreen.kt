@@ -8,10 +8,19 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material.icons.automirrored.filled.AlignHorizontalLeft
+import androidx.compose.material.icons.automirrored.filled.AlignHorizontalRight
+import androidx.compose.material.icons.filled.RoundedCorner
+import androidx.compose.material.icons.filled.ViewWeek
+import androidx.compose.material.icons.filled.Visibility
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSliderRow
+import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
+import it.palsoftware.pastiera.ui.SettingsSubRowTextInset
 import androidx.compose.ui.res.painterResource
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -20,6 +29,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.statusBars
@@ -33,8 +43,7 @@ private enum class StatusBarEditorMode { Extended, Pastierina }
 fun StatusBarButtonsScreen(
     modifier: Modifier = Modifier,
     onBack: () -> Unit,
-    onCustomizeVariations: () -> Unit,
-    onOpenModifiers: () -> Unit
+    onCustomizeVariations: () -> Unit
 ) {
     val context = LocalContext.current
     var leftSlots by remember { mutableStateOf(SettingsManager.getStatusBarSlotsLeft(context)) }
@@ -64,6 +73,7 @@ fun StatusBarButtonsScreen(
         mutableStateOf(SettingsManager.getTitan2EliteTopCornerMultiplier(context))
     }
     var maxIconShrink by remember { mutableStateOf(SettingsManager.getTitan2EliteMaxIconShrink(context)) }
+    var autoShowKeyboard by remember { mutableStateOf(SettingsManager.getAutoShowKeyboard(context)) }
     var editorMode by remember {
         mutableStateOf(
             if (
@@ -152,7 +162,8 @@ fun StatusBarButtonsScreen(
                         .padding(start = 8.dp)
                         .weight(1f)
                 )
-                IconButton(
+                // Resets only the bar's buttons and variation layout, so it is not styled as destructive.
+                TextButton(
                     onClick = {
                         val defaults = SettingsManager.resetStatusBarSlotsToDefault(context)
                         leftSlots = listOf(defaults.left)
@@ -167,57 +178,42 @@ fun StatusBarButtonsScreen(
                 ) {
                     Icon(
                         imageVector = Icons.Filled.Refresh,
-                        contentDescription = stringResource(R.string.status_bar_buttons_reset),
-                        tint = MaterialTheme.colorScheme.error
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
                     )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(stringResource(R.string.status_bar_buttons_reset))
                 }
             }
         }
         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
 
-        Surface(modifier = Modifier.fillMaxWidth()) {
-            Text(
-                text = stringResource(R.string.status_bar_buttons_description),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-            )
-        }
-
-        Surface(
-            modifier = Modifier
-                .fillMaxWidth()
-                .settingRow(SettingLinkIds.MODIFIERS_INDICATORS, onOpenModifiers)
-        ) {
+        // Moved here from the former Keyboard & Devices screen.
+        Surface(modifier = Modifier.fillMaxWidth().settingRow(SettingLinkIds.TEXT_INPUT_AUTO_SHOW_KEYBOARD), color = MaterialTheme.colorScheme.background) {
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 10.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    painter = painterResource(R.drawable.modifier_keys_24),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(24.dp)
-                )
+                SettingsRowIcon(Icons.Filled.Visibility)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
-                        text = stringResource(R.string.modifier_indicators_title),
+                        text = stringResource(R.string.auto_show_keyboard_title),
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = stringResource(R.string.modifier_indicators_description),
+                        text = stringResource(R.string.auto_show_keyboard_description),
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                Switch(
+                    checked = autoShowKeyboard,
+                    onCheckedChange = { enabled ->
+                        autoShowKeyboard = enabled
+                        SettingsManager.setAutoShowKeyboard(context, enabled)
+                    }
                 )
             }
         }
@@ -226,7 +222,7 @@ fun StatusBarButtonsScreen(
         SingleChoiceSegmentedButtonRow(
             modifier = Modifier
                 .fillMaxWidth().settingRow("status_bar.presentation")
-                .padding(horizontal = 16.dp, vertical = 10.dp)
+                .padding(start = 52.dp, end = 16.dp, top = 10.dp, bottom = 10.dp)
         ) {
             StatusBarEditorMode.entries.forEachIndexed { index, mode ->
                 SegmentedButton(
@@ -251,8 +247,7 @@ fun StatusBarButtonsScreen(
                             } else {
                                 R.string.pastierina_status_bar_buttons_title
                             }
-                        ),
-                        maxLines = 1
+                        )
                     )
                 }
             }
@@ -267,6 +262,28 @@ fun StatusBarButtonsScreen(
                 stringResource(R.string.pastierina_preview_suggestions)
             } else null
         )
+        if (editorMode == StatusBarEditorMode.Extended) {
+            // Bar gesture, shown with the bar itself rather than with variations.
+            Surface(modifier = Modifier.fillMaxWidth(), color = MaterialTheme.colorScheme.background) {
+                Row(
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                ) {
+                    Icon(
+                        imageVector = Icons.Filled.Info,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = stringResource(R.string.status_bar_swipe_cursor_info),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                }
+            }
+        }
 
         // Titan 2 Elite display corners: Numen shows them only on an Elite or if already enabled.
         val showEliteCorners = remember {
@@ -275,14 +292,13 @@ fun StatusBarButtonsScreen(
         }
         if (showEliteCorners) {
             SettingsSectionDivider(stringResource(R.string.device_specific_interface_section))
-        }
-        if (showEliteCorners) {
-            Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.rounded_corners")) {
+            Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.rounded_corners"), color = MaterialTheme.colorScheme.background) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    SettingsRowIcon(Icons.Filled.RoundedCorner)
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.titan2_elite_rounded_corners_title),
@@ -305,16 +321,15 @@ fun StatusBarButtonsScreen(
                     )
                 }
             }
-        }
 
-        if (showEliteCorners) {
             if (titan2EliteRoundedCornerInsetsEnabled) {
-                Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.fill_bottom_corners")) {
+                Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.fill_bottom_corners"), color = MaterialTheme.colorScheme.background) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                        modifier = Modifier.fillMaxWidth().padding(start = SettingsSubRowStartInset, end = 16.dp, top = 10.dp, bottom = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        SettingsRowIcon(null)
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.titan2_elite_fill_bottom_corners_title),
@@ -336,7 +351,7 @@ fun StatusBarButtonsScreen(
                         )
                     }
                 }
-                Column(Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp)) {
+                Column(Modifier.fillMaxWidth().padding(start = SettingsSubRowTextInset, end = 16.dp, top = 10.dp, bottom = 10.dp)) {
                     Text(stringResource(R.string.titan2_elite_top_corner_title), modifier = Modifier.fillMaxWidth().settingRow("status_bar.top_corner"), style = MaterialTheme.typography.titleMedium,
                         color = MaterialTheme.colorScheme.onSurface)
                     Text(stringResource(R.string.titan2_elite_top_corner_description),
@@ -366,12 +381,13 @@ fun StatusBarButtonsScreen(
 
         if (editorMode == StatusBarEditorMode.Extended) {
             SettingsSectionDivider(stringResource(R.string.extended_status_bar_features_section))
-            Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.variations_visible")) {
+            Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.variations_visible"), color = MaterialTheme.colorScheme.background) {
                 Row(
                     modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    SettingsRowIcon(Icons.Filled.ViewWeek)
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.status_bar_variations_visible_title),
@@ -394,69 +410,42 @@ fun StatusBarButtonsScreen(
                 }
             }
 
-            Surface(modifier = Modifier.fillMaxWidth()) {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Icon(
-                        imageVector = Icons.Filled.Info,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.status_bar_swipe_cursor_info),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-
             if (variationsVisible) {
-                Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.variation_slots")) {
-                    Column(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 8.dp)
-                    ) {
-                        Text(
-                            text = stringResource(R.string.dynamic_variation_slot_count_title),
-                            style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium
-                        )
-                        Text(
-                            text = stringResource(
-                                R.string.dynamic_variation_slot_count_description,
-                                dynamicVariationSlotCount
-                            ),
-                            style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                        )
-                        Slider(
-                            value = dynamicVariationSlotCount.toFloat(),
-                            onValueChange = { value ->
-                                dynamicVariationSlotCount = value.toInt().coerceIn(
-                                    SettingsManager.MIN_DYNAMIC_VARIATION_BAR_SLOT_COUNT,
-                                    SettingsManager.MAX_DYNAMIC_VARIATION_BAR_SLOT_COUNT
-                                )
-                            },
-                            onValueChangeFinished = {
-                                SettingsManager.setDynamicVariationBarSlotCount(context, dynamicVariationSlotCount)
-                            },
-                            valueRange = SettingsManager.MIN_DYNAMIC_VARIATION_BAR_SLOT_COUNT.toFloat()..
-                                SettingsManager.MAX_DYNAMIC_VARIATION_BAR_SLOT_COUNT.toFloat(),
-                            steps = SettingsManager.MAX_DYNAMIC_VARIATION_BAR_SLOT_COUNT -
-                                SettingsManager.MIN_DYNAMIC_VARIATION_BAR_SLOT_COUNT - 1
-                        )
-                    }
+                SettingsSliderRow(
+                    icon = null,
+                    title = stringResource(R.string.dynamic_variation_slot_count_title),
+                    value = stringResource(
+                        R.string.dynamic_variation_slot_count_description,
+                        dynamicVariationSlotCount
+                    ),
+                    subRow = true,
+                    modifier = Modifier.settingRow("status_bar.variation_slots")
+                ) {
+                    Slider(
+                        value = dynamicVariationSlotCount.toFloat(),
+                        onValueChange = { value ->
+                            dynamicVariationSlotCount = value.toInt().coerceIn(
+                                SettingsManager.MIN_DYNAMIC_VARIATION_BAR_SLOT_COUNT,
+                                SettingsManager.MAX_DYNAMIC_VARIATION_BAR_SLOT_COUNT
+                            )
+                        },
+                        onValueChangeFinished = {
+                            SettingsManager.setDynamicVariationBarSlotCount(context, dynamicVariationSlotCount)
+                        },
+                        valueRange = SettingsManager.MIN_DYNAMIC_VARIATION_BAR_SLOT_COUNT.toFloat()..
+                            SettingsManager.MAX_DYNAMIC_VARIATION_BAR_SLOT_COUNT.toFloat(),
+                        steps = SettingsManager.MAX_DYNAMIC_VARIATION_BAR_SLOT_COUNT -
+                            SettingsManager.MIN_DYNAMIC_VARIATION_BAR_SLOT_COUNT - 1
+                    )
                 }
 
-                Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.resize_variations")) {
+                Surface(modifier = Modifier.fillMaxWidth().settingRow("status_bar.resize_variations"), color = MaterialTheme.colorScheme.background) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                        modifier = Modifier.fillMaxWidth().padding(start = SettingsSubRowStartInset, end = 16.dp, top = 10.dp, bottom = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
+                        SettingsRowIcon(null)
                         Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = stringResource(R.string.dynamic_variation_resize_to_content_title),
@@ -480,19 +469,15 @@ fun StatusBarButtonsScreen(
                 }
 
                 Surface(
-                    modifier = Modifier.fillMaxWidth().settingRow("customization.variations", onCustomizeVariations)
+                    modifier = Modifier.fillMaxWidth().settingRow("customization.variations", onCustomizeVariations),
+                    color = MaterialTheme.colorScheme.background
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+                        modifier = Modifier.fillMaxWidth().padding(start = SettingsSubRowStartInset, end = 16.dp, top = 10.dp, bottom = 10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(12.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.Tune,
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
+                        SettingsRowIcon(null)
                         Text(
                             text = stringResource(R.string.variation_customize_title),
                             style = MaterialTheme.typography.titleMedium,
@@ -511,9 +496,9 @@ fun StatusBarButtonsScreen(
             SettingsSectionDivider(stringResource(R.string.status_bar_buttons_section))
             SlotGroup(
                 title = stringResource(R.string.status_bar_slots_left),
+                icon = Icons.AutoMirrored.Filled.AlignHorizontalLeft,
                 linkId = "status_bar.extended_left",
                 slots = leftSlots,
-                slotPrefix = "L",
                 onSlotSelected = { index, buttonId -> selectExtendedButton(buttonId, "left", index) },
                 onAddSlot = {
                     leftSlots = leftSlots + SettingsManager.STATUS_BAR_BUTTON_NONE
@@ -526,9 +511,9 @@ fun StatusBarButtonsScreen(
             )
             SlotGroup(
                 title = stringResource(R.string.status_bar_slots_right),
+                icon = Icons.AutoMirrored.Filled.AlignHorizontalRight,
                 linkId = "status_bar.extended_right",
                 slots = rightSlots,
-                slotPrefix = "R",
                 onSlotSelected = { index, buttonId -> selectExtendedButton(buttonId, "right", index) },
                 onAddSlot = {
                     rightSlots = rightSlots + SettingsManager.STATUS_BAR_BUTTON_NONE
@@ -545,14 +530,14 @@ fun StatusBarButtonsScreen(
                 text = stringResource(R.string.pastierina_status_bar_buttons_description),
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant,
-                modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                modifier = Modifier.padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
             )
             SettingsSectionDivider(stringResource(R.string.status_bar_buttons_section))
             SlotGroup(
                 title = stringResource(R.string.status_bar_slots_left),
+                icon = Icons.AutoMirrored.Filled.AlignHorizontalLeft,
                 linkId = "status_bar.pastierina_left",
                 slots = pastierinaLeftSlots,
-                slotPrefix = "L",
                 onSlotSelected = { index, buttonId -> selectPastierinaButton(buttonId, "left", index) },
                 onAddSlot = {
                     pastierinaLeftSlots = pastierinaLeftSlots + SettingsManager.STATUS_BAR_BUTTON_NONE
@@ -565,9 +550,9 @@ fun StatusBarButtonsScreen(
             )
             SlotGroup(
                 title = stringResource(R.string.status_bar_slots_right),
+                icon = Icons.AutoMirrored.Filled.AlignHorizontalRight,
                 linkId = "status_bar.pastierina_right",
                 slots = pastierinaRightSlots,
-                slotPrefix = "R",
                 onSlotSelected = { index, buttonId -> selectPastierinaButton(buttonId, "right", index) },
                 onAddSlot = {
                     pastierinaRightSlots = pastierinaRightSlots + SettingsManager.STATUS_BAR_BUTTON_NONE
@@ -580,7 +565,7 @@ fun StatusBarButtonsScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.navigationBarsPadding().height(16.dp))
         }
     }
 }
@@ -631,18 +616,21 @@ private fun StatusBarLayoutPreview(
 private fun SlotGroup(
     linkId: String,
     title: String,
+    icon: androidx.compose.ui.graphics.vector.ImageVector,
     slots: List<String>,
-    slotPrefix: String,
     onSlotSelected: (Int, String) -> Unit,
     onAddSlot: () -> Unit,
     onRemoveSlot: (Int) -> Unit
 ) {
-    Surface(modifier = Modifier.fillMaxWidth().settingRow(linkId)) {
-        Column(
+    Surface(modifier = Modifier.fillMaxWidth().settingRow(linkId), color = MaterialTheme.colorScheme.background) {
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+        SettingsRowIcon(icon, modifier = Modifier.padding(top = 12.dp))
+        Column(modifier = Modifier.weight(1f)) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically,
@@ -656,7 +644,8 @@ private fun SlotGroup(
                 IconButton(onClick = onAddSlot) {
                     Icon(
                         imageVector = Icons.Filled.Add,
-                        contentDescription = stringResource(R.string.status_bar_slot_add)
+                        contentDescription = stringResource(R.string.status_bar_slot_add),
+                        tint = MaterialTheme.colorScheme.primary
                     )
                 }
             }
@@ -667,8 +656,10 @@ private fun SlotGroup(
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     SlotDropdown(
-                        slotLabel = title,
-                        slotNumber = "$slotPrefix${index + 1}",
+                        // "Button 1" only helps when the group has more than one button.
+                        label = if (slots.size > 1) {
+                            stringResource(R.string.status_bar_slot_button_label, index + 1)
+                        } else null,
                         selectedButton = buttonId,
                         excludedButtons = emptyList(),
                         modifier = Modifier.weight(1f),
@@ -682,14 +673,15 @@ private fun SlotGroup(
                             imageVector = Icons.Filled.Delete,
                             contentDescription = stringResource(R.string.status_bar_slot_remove),
                             tint = if (slots.size > 1) {
-                                MaterialTheme.colorScheme.error
+                                MaterialTheme.colorScheme.primary
                             } else {
-                                MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f)
+                                MaterialTheme.colorScheme.primary.copy(alpha = 0.38f)
                             }
                         )
                     }
                 }
             }
+        }
         }
     }
 }
@@ -705,12 +697,13 @@ fun ModifierIndicatorMultiSelect(
         SettingsManager.MODIFIER_INDICATOR_MENU_BAR,
         SettingsManager.MODIFIER_INDICATOR_STATUS_BAR
     )
+    // Drawn like the segmented buttons used for other choices (outlined, joined, a check on
+    // the selected ones); kept as plain surfaces so each part stays long-pressable as a link.
     Column(modifier = modifier) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
         ) {
-            options.forEach { indicator ->
+            options.forEachIndexed { index, indicator ->
                 val selected = indicator in selectedIndicators
                 val linkId = when (indicator) {
                     SettingsManager.MODIFIER_INDICATOR_BOTTOM_STRIP ->
@@ -724,38 +717,47 @@ fun ModifierIndicatorMultiSelect(
                 Surface(
                     modifier = Modifier
                         .weight(1f)
-                        .height(42.dp)
+                        .heightIn(min = 40.dp)
+                        .fillMaxHeight()
+                        // Overlap the shared borders, as SegmentedButtonRow does.
+                        .offset(x = (-1).dp * index)
                         .settingRow(linkId) {
                             onIndicatorsSelected(
                                 if (selected) selectedIndicators - indicator else selectedIndicators + indicator
                             )
                         },
                     color = if (selected) {
-                        MaterialTheme.colorScheme.primaryContainer
+                        MaterialTheme.colorScheme.secondaryContainer
                     } else {
-                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.45f)
+                        MaterialTheme.colorScheme.background
                     },
                     contentColor = if (selected) {
-                        MaterialTheme.colorScheme.onPrimaryContainer
+                        MaterialTheme.colorScheme.onSecondaryContainer
                     } else {
-                        MaterialTheme.colorScheme.onSurfaceVariant
+                        MaterialTheme.colorScheme.onSurface
                     },
-                    shape = MaterialTheme.shapes.small,
-                    border = BorderStroke(
-                        1.dp,
-                        if (selected) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.outlineVariant
-                    )
+                    shape = SegmentedButtonDefaults.itemShape(index, options.size),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.outline)
                 ) {
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 8.dp, vertical = 8.dp),
                         horizontalArrangement = Arrangement.Center,
                         verticalAlignment = Alignment.CenterVertically
                     ) {
+                        if (selected) {
+                            Icon(
+                                imageVector = Icons.Filled.Check,
+                                contentDescription = null,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                        }
                         Text(
                             text = getModifierIndicatorLabel(indicator),
-                            style = MaterialTheme.typography.labelMedium,
-                            fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Medium,
-                            maxLines = 1
+                            style = MaterialTheme.typography.labelLarge,
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -817,8 +819,7 @@ private fun SlotPreview(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun SlotDropdown(
-    slotLabel: String,
-    slotNumber: String,
+    label: String?,
     selectedButton: String,
     excludedButtons: List<String> = emptyList(),
     modifier: Modifier = Modifier,
@@ -829,22 +830,26 @@ private fun SlotDropdown(
     val availableButtons = SettingsManager.getAvailableStatusBarButtons()
         .filter { it == SettingsManager.STATUS_BAR_BUTTON_NONE || it !in excludedButtons }
 
+    // Starts on the row's title column (52 dp), like the other settings controls.
     Surface(
-        modifier = modifier.fillMaxWidth()
+        modifier = modifier.fillMaxWidth(),
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(vertical = 8.dp)
         ) {
-            Text(
-                text = "$slotLabel ($slotNumber)",
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.primary,
-                fontWeight = FontWeight.SemiBold
-            )
+            if (label != null) {
+                Text(
+                    text = label,
+                    style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.primary,
+                    fontWeight = FontWeight.SemiBold
+                )
 
-            Spacer(modifier = Modifier.height(4.dp))
+                Spacer(modifier = Modifier.height(4.dp))
+            }
 
             ExposedDropdownMenuBox(
                 expanded = expanded,

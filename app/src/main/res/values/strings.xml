@@ -8,35 +8,35 @@
     
     <!-- Long Press Section -->
     <string name="long_press_title">Long press delay</string>
-    <string name="keyboard_timing_long_press_value">%1$dms</string>
+    <string name="keyboard_timing_long_press_value">%1$d ms</string>
     
     <!-- Text Input Sections -->
     <string name="text_input_section_capitalization">Capitalization</string>
     <string name="text_input_section_spacing_punctuation">Spacing &amp; punctuation</string>
     <string name="text_input_section_typography">Typography</string>
-    <string name="text_input_section_keyboard_behavior">Keyboard behaviour</string>
     <string name="text_input_section_delete">Delete</string>
 
     <!-- Auto Capitalize Section -->
     <string name="auto_capitalize_title">Capitalize at text start</string>
-    <string name="auto_capitalize_description">Capitalize the first letter when starting in an empty text field.</string>
+    <string name="auto_capitalize_description">Capitalize the first letter when starting in an empty text field</string>
     <string name="auto_capitalize_respect_manual_shift_off_title">Remember Shift off</string>
     <string name="auto_capitalize_respect_manual_shift_off_description">If you turn auto Shift off, keep it off in this text field</string>
     <string name="auto_capitalize_restricted_fields_title">Shift in all text fields</string>
-    <string name="auto_capitalize_restricted_fields_description">Also start address bars, email, and search fields with Shift. Password fields remain unchanged.</string>
+    <string name="auto_capitalize_restricted_fields_description">Also start address bars and email and search fields with Shift, but never password fields</string>
 
     <!-- Auto Capitalize After Period Section -->
     <string name="auto_capitalize_after_period_title">Capitalize after sentence end</string>
-    <string name="auto_capitalize_after_period_description">Capitalize the next letter after a period and space.</string>
+    <string name="auto_capitalize_after_period_description">Capitalize the next letter after a period and space</string>
 
     <!-- Double Space to Period Section -->
-    <string name="double_space_to_period_title">Double Space inserts period</string>
-    <string name="double_space_to_period_description">Press Space twice to insert a period and a space.</string>
+    <string name="double_space_to_period_title">Double-space for period</string>
+    <string name="double_space_to_period_description">Press Space twice to type a period and a space</string>
 
     <!-- Smart punctuation Section -->
     <string name="spaced_hyphen_to_en_dash_title">Hyphen to dash</string>
+    <string name="spaced_hyphen_to_en_dash_description">Turn a hyphen between spaces into a dash</string>
     <string name="mid_word_quote_to_apostrophe_title">Quotes inside words</string>
-    <string name="mid_word_quote_to_apostrophe_description">Turn straight quotes inside words into an apostrophe.</string>
+    <string name="mid_word_quote_to_apostrophe_description">Turn straight quotes inside words into an apostrophe</string>
     <string name="comma_space_title">Space after comma</string>
     <string name="comma_space_description">Add a space after commas and remove the space before them</string>
     <string name="auto_space_punctuation_title">Punctuation spacing</string>
@@ -46,7 +46,7 @@
     <string name="auto_space_punctuation_after_column">Before next text</string>
     <string name="auto_space_punctuation_help_action">Explain punctuation spacing</string>
     <string name="auto_space_punctuation_help_title">How punctuation spacing works</string>
-    <string name="auto_space_punctuation_help_text">“Remove before” removes only a space automatically inserted by Numen, not one you typed manually.\n\n“Before next text” defers the space until more text is typed. Enter or Send therefore leaves no trailing space.</string>
+    <string name="auto_space_punctuation_help_text">“Remove before” removes only a space Numen added, never one you typed.\n\n“Before next text” waits to add the space until you type more, so Enter or Send leaves no space at the end.</string>
     <string name="auto_space_punctuation_choose_off">Off</string>
     <string name="auto_space_punctuation_reset">Reset</string>
     <string name="smart_quotes_title">Curly quotes</string>
@@ -54,47 +54,50 @@
 
     <!-- Clear Alt on Space Section -->
     <string name="clear_alt_on_space_title">Release Alt with Space</string>
-    <string name="clear_alt_on_space_description">Pressing Space turns Alt off, including a locked Alt</string>
-    
+    <string name="clear_alt_on_space_description">Space or Enter turns Alt off</string>
+
     <!-- Swipe to Delete Section -->
 
     <!-- Delete Alternatives Section -->
-    <string name="delete_alternatives_description">Other ways to delete the character after the cursor</string>
-    <string name="delete_alternatives_nav_mode_title">Open Nav Mode settings</string>
-    <string name="shift_backspace_delete_title">Shift + Backspace</string>
-    <string name="alt_backspace_delete_title">Alt + Backspace</string>
-    <string name="backspace_at_start_delete_title">Backspace at line start</string>
-    <string name="delete_alternatives_hint">Tip: you can also set a Ctrl + key for this in Nav Mode</string>
-    <string name="delete_alternatives_selection_hint">When text is selected, these alternatives are disabled and Backspace deletes the selection.</string>
+    <string name="delete_alternatives_nav_mode_title">Open Nav mode settings</string>
+    <string name="shift_backspace_delete_title">Shift+Backspace</string>
+    <string name="shift_backspace_delete_description">Hold Shift and press Backspace to delete forward</string>
+    <string name="alt_backspace_delete_title">Alt+Backspace</string>
+    <string name="alt_backspace_delete_description">Hold Alt and press Backspace to delete forward</string>
+    <string name="backspace_at_start_delete_title">Backspace at text start</string>
+    <string name="backspace_at_start_delete_description">With nothing before the cursor, delete the character after it</string>
 
     <!-- Swipe Incremental Threshold Section -->
-    <string name="swipe_incremental_threshold_title">Cursor swipe distance</string>
+    <string name="swipe_incremental_threshold_title">Cursor speed</string>
+    <string name="swipe_incremental_threshold_description">How fast swiping on the bar moves the cursor</string>
+    <string name="swipe_cursor_speed_slower">Slower</string>
+    <string name="swipe_cursor_speed_faster">Faster</string>
     
     <!-- Auto Show Keyboard Section -->
-    <string name="auto_show_keyboard_title">Show keyboard automatically</string>
+    <string name="auto_show_keyboard_title">Show bar automatically</string>
     <string name="auto_show_keyboard_description">Show the bar whenever a text field opens</string>
     
     <!-- Alt+Ctrl Speech Recognition Shortcut Section -->
-    <string name="alt_ctrl_speech_shortcut_title">Alt+Ctrl for speech input</string>
-    <string name="alt_ctrl_speech_shortcut_description">Start speech input with Alt+Ctrl.</string>
+    <string name="alt_ctrl_speech_shortcut_title">Alt+Ctrl for voice input</string>
+    <string name="alt_ctrl_speech_shortcut_description">Start voice input without the microphone button</string>
 
     <!-- Static Variation Bar Mode -->
-    <string name="static_variation_bar_mode_title">Static Variation Bar</string>
-    <string name="static_variation_bar_mode_description">Always show a fixed set of utility keys in the variation row instead of context-based variations.</string>
-    <string name="static_variation_preset_title">Static variation preset</string>
+    <string name="static_variation_bar_mode_title">Fixed row</string>
+    <string name="static_variation_bar_mode_description">Always show the same keys in the accent row instead of accents for the last letter</string>
+    <string name="static_variation_preset_title">Fixed row keys</string>
     <string name="static_variation_preset_off">Off</string>
-    <string name="static_variation_preset_off_description">Use dynamic variations and suggestions only.</string>
+    <string name="static_variation_preset_off_description">Show accents for the letter you just typed</string>
     <string name="static_variation_preset_symbols">Symbols</string>
-    <string name="static_variation_preset_symbols_description">Default punctuation row.</string>
+    <string name="static_variation_preset_symbols_description">Common punctuation</string>
     <string name="static_variation_preset_numbers">Numbers</string>
-    <string name="static_variation_preset_numbers_description">Quick number row.</string>
+    <string name="static_variation_preset_numbers_description">A row of numbers</string>
     <string name="static_variation_preset_alternative">Alternative symbols</string>
-    <string name="static_variation_preset_alternative_description">Brackets and special characters.</string>
-    <string name="static_variation_preset_dev_choice">Dev’s Choice</string>
-    <string name="static_variation_preset_dev_choice_description">Curated punctuation row.</string>
-    <string name="static_variation_layer_sticky_title">Sticky Layer</string>
-    <string name="static_variation_layer_sticky_description">When the Shift or Device SYM layer is latched by double tap, keep it active after selecting a symbol from that layer.</string>
-    <string name="swipe_to_move_cursor">Swipe to move cursor</string>
+    <string name="static_variation_preset_alternative_description">Brackets and special characters</string>
+    <string name="static_variation_preset_dev_choice">Dev’s choice</string>
+    <string name="static_variation_preset_dev_choice_description">Hand-picked punctuation</string>
+    <string name="static_variation_layer_sticky_title">Keep the locked row</string>
+    <string name="static_variation_layer_sticky_description">After you double-tap Shift or Alt to lock it, keep its row after you pick a symbol</string>
+    <string name="swipe_to_move_cursor">Swipe to move the cursor</string>
     
     <!-- Info Section -->
     
@@ -122,18 +125,18 @@
     <string name="test_field_placeholder">Type here with the physical keyboard…</string>
     
     <!-- Last Event Section -->
-    <string name="last_keyboard_event_title">Last Keyboard Event</string>
-    <string name="ignore_back_short">Ignore BACK</string>
+    <string name="last_keyboard_event_title">Last keyboard event</string>
+    <string name="ignore_back_short">Ignore Back</string>
     
     <!-- Long Press Mappings Section -->
     
     <!-- Buttons -->
-    <string name="change_keyboard_button">Change Keyboard</string>
+    <string name="change_keyboard_button">Change keyboard</string>
     <string name="save">Save</string>
     
     <!-- SYM Customization -->
-    <string name="sym_customization_title">Customize SYM Layers</string>
-    <string name="sym_customization_button">Customize SYM Layers</string>
+    <string name="sym_customization_title">SYM pages</string>
+    <string name="sym_customization_button">Customize SYM pages</string>
     <string name="sym_customization_description">Choose, reorder and edit the pages SYM opens</string>
     <string name="close">Close</string>
     
@@ -142,91 +145,95 @@
     <string name="auto_correct_title_description">Apply your saved rules, like “omw” → “on my way”</string>
     <string name="auto_correct_languages_title">Manage text replacements</string>
     <string name="auto_correct_languages_description">Add and edit your replacement rules</string>
-    <string name="auto_correct_edit_description">Tap on a correction to edit it, or use the + button to add a new one.</string>
-    <string name="auto_correct_add_correction">Add Correction</string>
-    <string name="auto_correct_edit_correction">Edit Correction</string>
-    <string name="auto_correct_original">Original</string>
-    <string name="auto_correct_corrected">Corrected</string>
+    <string name="auto_correct_edit_description">Tap a replacement to edit it, or tap + to add one</string>
+    <string name="auto_correct_add_correction">Add replacement</string>
+    <string name="auto_correct_edit_correction">Edit replacement</string>
+    <string name="auto_correct_original">When you type</string>
+    <string name="auto_correct_corrected">Replace with</string>
     <string name="auto_correct_add_replacement_to_dictionary">Add replacement to personal dictionary</string>
     <string name="auto_correct_delete">Delete</string>
     <string name="auto_correct_save">Save</string>
     <string name="auto_correct_cancel">Cancel</string>
-    <string name="add_substitution_title">Add substitution</string>
-    <string name="add_substitution_replacement_label">Replacement: %1$s</string>
-    <string name="add_substitution_trigger_label">Shortcut</string>
-    <string name="add_substitution_also_dictionary">Also add replacement to dictionary</string>
-    <string name="add_substitution_saved">Substitution saved</string>
-    <string name="add_substitution_failed">Could not save substitution</string>
-    <string name="auto_correct_no_corrections">No corrections available. Tap the + button to add one.</string>
+    <string name="add_substitution_title">Add text replacement</string>
+    <string name="add_substitution_replacement_label">Replace with: %1$s</string>
+    <string name="add_substitution_trigger_label">When you type</string>
+    <string name="add_substitution_also_dictionary">Also add it to your personal dictionary</string>
+    <string name="add_substitution_saved">Replacement saved</string>
+    <string name="add_substitution_failed">Couldn’t save the replacement</string>
+    <string name="auto_correct_no_corrections">No replacements yet. Tap + to add one.</string>
     <string name="auto_correct_suggestions_toggle_title">Suggestions while typing</string>
-    <string name="auto_correct_accent_matching_title">Accent &amp; spelling marks</string>
-    <string name="auto_correct_auto_replace_title">Automatic correction</string>
-    <string name="auto_correct_auto_replace_description">Fix likely typos when you press Space or Enter</string>
-    <string name="auto_correct_max_distance_title">Maximum correction distance</string>
+    <string name="auto_correct_suggestions_toggle_description">Show word suggestions above the keys</string>
+    <string name="auto_correct_accent_matching_title">Accents and spelling marks</string>
+    <string name="auto_correct_accent_matching_description">Match café when you type cafe</string>
+    <string name="auto_correct_auto_replace_title">Autocorrect</string>
+    <string name="auto_correct_auto_replace_description">Fix typos when you press Space or Enter</string>
+    <string name="auto_correct_max_distance_title">How many letters to fix</string>
     <string name="auto_correct_max_distance_off">Off</string>
-    <string name="auto_correct_max_distance_description">Maximum number of character differences allowed for auto-correction. 0 = disabled, 1-3 = increasing tolerance.</string>
+    <string name="auto_correct_max_distance_description">Higher numbers fix more typos but guess wrong more often</string>
     <string name="auto_correct_manage_user_dict_title">Personal dictionary</string>
     <string name="auto_correct_manage_user_dict_description">Words Numen should know and suggest</string>
     <string name="auto_correct_aggressive_title">Aggressive autocorrect</string>
     <string name="auto_correct_context_aware_title">Sentence-aware corrections</string>
     <string name="auto_correct_context_aware_description">Fix real words used wrongly, from context</string>
-    <string name="auto_correct_aggressive_description">Fix missing and extra letters and missed spaces</string>
+    <string name="auto_correct_aggressive_description">Also fix missing and extra letters and missed spaces</string>
     <string name="experimental_suggestions_title">Suggestion engine</string>
     <string name="experimental_suggestions_subtitle">Required for autocorrect and suggestions</string>
 
     <!-- User dictionary management -->
-    <string name="user_dict_title">User dictionary</string>
+    <string name="user_dict_title">Personal dictionary</string>
     <string name="user_dict_add_hint">Add a word</string>
-    <string name="user_dict_add_button">Save word</string>
-    <string name="user_dict_empty_state">No user words saved yet.</string>
+    <string name="user_dict_add_button">Add word</string>
+    <string name="user_dict_empty_state">No words saved yet.</string>
     <string name="user_dict_edit_title">Edit word</string>
     
     <!-- SYM Customization Screen -->
-    <string name="sym_customize_title">Customize SYM Keyboard</string>
+    <string name="sym_customize_title">SYM pages</string>
     <string name="sym_auto_close_title">Close SYM automatically</string>
     <string name="sym_auto_close_description">Close SYM after you type a symbol or press Alt or Enter, not Ctrl or Shift</string>
     <string name="sym_auto_close_touch_title">Also close after on-screen SYM keys</string>
     <string name="sym_auto_close_touch_description">Also close SYM after tapping a symbol on screen</string>
     <string name="emoji_picker_expanded_height_title">Larger emoji picker</string>
-    <string name="emoji_picker_expanded_height_description">Use about 1.5x height for the emoji search page; other SYM pages keep their normal height.</string>
+    <string name="emoji_picker_expanded_height_description">Make the emoji picker about 1.5 times taller than other SYM pages</string>
     <string name="sym_swap_pages_title">SYM page order</string>
-    <string name="sym_swap_pages_description">Drag or use the arrows to reorder; the switch shows or hides each page</string>
-    <string name="sym_cycle_device_layer">Device SYM Layer</string>
-    <string name="sym_cycle_emoji_layer">Emoji Layer</string>
-    <string name="sym_cycle_symbols_layer">Symbols Layer</string>
+    <string name="sym_swap_pages_description">Drag to reorder and use the switches to show or hide pages</string>
+    <string name="sym_cycle_device_layer">Titan symbols</string>
+    <string name="sym_cycle_emoji_layer">Emoji</string>
+    <string name="sym_cycle_symbols_layer">Symbols</string>
     <string name="sym_cycle_clipboard_panel">Clipboard</string>
-    <string name="sym_cycle_emoji_picker_panel">Emoji Picker</string>
-    <string name="sym_cycle_type_key_layer">Key layer</string>
-    <string name="sym_cycle_type_panel">Panel</string>
+    <string name="sym_cycle_emoji_picker_panel">Emoji picker</string>
+    <string name="sym_cycle_type_key_layer">Type them with the keys</string>
+    <string name="sym_cycle_type_panel">Pick from a list</string>
     <string name="sym_move_up">Move up</string>
     <string name="sym_move_down">Move down</string>
     <string name="alt_binding_title">What Alt types</string>
-    <string name="alt_binding_description">Choose which layer Alt + a key types from, even if SYM hides it</string>
-    <string name="alt_binding_current_device">Device SYM Layer · Current input source</string>
-    <string name="alt_binding_first_key_layer">First key layer in SYM order</string>
-    <string name="modifiers_title">Keys &amp; Modifiers</string>
-    <string name="modifiers_description">SYM layers, long press and modifier keys</string>
+    <string name="alt_binding_description">Choose which SYM page Alt types from, even a hidden one</string>
+    <string name="alt_binding_current_device">What’s printed on the key (default)</string>
+    <string name="alt_binding_first_key_layer">First SYM page typed with the keys</string>
+    <string name="modifiers_title">Keys &amp; modifiers</string>
+    <string name="modifiers_description">Long press, SYM pages and the Shift, Alt and Ctrl keys</string>
+    <string name="modifiers_app_shortcuts_description">Open apps and actions with SYM or Alt plus a key</string>
     <string name="modifiers_section_sym">SYM</string>
     <string name="modifiers_section_long_press">Long press</string>
+    <string name="modifiers_section_shift">Shift key</string>
     <string name="modifiers_section_alt_modifier">Alt key</string>
     <string name="modifiers_section_indicators">Modifier indicators</string>
-    <string name="modifiers_section_control">Control</string>
-    <string name="modifier_control_nav_mode_title">Control in Nav Mode</string>
-    <string name="modifier_control_nav_mode_description">Ctrl is used by Nav Mode; change its keys and behaviour there</string>
-    <string name="sym_modifiers_deeplink_description">Choose which layer Alt types from, in Keys &amp; Modifiers</string>
-    <string name="sym_behavior_section_title">SYM behaviour and display</string>
-    <string name="sym_edit_emoji_layer_title">Edit Emoji Layer</string>
-    <string name="sym_edit_symbols_layer_title">Edit Symbols Layer</string>
-    <string name="sym_edit_layer_content_description">Edit layer</string>
-    <string name="sym_reset_to_default">Reset to Default</string>
-    <string name="sym_reset_confirm_title">Reset to Default</string>
-    <string name="sym_reset_confirm_message">Reset all SYM layers to their defaults? This can’t be undone.</string>
+    <string name="modifiers_section_control">Ctrl key</string>
+    <string name="modifier_control_nav_mode_title">Ctrl in Nav mode</string>
+    <string name="modifier_control_nav_mode_description">Choose what Ctrl and the letter keys do in Nav mode</string>
+    <string name="sym_modifiers_deeplink_description">Choose which page Alt types from, in Keys &amp; modifiers</string>
+    <string name="sym_behavior_section_title">Behavior &amp; display</string>
+    <string name="sym_edit_emoji_layer_title">Edit emoji page</string>
+    <string name="sym_edit_symbols_layer_title">Edit symbols page</string>
+    <string name="sym_edit_layer_content_description">Edit page</string>
+    <string name="sym_reset_to_default">Reset to default</string>
+    <string name="sym_reset_confirm_title">Reset to default</string>
+    <string name="sym_reset_confirm_message">Reset all SYM pages to their defaults? This can’t be undone.</string>
     <string name="sym_reset_confirm_button">Reset</string>
     <string name="cancel">Cancel</string>
     
     <!-- Emoji Picker Dialog -->
-    <string name="emoji_picker_title">Select Emoji</string>
-    <string name="emoji_picker_title_for_letter">Select emoji for letter %1$s</string>
+    <string name="emoji_picker_title">Choose emoji</string>
+    <string name="emoji_picker_title_for_letter">Choose emoji for %1$s</string>
     <string name="emoji_picker_close">Close</string>
     
     <!-- Modifiers -->
@@ -234,78 +241,72 @@
     <string name="modifier_ctrl">CTRL</string>
     
     <!-- Long Press Modifier Section -->
-    <string name="long_press_modifier_title">Long press types</string>
+    <string name="long_press_modifier_title">Hold a key to type</string>
     <string name="long_press_modifier_alt">The key’s Alt character</string>
     <string name="long_press_modifier_shift">Shift</string>
-    <string name="long_press_modifier_variations">Variations</string>
-    <string name="long_press_modifier_sym">First Emoji or Symbols Layer</string>
-    <string name="long_press_modifier_sym_symbols">Symbols Layer</string>
-    <string name="long_press_modifier_sym_emoji">Emoji Layer</string>
-    <string name="modifier_tap_behaviour_title">Tap to lock</string>
+    <string name="long_press_modifier_variations">Accents</string>
+    <string name="long_press_modifier_sym">First SYM page</string>
+    <string name="long_press_modifier_sym_symbols">Symbols</string>
+    <string name="long_press_modifier_sym_emoji">Emoji</string>
     <string name="shift_tap_latches_title">Single-tap locks Shift</string>
     <string name="shift_tap_latches_description">One tap turns on Caps Lock instead of capitalizing one letter</string>
     <string name="alt_tap_latches_title">Single-tap locks Alt</string>
     <string name="alt_tap_latches_description">One tap keeps Alt on until you tap it again</string>
     <string name="alt_latch_stays_on_space_title">Keep locked Alt after Space</string>
-    <string name="alt_latch_stays_on_space_description">Pressing Space doesn’t turn a locked Alt off</string>
+    <string name="alt_latch_stays_on_space_description">Space and Enter turn off a single Alt press but not a locked Alt</string>
     <string name="ctrl_tap_latches_title">Single-tap locks Ctrl</string>
     <string name="ctrl_tap_latches_description">One tap keeps Ctrl on until you tap it again</string>
     <string name="ctrl_latch_stays_on_space_title">Keep locked Ctrl after Ctrl+Space</string>
-    <string name="ctrl_latch_stays_on_space_description">Ctrl stays locked after you switch layouts with Ctrl+Space</string>
-    <string name="typing_sound_title">Typing Sounds</string>
+    <string name="ctrl_latch_stays_on_space_description">A locked Ctrl stays on when you press Space</string>
+    <string name="typing_sound_title">Typing sounds</string>
     <string name="typing_sound_off">Off</string>
     <string name="typing_sound_click">Keyboard click</string>
     <string name="typing_sound_typewriter">Typewriter</string>
     <string name="typing_sound_custom">Custom sound pack…</string>
     <string name="typing_sound_output_title">Volume used for typing sounds</string>
     <string name="typing_sound_output_media">Media volume</string>
-    <string name="typing_sound_output_system">System sounds</string>
-    <string name="typing_sound_output_notification">Notifications</string>
-    <string name="typing_sound_output_dnd_hint">System sounds and notifications follow silent mode and Do Not Disturb.</string>
+    <string name="typing_sound_output_system">System sounds (follows silent mode)</string>
+    <string name="typing_sound_output_notification">Notifications (follows silent mode)</string>
     <string name="typing_sound_import_success">Typing sound pack imported</string>
-    <string name="typing_sound_import_failed">Could not import this sound pack. Use a ZIP with audio files in normal/, space/, backspace/, enter/, and modifier/ folders.</string>
-    <string name="tap_haptic_system_title">Tap vibration</string>
-    <string name="tap_haptic_system_description">Use the phone’s standard vibration when tapping suggestions and variations</string>
-    <string name="tap_haptic_duration_title">Custom vibration: %1$d ms</string>
-    <string name="tap_haptic_duration_description">Used instead of the phone’s standard vibration</string>
+    <string name="typing_sound_import_failed">Couldn’t import this sound pack. Use a ZIP with audio files in normal/, space/, backspace/, enter/ and modifier/ folders.</string>
+    <string name="tap_haptic_system_title">Use phone vibration</string>
+    <string name="tap_haptic_system_description">Match the rest of the phone when you tap the bar</string>
+    <string name="tap_haptic_duration_description">How long the bar vibrates when you tap it</string>
     
     <!-- Keyboard Layout Section -->
-    <string name="keyboard_profile_override_auto_description">Auto detect from device fingerprint (current: %1$s).</string>
-    <string name="keyboard_profile_override_manual_description">Manual override for device-specific key mappings.</string>
+    <string name="keyboard_profile_override_description">The phone whose key layout Numen uses, or Auto to detect it</string>
     <string name="keyboard_profile_option_auto">Auto</string>
     <string name="keyboard_profile_option_titan">Unihertz Titan</string>
     <string name="keyboard_profile_option_titan2">Unihertz Titan 2</string>
     <string name="keyboard_profile_option_titan2elite_qwerty">Titan 2 Elite (QWERTY)</string>
-    <string name="keyboard_currency_symbol_title">Currency Symbol</string>
-    <string name="keyboard_currency_symbol_description">Symbol inserted by dedicated hardware currency keys.</string>
-    <string name="hardware_keyboards_title">Built-in Keyboards</string>
-    <string name="hardware_keyboards_description">Device-bound profiles for keyboards built into or permanently attached to this phone.</string>
-    <string name="hardware_keyboard_detected_device_title">Detected device</string>
-    <string name="hardware_keyboard_detected_device_summary">%1$s · %2$s</string>
-    <string name="hardware_keyboard_device_bound">Device-bound</string>
-    <string name="hardware_keyboard_behavior_title">Device-specific behaviour</string>
-    <string name="hardware_keyboard_curated_profiles_title">Curated profiles</string>
+    <string name="keyboard_currency_symbol_title">Currency symbol</string>
+    <string name="keyboard_currency_symbol_description">What Alt types on the currency key</string>
+    <string name="hardware_keyboards_title">Built-in keyboard</string>
     <string name="hardware_keyboard_profile_select_label">Keyboard profile</string>
+    <string name="other_keyboards_title">Other keyboards</string>
+    <string name="other_keyboards_note">The Titan 2 Elite doesn’t need these. They’re shown because you changed them, so set them back if you’re not sure</string>
+    <string name="other_keyboards_on_screen_description">Layout and touch settings for the on-screen keyboard</string>
+    <string name="other_keyboards_built_in_description">Key layout settings for other phones</string>
     <string name="feature_status_construction_content_description">Under construction</string>
     <string name="feature_status_construction_hint">This feature is still being developed and will improve in a future update.</string>
     <string name="feature_status_experimental_content_description">Experimental feature</string>
     <string name="feature_status_experimental_hint">This may already work, but it is new and may soon be changed or improved. Bug reports are welcome.</string>
     
     <!-- About Section -->
-    <string name="settings_device_keyboard_info">Device: %1$s; Keyboard: %2$s</string>
+    <string name="about_version">Version %1$s</string>
     <string name="about_title">About</string>
-    <string name="about_credits_error">Unable to load credits information.</string>
+    <string name="about_credits_error">Couldn’t load the credits.</string>
     
     <!-- Launcher Shortcuts Section -->
-    <string name="starter_launcher_shortcuts_title">KeyLaunches</string>
-    <string name="starter_launcher_shortcuts_description">Quick launching, SYM shortcuts, and launcher key assignments</string>
+    <string name="starter_launcher_shortcuts_title">App shortcuts</string>
+    <string name="starter_launcher_shortcuts_description">Open apps and actions with SYM or Alt plus a key</string>
     <string name="starter_launcher_shortcuts_intro">All the shortcut types below use the same key list. Choose where Numen listens for those keys.</string>
     <string name="launcher_shortcuts_title">Home screen shortcuts</string>
     <string name="launcher_shortcuts_description">Press an assigned key on the home screen to open its app or action</string>
     <string name="launcher_shortcuts_configure">Key assignments</string>
-    <string name="launcher_shortcuts_configure_description">Tap a key to choose what it opens; shared by all shortcut types</string>
-    <string name="launcher_shortcuts_configure_description_with_quick_launcher">Tap a key to assign or replace a command. KeyLaunches is currently assigned to %1$s.</string>
-    <string name="quick_launcher_default_blocked_hint">New: SYM can open KeyLaunches. Numen would normally assign it to Space, but Space already has a shortcut. Open the assignments page and choose “Open KeyLaunches” on any key to try it.</string>
+    <string name="launcher_shortcuts_configure_description">Choose what each key opens, for every shortcut type</string>
+    <string name="launcher_shortcuts_configure_description_with_quick_launcher">Choose what each key opens (app search is on %1$s)</string>
+    <string name="quick_launcher_default_blocked_hint">New: SYM can open app search. Numen would normally put it on Space, but Space already has a shortcut. Open Key assignments and pick app search for any key to try it.</string>
     
     <!-- Launcher Shortcuts Screen -->
     <string name="launcher_shortcuts_screen_title">Key assignments</string>
@@ -313,57 +314,60 @@
     
     <!-- Launcher Shortcut Assignment Activity -->
     <string name="launcher_shortcut_assignment_header">Shortcut</string>
-    <string name="launcher_shortcut_assignment_search_placeholder">Search commands...</string>
+    <string name="launcher_shortcut_assignment_search_placeholder">Search commands…</string>
     <string name="launcher_shortcut_assignment_search_description">Search</string>
     <string name="launcher_shortcut_assignment_close">Close</string>
     <string name="launcher_shortcut_assignment_no_apps">No commands found</string>
     <string name="launcher_shortcut_assignment_no_results">No results for \"%1$s\"</string>
     <string name="launcher_shortcut_assignment_key_name">Key %1$d</string>
-    <string name="quick_launcher_title">KeyLaunches</string>
+    <string name="quick_launcher_title">App search</string>
     <string name="quick_launcher_close">Close</string>
-    <string name="quick_launcher_search_placeholder">Start typing...</string>
-    <string name="quick_launcher_auto_start_single_title">Open unique match automatically</string>
-    <string name="quick_launcher_auto_start_single_description">When KeyLaunches search leaves only one app, launch it without pressing Enter.</string>
-    <string name="quick_launcher_limit_results_title">Show only top search results</string>
-    <string name="quick_launcher_limit_results_description">Do not render the full alphabetical app list. KeyLaunches stays empty until you type and then shows only the top three matches.</string>
-    <string name="quick_launcher_text_field_shortcuts_hint">In text fields, hold SYM and press Space. Tapping SYM won’t work here, since it switches SYM pages.</string>
+    <string name="quick_launcher_search_placeholder">Start typing…</string>
+    <string name="quick_launcher_auto_start_single_title">Open the only match automatically</string>
+    <string name="quick_launcher_auto_start_single_description">When app search leaves only one app, open it without pressing Enter</string>
+    <string name="quick_launcher_limit_results_title">Show only top matches</string>
+    <string name="quick_launcher_limit_results_description">Hide the app list until you type, then show the top three matches</string>
+    <string name="quick_launcher_text_field_shortcuts_hint">In text fields, hold SYM and press Space</string>
     <string name="quick_launcher_respect_keyboard_layout_title">Use active keyboard layout</string>
     <string name="quick_launcher_respect_keyboard_layout_description">Search uses the letters of your keyboard layout, not plain QWERTY</string>
     <string name="quick_launcher_typo_tolerant_ranking_title">Typo-tolerant search</string>
-    <string name="quick_launcher_typo_tolerant_ranking_description">Find apps even with small typos; closer matches still come first</string>
-    <string name="quick_launcher_provider_title">KeyLaunches behaviour</string>
-    <string name="quick_launcher_provider_description">Choose whether the shortcut opens KeyLaunches or Niagara Launcher search. Niagara falls back to KeyLaunches if unavailable.</string>
-    <string name="quick_launcher_provider_pastiera">KeyLaunches</string>
-    <string name="quick_launcher_provider_niagara">Niagara Launcher Search</string>
+    <string name="quick_launcher_typo_tolerant_ranking_description">Find apps despite small typos, with closer matches first</string>
+    <string name="quick_launcher_provider_title">What app search opens</string>
+    <string name="quick_launcher_provider_description">Uses Numen’s search when Niagara Launcher isn’t installed</string>
+    <string name="quick_launcher_provider_pastiera">Numen app search</string>
+    <string name="quick_launcher_provider_niagara">Niagara Launcher search</string>
     <string name="quick_launcher_ranking_info_button">How ranking works</string>
-    <string name="quick_launcher_ranking_info_title">KeyLaunches ranking</string>
+    <string name="quick_launcher_ranking_info_title">App search ranking</string>
     <string name="quick_launcher_ranking_info_body">Results are sorted in this order: exact app name, start of the app name, start of any word, abbreviations, names with small typos, then the app’s technical name. Typos are ignored for very short searches.</string>
-    <string name="quick_launcher_behaviour_title">Behaviour</string>
-    <string name="quick_launcher_behaviour_description">Which search opens, how results are sorted, and SYM+Space while typing</string>
+    <string name="quick_launcher_behaviour_title">Behavior</string>
+    <string name="quick_launcher_behaviour_description">Which search opens, how results are sorted and SYM+Space while typing</string>
+    <string name="quick_launcher_entries_description">Choose what appears in app search</string>
     <string name="quick_launcher_animation_duration_title">Animation duration</string>
     <string name="quick_launcher_animation_duration_value">%1$d ms</string>
     <string name="quick_launcher_cosmetic_title">Appearance</string>
     <string name="quick_launcher_cosmetic_description">Width, compact pill, what’s listed, favorites, nicknames and colors</string>
-    <string name="keyboard_theme_title">Keyboard Theme</string>
+    <string name="keyboard_theme_title">Keyboard theme</string>
     <string name="keyboard_theme_preset_title">Choose a preset</string>
-    <string name="keyboard_theme_preview_title">Keyboard UI Preview</string>
-    <string name="keyboard_theme_customize_title">Customize colors</string>
+    <string name="keyboard_theme_preview_title">Preview</string>
+    <string name="keyboard_theme_customize_title">Customize</string>
     <string name="keyboard_theme_tab_colors">Colors</string>
     <string name="keyboard_theme_tab_keys">Keys</string>
-    <string name="keyboard_theme_assignment_hardware_title">Theme assignment for hardware keyboard</string>
-    <string name="keyboard_theme_assignment_software_title">Theme assignment for software keyboard</string>
-    <string name="keyboard_theme_assignment_fixed">Fixed</string>
+    <string name="keyboard_theme_tab_bar_shape">Size and shape</string>
+    <string name="keyboard_theme_more_actions">More theme actions</string>
+    <string name="keyboard_theme_assignment_hardware_title">Light and dark mode</string>
+    <string name="keyboard_theme_assignment_software_title">Light and dark mode (on-screen keyboard)</string>
+    <string name="keyboard_theme_assignment_fixed">Same theme</string>
     <string name="keyboard_theme_assignment_follow_system">Follow system</string>
     <string name="keyboard_theme_light_mode_theme">Light mode theme</string>
     <string name="keyboard_theme_dark_mode_theme">Dark mode theme</string>
     <string name="keyboard_theme_selected">Active</string>
     <string name="keyboard_theme_new_theme">New theme</string>
-    <string name="keyboard_theme_new_theme_description">Create a blank draft. Required values remain empty until you set them.</string>
+    <string name="keyboard_theme_new_theme_description">Start a blank theme. Fill in each required color before you save it.</string>
     <string name="keyboard_theme_name">Theme name</string>
     <string name="keyboard_theme_name_exists">A saved theme or draft already uses this name.</string>
     <string name="keyboard_theme_create_draft">Create draft</string>
-    <string name="keyboard_theme_wizard_leds">LED colors</string>
-    <string name="keyboard_theme_wizard_leds_description">Choose the inactive, active, and locked modifier indicator colors.</string>
+    <string name="keyboard_theme_wizard_leds">Indicator colors</string>
+    <string name="keyboard_theme_wizard_leds_description">Colors for the Shift, Alt and Ctrl indicators when off, on and locked</string>
     <string name="keyboard_theme_delete_draft">Delete draft</string>
     <string name="keyboard_theme_delete_draft_confirmation">Delete the draft “%1$s”?</string>
     <string name="keyboard_theme_action_new">New</string>
@@ -375,7 +379,7 @@
     <string name="keyboard_theme_save_as_title">Save theme as</string>
     <string name="keyboard_theme_duplicate_draft_title">Duplicate draft</string>
     <string name="keyboard_theme_import_title">Import theme</string>
-    <string name="keyboard_theme_import_string">Theme JSON</string>
+    <string name="keyboard_theme_import_string">Theme code</string>
     <string name="keyboard_theme_import_invalid">This is not a complete, valid theme.</string>
     <string name="keyboard_theme_import_name_title">Name imported theme</string>
     <string name="keyboard_theme_import_save">Save and use</string>
@@ -388,23 +392,25 @@
     <string name="off">Off</string>
     <string name="keyboard_theme_accent">Accent</string>
     <string name="keyboard_theme_suggestions">Suggestions</string>
-    <string name="keyboard_theme_status_bar_buttons">Keyboard bar buttons</string>
+    <string name="keyboard_theme_status_bar_buttons">Bar buttons</string>
     <string name="keyboard_theme_cursor_swipe">Cursor swipe</string>
     <string name="keyboard_theme_key_popup">Key popup</string>
     <string name="keyboard_theme_key_popup_selected">Selected popup key</string>
+    <string name="keyboard_theme_emoji_popup">Emoji popup</string>
+    <string name="keyboard_theme_sym_keys">SYM keys</string>
     <string name="keyboard_theme_key_rounding">Key rounding</string>
-    <string name="keyboard_theme_chrome_rounding">Suggestions / variations rounding</string>
+    <string name="keyboard_theme_chrome_rounding">Bar rounding</string>
     <string name="keyboard_theme_key_height">Key height</string>
     <string name="keyboard_theme_number_row_height">Number row height</string>
     <string name="keyboard_theme_key_width">Key width</string>
     <string name="keyboard_theme_row_spacing">Row spacing</string>
     <string name="keyboard_theme_suggestions_height">Suggestions height</string>
-    <string name="keyboard_theme_variations_height">Variations height</string>
-    <string name="keyboard_theme_show_leds">Show LEDs</string>
-    <string name="keyboard_theme_distribute_spacing">Distribute spacing</string>
-    <string name="keyboard_theme_ortholinear">Ortholinear</string>
+    <string name="keyboard_theme_variations_height">Accent row height</string>
+    <string name="keyboard_theme_show_leds">Show indicators</string>
+    <string name="keyboard_theme_distribute_spacing">Spread keys evenly</string>
+    <string name="keyboard_theme_ortholinear">Keys in straight columns</string>
     <string name="keyboard_theme_attach_popup">Attach popup to key</string>
-    <string name="keyboard_theme_popup_tail">Popup tail connector</string>
+    <string name="keyboard_theme_popup_tail">Popup pointer</string>
     <string name="keyboard_theme_preview_on_hold">Show key preview only on hold</string>
     <string name="keyboard_theme_character_picker">Long-press character picker</string>
     <string name="keyboard_theme_reset">Reset</string>
@@ -413,107 +419,103 @@
     <string name="keyboard_theme_normal_keys">Normal keys</string>
     <string name="keyboard_theme_special_keys">Special keys</string>
     <string name="keyboard_theme_text_icons">Text and icons</string>
-    <string name="keyboard_theme_led_inactive">LED inactive</string>
-    <string name="keyboard_theme_led_active">LED active</string>
-    <string name="keyboard_theme_led_locked">LED locked</string>
-    <string name="quick_launcher_width_title">Launcher width</string>
+    <string name="keyboard_theme_led_inactive">Indicator off</string>
+    <string name="keyboard_theme_led_active">Indicator on</string>
+    <string name="keyboard_theme_led_locked">Indicator locked</string>
+    <string name="quick_launcher_width_title">App search width</string>
     <string name="quick_launcher_width_value">%1$d%% screen width</string>
     <string name="quick_launcher_pill_mode_title">Pill mode</string>
-    <string name="quick_launcher_pill_mode_description">Open as a compact search pill and expand only after typing.</string>
+    <string name="quick_launcher_pill_mode_description">Open as a small search pill that grows when you type</string>
     <string name="quick_launcher_type_to_search">Start typing to search apps</string>
-    <string name="quick_launcher_loading_apps">Loading apps...</string>
+    <string name="quick_launcher_loading_apps">Loading apps…</string>
     <string name="quick_launcher_no_apps">No apps found</string>
     <string name="quick_launcher_no_results">No results for \"%1$s\"</string>
     <string name="quick_launcher_enter_hint">Enter</string>
     
     <!-- Power Shortcuts Section -->
     <string name="power_shortcuts_title">SYM key shortcuts</string>
-    <string name="power_shortcuts_description">Use SYM with assigned keys to launch apps and actions.</string>
-    <string name="alt_key_shortcuts_title">Alt Key Shortcuts</string>
-    <string name="alt_key_shortcuts_description">Use Alt with assigned keys to launch apps and actions.</string>
-    <string name="alt_key_shortcuts_modifier_link_description">Set Alt + key shortcuts and whether they work while typing</string>
+    <string name="power_shortcuts_description">Press SYM and an assigned key to open an app or action</string>
+    <string name="alt_key_shortcuts_title">Alt key shortcuts</string>
+    <string name="alt_key_shortcuts_description">Press Alt and an assigned key to open an app or action</string>
     <string name="key_shortcuts_allow_in_text_fields_title">Allow in text fields</string>
-    <string name="sym_shortcuts_in_text_fields_description">Also use assigned SYM shortcuts while typing.</string>
-    <string name="alt_shortcuts_in_text_fields_description">Also use assigned Alt shortcuts while typing.</string>
-    <string name="sym_shortcuts_compatibility_info">About SYM key compatibility</string>
-    <string name="sym_shortcuts_compatibility_title">SYM key compatibility</string>
-    <string name="sym_shortcuts_compatibility_description">SYM key shortcuts need a keyboard that sends SYM to Numen as its own key. Some keyboards, like the Clicks Power Keyboard, turn SYM combinations into characters or arrows first, so these shortcuts can’t work with them.</string>
-    <string name="power_shortcuts_press_key">Press shortcut key to launch</string>
+    <string name="sym_shortcuts_in_text_fields_description">Also use assigned SYM shortcuts while typing</string>
+    <string name="alt_shortcuts_in_text_fields_description">Also use assigned Alt shortcuts while typing</string>
+    <string name="power_shortcuts_press_key">Press a shortcut key</string>
     
     <!-- Notification Helper -->
-    <string name="notification_nav_mode_channel_name">Numen Nav Mode</string>
-    <string name="notification_nav_mode_channel_description">Notifications for Numen nav mode</string>
+    <string name="notification_nav_mode_channel_name">Numen Nav mode</string>
+    <string name="notification_nav_mode_channel_description">Shows when Nav mode is on</string>
     
     <!-- Update Notifications -->
     
     <!-- Speech Recognition -->
-    <string name="speech_recognition_prompt">Speak now...</string>
+    <string name="speech_recognition_prompt">Speak now…</string>
     <string name="speech_recognition_error_no_match">No text recognized. Try again.</string>
     <string name="speech_recognition_error_timeout">No speech input detected.</string>
     <string name="speech_recognition_error_permission">Microphone permission denied.</string>
     <string name="speech_recognition_error_network">Network error.</string>
-    <string name="speech_recognition_error_generic">Speech recognition error.</string>
-    <string name="speech_recognition_error_not_available">Speech recognition not available.</string>
+    <string name="speech_recognition_error_generic">Voice input error.</string>
+    <string name="speech_recognition_error_not_available">Voice input isn’t available.</string>
     
     <!-- Auto Correct Edit Screen -->
-    <string name="auto_correct_search_placeholder">Search corrections...</string>
+    <string name="auto_correct_search_placeholder">Search…</string>
     <string name="auto_correct_search_description">Search</string>
     <string name="auto_correct_clear_search">Clear search</string>
-    <string name="auto_correct_no_corrections_found">No corrections found</string>
+    <string name="auto_correct_no_corrections_found">No matches</string>
     
-    <!-- Nav Mode Settings -->
-    <string name="nav_mode_title">Nav Mode</string>
-    <string name="nav_mode_guide_title">Nav Mode guide</string>
-    <string name="nav_mode_guide_description">How Nav Mode, Ctrl and app shortcuts work together</string>
-    <string name="nav_mode_guide_text">Nav Mode turns letter keys into navigation and shortcut keys. The result can differ by app because some apps understand Android editor actions, while others only react to real Ctrl shortcuts.
-
-Ctrl-hold navigation
-When Ctrl-hold navigation is off, physically held Ctrl is passed to the app whenever possible. Shortcuts such as Ctrl+B, Ctrl+I, or Ctrl+Z can then work directly in editors.
-
-When Ctrl-hold navigation is on, physically held Ctrl first uses the Nav Mode mappings below. A mapped key performs its configured Nav Mode command.
+    <!-- Nav mode Settings -->
+    <string name="nav_mode_title">Nav mode</string>
+    <string name="nav_mode_guide_title">Nav mode guide</string>
+    <string name="nav_mode_guide_description">How Nav mode, Ctrl and app shortcuts work together</string>
+    <string name="nav_mode_guide_text">Nav mode turns letter keys into arrows, selection and shortcut keys. Results can differ by app. Some apps understand Android text actions, and others only react to real Ctrl shortcuts.
 
 Double-tap Ctrl
-Double-tapping Ctrl latches Nav Mode. After that, pressing a letter triggers the Nav Mode mapping until Nav Mode is left again. This is useful for arrows, Page Up/Down, Escape, Tab, and selection commands without holding Ctrl.
+Double-tap Ctrl to turn Nav mode on. Letters then do their Nav mode job until you leave Nav mode. This is handy for arrows, Page up and Page down, Escape, Tab and selecting text without holding Ctrl.
 
-Action vs. Native Ctrl
-Actions such as Copy, Paste, Cut, Select All, and Undo are sent as Android editor actions. They work in many text fields, but not every app supports every action.
+Ctrl-hold navigation
+When this is off, holding Ctrl sends normal Ctrl shortcuts to the app, so Ctrl+B, Ctrl+I or Ctrl+Z work in editors.
 
-Use Native Ctrl when an app expects a real shortcut. For example, mapping I to Native Ctrl sends Ctrl+I, so editors such as Google Docs can use it for italic text. Undo can also be mapped as Native Ctrl if an app handles Ctrl+Z better than Android Undo.
+When this is on, holding Ctrl uses the Nav mode keys below instead.
 
-Overrides
-Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrides to solve app-specific conflicts without changing the whole mode.</string>
-    <string name="nav_mode_enable_title">Enable Nav Mode</string>
-    <string name="nav_mode_enable_description">Double-tap Ctrl to activate navigation mode</string>
+Action or Ctrl shortcut
+Actions such as Copy, Paste, Cut, Select all and Undo are sent as Android text actions. They work in most text fields, but not every app supports every action.
+
+Choose Ctrl shortcut when an app expects a real shortcut. For example, setting I to Ctrl shortcut sends Ctrl+I, so editors such as Google Docs make text italic. Undo can also be a Ctrl shortcut if an app handles Ctrl+Z better.
+
+Changing keys
+Tap a key below to choose what it does: a key, an action, a Ctrl shortcut or nothing. Use this to fix conflicts in a specific app without changing everything else.</string>
+    <string name="nav_mode_enable_title">Turn on Nav mode</string>
+    <string name="nav_mode_enable_description">Double-tap Ctrl to use letter keys as arrows and editing keys</string>
     <string name="nav_mode_ctrl_hold_title">Ctrl-hold navigation</string>
-    <string name="nav_mode_ctrl_hold_description">In text fields, holding Ctrl uses Nav Mode keys instead of app shortcuts</string>
-    <string name="nav_mode_revert_to_default">Revert to Default</string>
-    <string name="nav_mode_configure_key">Configure %1$s</string>
-    <string name="nav_mode_type">Type</string>
-    <string name="nav_mode_keycode">Keycode</string>
+    <string name="nav_mode_ctrl_hold_description">In text fields, holding Ctrl uses Nav mode keys instead of app shortcuts</string>
+    <string name="nav_mode_revert_to_default">Revert to default</string>
+    <string name="nav_mode_configure_key">Set up %1$s</string>
+    <string name="nav_mode_type">What it does</string>
+    <string name="nav_mode_keycode">Key</string>
     <string name="nav_mode_action">Action</string>
-    <string name="nav_mode_native_ctrl">Native Ctrl</string>
+    <string name="nav_mode_native_ctrl">Ctrl shortcut</string>
+    <string name="nav_mode_command">Command</string>
     <string name="nav_mode_none">None</string>
-    <string name="nav_mode_use_default">Use Default: %1$s</string>
+    <string name="nav_mode_use_default">Use default: %1$s</string>
     <string name="nav_mode_save">Save</string>
     <string name="nav_mode_cancel">Cancel</string>
-    <string name="nav_mode_default">default</string>
     
     <!-- Unicode Character Picker -->
-    <string name="unicode_picker_title_for_letter">Select character for %1$s</string>
-    <string name="unicode_picker_title">Select unicode character</string>
+    <string name="unicode_picker_title_for_letter">Choose character for %1$s</string>
+    <string name="unicode_picker_title">Choose a character</string>
     <string name="unicode_picker_close">Close</string>
     <string name="unicode_category_punctuation">Punctuation</string>
-    <string name="unicode_category_math">Mathematical Symbols</string>
+    <string name="unicode_category_math">Math symbols</string>
     <string name="unicode_category_currency">Currencies</string>
-    <string name="unicode_category_technical">Technical Symbols</string>
+    <string name="unicode_category_technical">Technical symbols</string>
     <string name="unicode_category_arrows">Arrows</string>
     <string name="unicode_category_misc">Miscellaneous</string>
-    <string name="unicode_category_variations">Variations</string>
-    <string name="emoji_category_smileys_and_emotion">Smileys &amp; Emotion</string>
-    <string name="emoji_category_people_and_body">People &amp; Body</string>
-    <string name="emoji_category_animals_and_nature">Animals &amp; Nature</string>
-    <string name="emoji_category_food_and_drink">Food &amp; Drink</string>
-    <string name="emoji_category_travel_and_places">Travel &amp; Places</string>
+    <string name="unicode_category_variations">Accents</string>
+    <string name="emoji_category_smileys_and_emotion">Smileys &amp; emotion</string>
+    <string name="emoji_category_people_and_body">People &amp; body</string>
+    <string name="emoji_category_animals_and_nature">Animals &amp; nature</string>
+    <string name="emoji_category_food_and_drink">Food &amp; drink</string>
+    <string name="emoji_category_travel_and_places">Travel &amp; places</string>
     <string name="emoji_category_activities">Activities</string>
     <string name="emoji_category_objects">Objects</string>
     <string name="emoji_category_symbols">Symbols</string>
@@ -521,21 +523,20 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="emoji_category_recents">Recents</string>
     <string name="emoji_picker_error">Unable to load emoji</string>
     <string name="emoji_picker_search_label">Search</string>
-    <string name="emoji_picker_search_placeholder">Search emoji...</string>
+    <string name="emoji_picker_search_placeholder">Search emoji…</string>
     <string name="emoji_picker_no_results">No emoji found</string>
     
     <!-- Variation Customization -->
-    <string name="variation_customize_title">Customize Variations</string>
-    <string name="app_enter_behaviour_title">Enter key behaviour</string>
-    <string name="app_enter_behaviour_description">Configure app-specific Enter and newline handling</string>
+    <string name="variation_customize_title">Customize accent row</string>
+    <string name="app_enter_behaviour_title">Enter key</string>
     <string name="app_enter_behaviour_enable_title">Enter key per app</string>
     <string name="app_enter_behaviour_enable_description">Choose whether Enter sends or starts a new line in chat apps</string>
     <string name="app_enter_behaviour_preset_title">Default for chat apps</string>
-    <string name="app_enter_behaviour_preset_description">Set the same Enter behaviour for known chat apps on your phone</string>
+    <string name="app_enter_behaviour_preset_description">Use the same Enter setting for the chat apps on your phone</string>
     <string name="app_enter_behaviour_preset_app_default">App default</string>
-    <string name="app_enter_behaviour_preset_send_shift_newline">Enter sends, Shift+Enter newline</string>
-    <string name="app_enter_behaviour_preset_newline_ctrl_send">Enter newline, Ctrl+Enter sends</string>
-    <string name="app_enter_behaviour_preset_newline_only">Enter newline only</string>
+    <string name="app_enter_behaviour_preset_send_shift_newline">Enter sends, Shift+Enter new line</string>
+    <string name="app_enter_behaviour_preset_newline_ctrl_send">Enter new line, Ctrl+Enter sends</string>
+    <string name="app_enter_behaviour_preset_newline_only">Enter new line only</string>
     <string name="app_enter_behaviour_preset_custom">Custom</string>
     <string name="app_enter_behaviour_overrides_title">Per-app settings</string>
     <string name="app_enter_behaviour_add_app">Add app</string>
@@ -544,54 +545,54 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="app_enter_behaviour_app_picker_empty">No matching apps</string>
     <string name="app_enter_behaviour_app_picker_add_selected">Add (%1$d)</string>
     <string name="app_enter_behaviour_remove_app">Remove app</string>
-    <string name="app_enter_behaviour_show_manual_override">Change manually</string>
-    <string name="app_enter_behaviour_hide_manual_override">Hide manual settings</string>
-    <string name="app_enter_behaviour_manual_override_note">The built-in setting usually works best; change it only if an app update breaks it</string>
+    <string name="app_enter_behaviour_show_manual_override">Change</string>
+    <string name="app_enter_behaviour_hide_manual_override">Hide</string>
+    <string name="app_enter_behaviour_manual_override_note">Change this only if an app update breaks the built-in setting</string>
     <string name="app_enter_behaviour_manual_summary">%1$s · %2$s</string>
-    <string name="app_enter_behaviour_manual_additional_shortcut_summary">Additional shortcut: %1$s</string>
+    <string name="app_enter_behaviour_manual_additional_shortcut_summary">Extra shortcut: %1$s</string>
     <string name="app_enter_behaviour_option_app_default">App default</string>
-    <string name="app_enter_behaviour_option_send_shift_newline">Enter sends, Shift+Enter newline</string>
-    <string name="app_enter_behaviour_option_newline_ctrl_send">Enter newline, Ctrl+Enter sends</string>
-    <string name="app_enter_behaviour_option_enter_newline">Enter newline</string>
-    <string name="app_enter_behaviour_status_not_active">Not active yet: %1$s is planned.</string>
-    <string name="app_enter_behaviour_status_native_result">App default: Numen leaves Enter alone.</string>
-    <string name="app_enter_behaviour_status_strategy_result">Active: %1$s.</string>
-    <string name="app_enter_behaviour_status_experimental_result">Experimentally active: %1$s.</string>
+    <string name="app_enter_behaviour_option_send_shift_newline">Enter sends, Shift+Enter new line</string>
+    <string name="app_enter_behaviour_option_newline_ctrl_send">Enter new line, Ctrl+Enter sends</string>
+    <string name="app_enter_behaviour_option_enter_newline">Enter new line</string>
+    <string name="app_enter_behaviour_status_not_active">Not active yet: %1$s is planned</string>
+    <string name="app_enter_behaviour_status_native_result">App default: Numen leaves Enter alone</string>
+    <string name="app_enter_behaviour_status_strategy_result">%1$s</string>
+    <string name="app_enter_behaviour_status_experimental_result">%1$s (not yet confirmed)</string>
     <string name="app_enter_behaviour_strategy_none_label">No override</string>
-    <string name="app_enter_behaviour_strategy_app_action_label">App action</string>
+    <string name="app_enter_behaviour_strategy_app_action_label">App’s send button</string>
     <string name="app_enter_behaviour_strategy_plain_enter_label">Plain Enter</string>
-    <string name="app_enter_behaviour_strategy_unconfigured_label">Not configured</string>
-    <string name="app_enter_behaviour_strategy_app_default_detail">The app decides whether Enter sends or inserts a newline.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_newline_ctrl_send">Numen inserts newlines directly and sends through the app\'s send action.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_send_shift_newline">Numen sends through the app\'s send action. Shift+Enter is inserted directly as a newline.</string>
-    <string name="app_enter_behaviour_strategy_whatsapp_newline_only">Tested: Numen inserts Enter directly as a newline and does not trigger send.</string>
-    <string name="app_enter_behaviour_strategy_discord_app_default_detail">Tested: Discord already behaves correctly for Enter sends and Shift+Enter newline. Numen does not intervene here.</string>
-    <string name="app_enter_behaviour_strategy_discord_partial_detail">Tested: Newlines are inserted directly. Ctrl+Enter sends a plain Enter without Ctrl meta because Discord\'s app action only hides the keyboard.</string>
-    <string name="app_enter_behaviour_strategy_experimental_detail">Not confirmed: Numen is trying the app\'s send action and direct newline insertion.</string>
+    <string name="app_enter_behaviour_strategy_unconfigured_label">Not set up</string>
+    <string name="app_enter_behaviour_strategy_app_default_detail">The app decides whether Enter sends or adds a new line.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_newline_ctrl_send">Numen adds new lines itself and sends with the app’s send button.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_send_shift_newline">Numen sends with the app’s send button. Shift+Enter adds a new line.</string>
+    <string name="app_enter_behaviour_strategy_whatsapp_newline_only">Tested: Enter adds a new line and never sends.</string>
+    <string name="app_enter_behaviour_strategy_discord_app_default_detail">Tested: Discord already sends on Enter and adds a new line on Shift+Enter, so Numen stays out of the way.</string>
+    <string name="app_enter_behaviour_strategy_discord_partial_detail">Tested: Enter adds a new line. Ctrl+Enter sends a plain Enter, because Discord’s send action only hides the keyboard.</string>
+    <string name="app_enter_behaviour_strategy_experimental_detail">Not confirmed: Numen tries the app’s send button and adds new lines itself.</string>
     <string name="app_enter_behaviour_strategy_not_tested_detail">Not tested with this app yet.</string>
-    <string name="app_enter_behaviour_desired_label">Wanted behaviour</string>
+    <string name="app_enter_behaviour_desired_label">What Enter does</string>
     <string name="app_enter_behaviour_strategy_label">How Numen sends</string>
-    <string name="app_enter_behaviour_strategy_auto">Auto / not tested</string>
-    <string name="app_enter_behaviour_strategy_editor_action">Editor action</string>
+    <string name="app_enter_behaviour_strategy_auto">Auto (not tested)</string>
+    <string name="app_enter_behaviour_strategy_editor_action">App’s send button</string>
     <string name="app_enter_behaviour_strategy_ctrl_enter">Ctrl+Enter</string>
     <string name="app_enter_behaviour_strategy_plain_enter">Plain Enter</string>
-    <string name="app_enter_behaviour_additional_send_shortcut_label">Additional send shortcut</string>
-    <string name="app_enter_behaviour_additional_send_shortcut_description">Add another key combo that sends, for every app listed below</string>
+    <string name="app_enter_behaviour_additional_send_shortcut_label">Extra send shortcut</string>
+    <string name="app_enter_behaviour_additional_send_shortcut_description">Another key combo that sends, in every app listed below</string>
     <string name="app_enter_behaviour_additional_send_shortcut_none">None</string>
-    <string name="app_enter_behaviour_additional_send_shortcut_sym_enter">SYM + Enter</string>
-    <string name="app_enter_behaviour_sym_enter_conflict_title">SYM + Enter is already used by KeyLaunches</string>
-    <string name="app_enter_behaviour_sym_enter_conflict_description">Move the KeyLaunches trigger to another key before using SYM + Enter as an additional send shortcut.</string>
-    <string name="app_enter_behaviour_sym_enter_conflict_action">Change trigger</string>
-    <string name="variation_picker_title">Select variation for %1$s</string>
+    <string name="app_enter_behaviour_additional_send_shortcut_sym_enter">SYM+Enter</string>
+    <string name="app_enter_behaviour_sym_enter_conflict_title">SYM+Enter already opens app search</string>
+    <string name="app_enter_behaviour_sym_enter_conflict_description">Move app search to another key before using SYM+Enter to send</string>
+    <string name="app_enter_behaviour_sym_enter_conflict_action">Move app search</string>
+    <string name="variation_picker_title">Choose accent for %1$s</string>
     <string name="custom_variation_input">Custom character</string>
     <string name="add">Add</string>
-    <string name="variation_picker_clear">Clear (Empty)</string>
-    <string name="variation_reset_to_default">Reset to Default</string>
-    <string name="variation_reset_confirm_title">Reset to Default</string>
-    <string name="variation_reset_confirm_message">Are you sure you want to reset all variations to default? This action cannot be undone.</string>
+    <string name="variation_picker_clear">Clear</string>
+    <string name="variation_reset_to_default">Reset to default</string>
+    <string name="variation_reset_confirm_title">Reset to default</string>
+    <string name="variation_reset_confirm_message">Reset the accent row to its defaults? This can’t be undone.</string>
     <string name="variation_reset_confirm_button">Reset</string>
-    <string name="static_variation_input_label">Value</string>
-    <string name="static_variation_input_hint">Leave empty and save to remove the slot.</string>
+    <string name="static_variation_input_label">Character</string>
+    <string name="static_variation_input_hint">Leave empty and save to remove this spot</string>
     
     <!-- SYM Customization Screen -->
     
@@ -599,50 +600,48 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     
     <!-- Settings Screen -->
     <string name="settings_support_creator_ko_fi">Support the creator on Ko-fi</string>
-    <string name="settings_nav_mode_configure">Choose what each key does in Nav Mode</string>
+    <string name="settings_nav_mode_configure">Choose what each key does in Nav mode</string>
     
     <!-- Auto Correct Settings -->
     
     <!-- Settings Categories -->
-    <string name="settings_category_text_input">Text Input</string>
+    <string name="settings_category_text_input">Text input</string>
     <string name="settings_category_accessibility">Accessibility</string>
-    <string name="settings_category_auto_correction">Autocorrect &amp; Suggestions</string>
-    <string name="settings_category_customization">Sound &amp; Variations</string>
-    <string name="settings_category_sounds">Sound &amp; Haptics</string>
-    <string name="settings_sounds_description">Typing sounds, vibration, and sound pack import</string>
+    <string name="settings_category_auto_correction">Autocorrect &amp; suggestions</string>
+    <string name="settings_category_enter_key">Enter key</string>
+    <string name="settings_category_sounds">Sound &amp; vibration</string>
+    <string name="settings_sounds_description">Typing sounds, vibration and sound packs</string>
     <string name="settings_category_advanced">Advanced</string>
     <string name="settings_group_typing">Typing</string>
-    <string name="settings_group_customization">Keyboard bar</string>
+    <string name="settings_group_customization">Look &amp; sound</string>
     <string name="settings_group_system">System</string>
     <string name="settings_group_utility">Keys</string>
-    <string name="settings_group_pastiera">About</string>
     <string name="settings_about_version_summary">v%1$s</string>
-    <string name="settings_accessibility_live_read_title">Live reading for keyboard bar changes</string>
-    <string name="settings_accessibility_live_read_description">When enabled, TalkBack can announce language/layout and keyboard bar changes automatically.</string>
-    <string name="settings_accessibility_second_row_title">Read quick settings and variations</string>
-    <string name="settings_accessibility_second_row_description">When disabled, TalkBack will skip the lower row and keep word suggestions separate.</string>
-    <string name="settings_accessibility_suggestions_delay_title">Suggestions read delay</string>
+    <string name="settings_accessibility_live_read_title">Read suggestions aloud</string>
+    <string name="settings_accessibility_live_read_description">TalkBack reads new word suggestions on the bar as they appear</string>
+    <string name="settings_accessibility_second_row_title">Read the accent row and buttons</string>
+    <string name="settings_accessibility_second_row_description">When off, TalkBack reads only the word suggestions on the bar</string>
+    <string name="settings_accessibility_suggestions_delay_title">Wait before reading suggestions</string>
     <string name="settings_accessibility_suggestions_delay_value">%1$d ms</string>
     <string name="settings_accessibility_delay_decrease">Decrease delay by 50 milliseconds</string>
     <string name="settings_accessibility_delay_increase">Increase delay by 50 milliseconds</string>
     <string name="settings_accessibility_delay_feedback">Suggestions delay: %1$d ms</string>
-    <string name="settings_accessibility_bounce_keys_title">Bounce Keys</string>
-    <string name="settings_accessibility_bounce_keys_description">Ignore accidental repeated presses of the same physical key.</string>
-    <string name="settings_accessibility_bounce_keys_delay_title">Minimum same-key delay: %1$d ms</string>
-    <string name="settings_accessibility_bounce_keys_delay_description">Same key presses below this delay are ignored.</string>
+    <string name="settings_accessibility_bounce_keys_title">Bounce keys</string>
+    <string name="settings_accessibility_bounce_keys_description">Ignore a key pressed twice by accident</string>
+    <string name="settings_accessibility_bounce_keys_delay_description">A second press of the same key within this time is ignored</string>
     <string name="settings_accessibility_bounce_keys_character_keys_title">Character keys</string>
-    <string name="settings_accessibility_bounce_keys_character_keys_description">Letters, numbers and symbol keys.</string>
+    <string name="settings_accessibility_bounce_keys_character_keys_description">Letters, numbers and symbols</string>
     <string name="settings_accessibility_bounce_keys_modifier_keys_title">Modifier keys</string>
-    <string name="settings_accessibility_bounce_keys_modifier_keys_description">Shift, Ctrl, Alt and Sym.</string>
+    <string name="settings_accessibility_bounce_keys_modifier_keys_description">Shift, Ctrl, Alt and SYM</string>
     <string name="settings_accessibility_bounce_keys_text_control_title">Text control keys</string>
     <string name="settings_accessibility_bounce_keys_space_title">Space</string>
-    <string name="settings_accessibility_bounce_keys_space_description">Ignore accidental repeated spaces.</string>
+    <string name="settings_accessibility_bounce_keys_space_description">Ignore accidental double spaces</string>
     <string name="settings_accessibility_bounce_keys_enter_title">Enter</string>
-    <string name="settings_accessibility_bounce_keys_enter_description">Ignore accidental repeated line breaks or send actions.</string>
+    <string name="settings_accessibility_bounce_keys_enter_description">Ignore accidental double line breaks or sends</string>
     <string name="settings_accessibility_bounce_keys_backspace_title">Backspace</string>
-    <string name="settings_accessibility_bounce_keys_backspace_description">Ignore accidental repeated deletes.</string>
+    <string name="settings_accessibility_bounce_keys_backspace_description">Ignore accidental double deletes</string>
     <string name="settings_accessibility_overlapping_keys_title">Ignore overlapping key presses</string>
-    <string name="settings_accessibility_overlapping_keys_description">Ignore a second key until you let go of the first; Shift, Alt and Ctrl still work</string>
+    <string name="settings_accessibility_overlapping_keys_description">Ignore a second key until you release the first, except Shift, Alt and Ctrl</string>
     
     <!-- Languages (Input Method Subtypes) -->
     
@@ -669,146 +668,123 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="debug_recorder_status_stopped">stopped</string>
     <string name="debug_recorder_started_at">Started at: </string>
     <string name="debug_recorder_include_suggestions">incl. suggestions</string>
-    <string name="debug_report_viewer_title">Debug Report Viewer</string>
+    <string name="debug_report_viewer_title">Debug report</string>
     
-    <!-- Nav Mode Key Labels -->
+    <!-- Nav mode key names (shown in the key editor and read by screen readers) -->
     <string name="nav_mode_action_copy">Copy</string>
     <string name="nav_mode_action_paste">Paste</string>
     <string name="nav_mode_action_cut">Cut</string>
     <string name="nav_mode_action_undo">Undo</string>
-    <string name="nav_mode_action_select_all">SelAll</string>
-    <string name="nav_mode_action_expand_selection_left">←Sel</string>
-    <string name="nav_mode_action_expand_selection_right">→Sel</string>
-    <string name="nav_mode_action_move_word_left">←Word</string>
-    <string name="nav_mode_action_move_word_right">Word→</string>
-    <string name="nav_mode_action_expand_selection_word_left">←WordSel</string>
-    <string name="nav_mode_action_expand_selection_word_right">WordSel→</string>
-    <string name="nav_mode_action_page_start">DocStart</string>
-    <string name="nav_mode_action_page_end">DocEnd</string>
+    <string name="nav_mode_action_select_all">Select all</string>
+    <string name="nav_mode_action_expand_selection_left">Select left</string>
+    <string name="nav_mode_action_expand_selection_right">Select right</string>
+    <string name="nav_mode_action_move_word_left">Word left</string>
+    <string name="nav_mode_action_move_word_right">Word right</string>
+    <string name="nav_mode_action_expand_selection_word_left">Select word left</string>
+    <string name="nav_mode_action_expand_selection_word_right">Select word right</string>
+    <string name="nav_mode_action_page_start">Top of text</string>
+    <string name="nav_mode_action_page_end">End of text</string>
     <string name="nav_mode_action_toggle_pastierina">Compact bar</string>
-    <string name="nav_mode_action_media_play_pause">Play/Pause</string>
-    <string name="nav_mode_action_media_previous">Media Previous</string>
-    <string name="nav_mode_action_media_next">Media Next</string>
-    <string name="nav_mode_keycode_up">↑</string>
-    <string name="nav_mode_keycode_down">↓</string>
-    <string name="nav_mode_keycode_left">←</string>
-    <string name="nav_mode_keycode_right">→</string>
-    <string name="nav_mode_keycode_center">○</string>
-    <string name="nav_mode_keycode_home">Home</string>
-    <string name="nav_mode_keycode_end">End</string>
-    <string name="nav_mode_keycode_page_up">PgUp</string>
-    <string name="nav_mode_keycode_page_down">PgDn</string>
-    <string name="nav_mode_keycode_escape">Esc</string>
+    <string name="nav_mode_action_media_play_pause">Play/pause</string>
+    <string name="nav_mode_action_media_previous">Previous track</string>
+    <string name="nav_mode_action_media_next">Next track</string>
+    <string name="nav_mode_keycode_up">Up</string>
+    <string name="nav_mode_keycode_down">Down</string>
+    <string name="nav_mode_keycode_left">Left</string>
+    <string name="nav_mode_keycode_right">Right</string>
+    <string name="nav_mode_keycode_center">OK (select)</string>
+    <string name="nav_mode_keycode_home">Line start</string>
+    <string name="nav_mode_keycode_end">Line end</string>
+    <string name="nav_mode_keycode_page_up">Page up</string>
+    <string name="nav_mode_keycode_page_down">Page down</string>
+    <string name="nav_mode_keycode_escape">Escape</string>
     <string name="nav_mode_keycode_tab">Tab</string>
-    <string name="nav_mode_keycode_forward_delete">Del→</string>
+    <string name="nav_mode_keycode_forward_delete">Delete forward</string>
     <string name="nav_mode_key_unknown">?</string>
     
     <!-- Tutorial -->
     <string name="tutorial_skip">Skip</string>
     <string name="tutorial_previous">Previous</string>
     <string name="tutorial_next">Next</string>
-    <string name="tutorial_page_enable_title">Enable Numen</string>
-    <string name="tutorial_page_select_title">Select Numen</string>
-    <string name="tutorial_enable_button">Enable Numen</string>
-    <string name="tutorial_enabled_message">Numen is enabled!</string>
-    <string name="tutorial_select_button">Select Numen</string>
-    <string name="tutorial_enable_first_message">Enable Numen first on the previous page</string>
+    <string name="tutorial_page_enable_title">Turn on Numen</string>
+    <string name="tutorial_page_select_title">Choose Numen</string>
+    <string name="tutorial_enable_button">Turn on Numen</string>
+    <string name="tutorial_enabled_message">Numen is on!</string>
+    <string name="tutorial_select_button">Choose Numen</string>
+    <string name="tutorial_enable_first_message">Turn on Numen first on the previous page</string>
     <string name="tutorial_selected_message">Numen is selected!</string>
-    <string name="tutorial_show">Show Tutorial</string>
-    <string name="tutorial_review_description">Review the introductory tutorial</string>
+    <string name="tutorial_show">Show tutorial</string>
+    <string name="tutorial_review_description">Go through the welcome tour again</string>
 
     <string name="software_keyboard_mode_auto_short">Auto</string>
-    <string name="software_keyboard_mode_toggle_shortcut_short">Toggle Keyboard Mode</string>
-    <string name="software_keyboard_mode_toggle_shortcut_long">Temporarily open / close the on-screen keyboard</string>
-    <string name="software_keyboard_mode_toggle_now_virtual">Keyboard mode: Virtual</string>
-    <string name="software_keyboard_mode_toggle_now_hardware">Keyboard mode: Hardware</string>
+    <string name="software_keyboard_mode_toggle_shortcut_short">Switch keyboard mode</string>
+    <string name="software_keyboard_mode_toggle_shortcut_long">Temporarily open or close the on-screen keyboard</string>
+    <string name="software_keyboard_mode_toggle_now_virtual">Using the on-screen keyboard</string>
+    <string name="software_keyboard_mode_toggle_now_hardware">Using the built-in keyboard</string>
     <string name="software_keyboard_mode_toggle_toasts_title">Keyboard switch message</string>
     <string name="software_keyboard_mode_toggle_toasts_description">Show a short message when the on-screen keyboard turns on or off</string>
-    <string name="software_keyboard_layout_style_title">Virtual keyboard layout</string>
-    <string name="software_keyboard_layout_style_description">%1$s. Controls the key grid used by the virtual keyboard. Full layouts expose the extra keys of their ANSI/ISO layout family.</string>
+    <string name="software_keyboard_layout_style_title">On-screen keyboard layout</string>
+    <string name="software_keyboard_layout_style_description">%1$s. Full layouts add the extra ANSI or ISO keys</string>
     <string name="software_keyboard_layout_style_compact">Compact</string>
     <string name="software_keyboard_layout_style_extended_iso">Extended ISO</string>
     <string name="software_keyboard_layout_style_full_ansi">Full ANSI</string>
     <string name="software_keyboard_layout_style_full_iso">Full ISO</string>
-    <string name="virtual_keyboard_behaviour_title">On-screen Keyboard</string>
-    <string name="software_keyboard_theme_link_title">Software keyboard theme</string>
-    <string name="software_keyboard_theme_link_description">Open the theme editor on the virtual keyboard page.</string>
+    <string name="virtual_keyboard_behaviour_title">On-screen keyboard</string>
+    <string name="software_keyboard_theme_link_title">On-screen keyboard theme</string>
+    <string name="software_keyboard_theme_link_description">Open the theme editor for the on-screen keyboard</string>
     <string name="software_keyboard_number_row_title">Number row</string>
-    <string name="software_keyboard_number_row_description">Show 1-0 above the virtual keyboard letters.</string>
+    <string name="software_keyboard_number_row_description">Show 1–0 above the letters</string>
     <string name="software_keyboard_nearest_key_touch_title">Nearest key touch</string>
-    <string name="software_keyboard_nearest_key_touch_description">Touches in the gap between keys go to the nearest likely key.</string>
-    <string name="software_keyboard_long_press_layer_popup_title">Layer alternatives popup</string>
-    <string name="software_keyboard_long_press_layer_popup_description">On long press, show Alt plus the configured Symbol/Emoji page mappings below the held key.</string>
-    <string name="software_keyboard_long_press_layer_popup_below_key_title">Place layer popup below key</string>
-    <string name="software_keyboard_long_press_layer_popup_below_key_description">Show the Alt/Symbol/Emoji popup below the held key instead of stacking it above.</string>
+    <string name="software_keyboard_nearest_key_touch_description">Send taps between keys to the nearest likely key</string>
+    <string name="software_keyboard_long_press_layer_popup_title">Long-press popup</string>
+    <string name="software_keyboard_long_press_layer_popup_description">Hold a key to show its Alt, symbol and emoji characters</string>
+    <string name="software_keyboard_long_press_layer_popup_below_key_title">Show popup below the key</string>
+    <string name="software_keyboard_long_press_layer_popup_below_key_description">Show the long-press popup below the key instead of above it</string>
     <string name="software_keyboard_modifier_keys_title">Bottom-row modifier keys</string>
     <string name="software_keyboard_left_modifier_key_title">Left key</string>
     <string name="software_keyboard_right_modifier_key_title">Right key</string>
     <string name="software_keyboard_modifier_key_ctrl">Ctrl</string>
     <string name="software_keyboard_modifier_key_alt">Alt</string>
 
-    <string name="titan2_layout_title">Titan 2 Layout Alignment</string>
-    <string name="titan2_layout_description">Align on-screen keyboard with Titan 2 physical keys</string>
+    <string name="titan2_layout_title">Titan 2 layout alignment</string>
+    <string name="titan2_layout_description">Line up the on-screen keys with the Titan 2 keys</string>
 
     <!-- Backup & Restore -->
-    <string name="backup_now">Backup now</string>
-    <string name="backup_now_description">Export all settings to a ZIP</string>
-    <string name="restore_from_file">Restore from file</string>
-    <string name="restore_from_file_description">Import a Numen backup ZIP</string>
+    <string name="backup_now">Back up settings</string>
+    <string name="backup_now_description">Save all settings to a file</string>
+    <string name="restore_from_file">Restore settings</string>
+    <string name="restore_from_file_description">Load settings from a Numen backup file</string>
     <string name="backup_completed">Backup completed</string>
     <string name="restore_completed">Restore completed</string>
     <string name="backup_failed">Backup failed: %1$s</string>
     <string name="restore_failed">Restore failed: %1$s</string>
     <string name="restore_device_change_title">Backup from another device</string>
-    <string name="restore_device_change_message">This backup was created on %1$s and is being imported on %2$s. Adapting keeps this device’s detected keyboard profile and display-specific settings.</string>
+    <string name="restore_device_change_message">This backup is from %1$s and you’re restoring it on %2$s. Adapting keeps this device’s keyboard profile and display settings.</string>
     <string name="restore_device_change_adapt">Adapt for this device</string>
     <string name="restore_device_change_unchanged">Import unchanged</string>
-    
-    <!-- Units -->
-    <string name="dip_unit">dp per character</string>
-    
+
     <!-- Custom Input Styles -->
-    <string name="keyboards_devices_title">Keyboard &amp; Devices</string>
-    <string name="keyboard_switching_section_title">Automatic switching</string>
     <string name="keyboard_switching_auto_title">Automatic keyboard switching</string>
     <string name="keyboard_switching_auto_description">Use the on-screen keyboard when no physical keyboard is found</string>
-    <string name="keyboard_switching_current_title">Current keyboard</string>
-    <string name="keyboard_switching_status_override_virtual">On-screen · Switched for now</string>
-    <string name="keyboard_switching_status_override_hardware">Physical · Switched for now</string>
-    <string name="keyboard_switching_status_no_physical">On-screen · No physical keyboard detected</string>
-    <string name="keyboard_switching_status_virtual">On-screen · Selected manually</string>
-    <string name="keyboard_switching_status_built_in">Physical · Built-in keyboard</string>
-    <string name="keyboard_source_on_screen">On-screen</string>
-    <string name="keyboard_source_physical">Physical</string>
-    <string name="keyboard_switching_override_shortcut">Temporary override: %1$s</string>
-    <string name="keyboard_switching_shortcut_unassigned">Shortcut not assigned</string>
-    <string name="keyboard_switching_override_description">Show or hide the on-screen keyboard until a keyboard connects or disconnects</string>
-    <string name="keyboard_sources_section_title">Keyboard sources</string>
-    <string name="on_screen_keyboard_title">On-screen Keyboard</string>
+    <string name="on_screen_keyboard_title">On-screen keyboard</string>
     <string name="on_screen_keyboard_section_layout">Layout</string>
-    <string name="on_screen_keyboard_section_touch">Touch behaviour</string>
+    <string name="on_screen_keyboard_section_touch">Touch behavior</string>
     <string name="on_screen_keyboard_section_appearance">Appearance</string>
-    <string name="built_in_keyboards_title">Built-in Keyboards</string>
-    <string name="keyboard_source_active">In use</string>
-    <string name="keyboard_source_standby">Not in use</string>
-    <string name="keyboard_source_device_bound">No supported built-in keyboard found</string>
-    <string name="keyboard_source_device_bound_detected">Found on this phone</string>
+    <string name="built_in_keyboards_title">Built-in keyboard</string>
 
     <!-- Installed dictionaries screen -->
 
     <!-- Clipboard page UI -->
-    <string name="clipboard_history_title">Clipboard History</string>
-    <string name="clipboard_clear_all">Clear All</string>
+    <string name="clipboard_history_title">Clipboard history</string>
+    <string name="clipboard_clear_all">Clear all</string>
     <string name="clipboard_empty_state">No clipboard history</string>
     <string name="clipboard_locked_state">Clipboard history is unavailable while the device is locked.</string>
     <string name="clipboard_pin">Pin</string>
     <string name="clipboard_unpin">Unpin</string>
     <string name="clipboard_delete">Delete</string>
-    <string name="clipboard_retention_apply">Apply</string>
     <string name="experimental_candidates_view_title">Experimental bar display</string>
-    <string name="experimental_candidates_view_description">Shows the bar in a different Android mode. May cause display glitches</string>
+    <string name="experimental_candidates_view_description">Show the bar in a different Android mode, which may cause display glitches</string>
     <string name="clipboard_retention_time_title">Keep clipboard items</string>
-    <string name="clipboard_retention_time_description">Minutes; 0 keeps them forever</string>
 
     <!-- Trackpad Gesture Settings -->
 
@@ -817,22 +793,23 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <!-- Trackpad Debug Accessibility Service -->
 
     <!-- Status Bar Buttons Configuration -->
-    <string name="status_bar_buttons_title">Keyboard Bar</string>
+    <string name="status_bar_buttons_title">Keyboard bar</string>
     <string name="status_bar_buttons_description">Compact or full bar, and its buttons</string>
     <string name="status_bar_style_section">Keyboard bar style</string>
     <string name="extended_status_bar_title">Full bar</string>
     <string name="extended_status_bar_features_section">Full bar features</string>
     <string name="status_bar_buttons_section">Buttons</string>
     <string name="pastierina_preview_suggestions">Suggestions</string>
-    <string name="device_specific_interface_section">Device-specific interface</string>
-    <string name="titan2_elite_rounded_corners_title">Titan 2 Elite rounded corners</string>
-    <string name="titan2_elite_rounded_corners_description">Round the bottom corners of the keyboard bar to match the Elite’s rounded display corners.</string>
+    <string name="device_specific_interface_section">Screen corners</string>
+    <string name="titan2_elite_rounded_corners_title">Round bar corners</string>
+    <string name="titan2_elite_rounded_corners_description">Round the bar’s bottom corners to match the screen</string>
     <string name="titan2_elite_fill_bottom_corners_title">Fill lower display corners</string>
-    <string name="titan2_elite_fill_bottom_corners_description">Extend the bar color into the corners; buttons stay rounded</string>
+    <string name="titan2_elite_fill_bottom_corners_description">Extend the bar color into the corners and keep the buttons rounded</string>
     <string name="status_bar_slots_left">Left buttons</string>
     <string name="status_bar_slots_right">Right buttons</string>
+    <string name="status_bar_slot_button_label">Button %1$d</string>
     <string name="pastierina_status_bar_buttons_title">Compact bar</string>
-    <string name="pastierina_status_bar_buttons_description">Choose which buttons appear on the left and right edges of the compact bar.</string>
+    <string name="pastierina_status_bar_buttons_description">Choose which buttons appear on the left and right edges of the compact bar</string>
     <string name="status_bar_slot_add">Add keyboard bar button</string>
     <string name="status_bar_slot_remove">Remove keyboard bar button</string>
     <string name="status_bar_button_none">None</string>
@@ -847,79 +824,79 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="status_bar_button_hamburger_description">Quick actions</string>
     <string name="status_bar_button_minimal_ui">Compact bar</string>
     <string name="status_bar_button_software_keyboard_mode">Keyboard mode</string>
-    <string name="status_bar_button_software_keyboard_mode_description">Temporarily open / close the on-screen keyboard (Ctrl+B)</string>
+    <string name="status_bar_button_software_keyboard_mode_description">Temporarily open or close the on-screen keyboard (Ctrl+B)</string>
     <string name="status_bar_button_close_menu_description">Close quick actions</string>
     <string name="status_bar_button_settings">Settings</string>
     <string name="status_bar_button_settings_description">Open settings</string>
     <string name="status_bar_button_symbols">Symbols</string>
-    <string name="status_bar_button_symbols_description">Symbols keyboard</string>
+    <string name="status_bar_button_symbols_description">SYM pages</string>
     <string name="status_bar_button_undo">Undo</string>
     <string name="status_bar_button_undo_description">Send Ctrl+Z</string>
     <string name="status_bar_button_redo">Redo</string>
     <string name="status_bar_button_redo_description">Send Ctrl+Y</string>
-    <string name="status_bar_variations_visible_title">Show variations</string>
-    <string name="status_bar_variations_visible_description">Show accents and other forms of the letter you just typed</string>
-    <string name="status_bar_swipe_cursor_info">Swipe across the keyboard bar to move the cursor.</string>
-    <string name="dynamic_variation_slot_count_title">Variation spaces</string>
-    <string name="dynamic_variation_slot_count_description">Room for about %1$d variations between the bar buttons</string>
-    <string name="dynamic_variation_resize_to_content_title">Stretch variations to fit</string>
-    <string name="dynamic_variation_resize_to_content_description">Widen variations to fill the row; off keeps them left-aligned</string>
+    <string name="status_bar_variations_visible_title">Show accent row</string>
+    <string name="status_bar_variations_visible_description">Show accents of the letter you just typed</string>
+    <string name="status_bar_swipe_cursor_info">Swipe across the keyboard bar to move the cursor</string>
+    <string name="dynamic_variation_slot_count_title">Accent spaces</string>
+    <string name="dynamic_variation_slot_count_description">Room for about %1$d accents between the bar buttons</string>
+    <string name="dynamic_variation_resize_to_content_title">Stretch accents to fit</string>
+    <string name="dynamic_variation_resize_to_content_description">Widen accents to fill the row instead of aligning them left</string>
     <string name="modifier_indicators_title">Modifier indicators</string>
     <string name="modifier_indicators_description">Choose where to show when Shift, Ctrl, Alt or SYM is on</string>
-    <string name="modifier_indicators_bottom_strip">Bottom light strip</string>
+    <string name="modifier_indicators_bottom_strip">Lights</string>
     <string name="modifier_indicators_bottom_strip_description">Colored lights in a thin strip below the keyboard bar</string>
-    <string name="modifier_indicators_menu_bar">Phone status bar</string>
+    <string name="modifier_indicators_menu_bar">Status bar</string>
     <string name="modifier_indicators_menu_bar_description">A small icon in the phone’s status bar at the top</string>
-    <string name="modifier_indicators_status_bar">Keyboard bar</string>
-    <string name="modifier_indicators_status_bar_description">Compact symbols at the left edge of the keyboard bar.</string>
-    <string name="modifier_indicators_off_state">All modifier indicators are off.</string>
+    <string name="modifier_indicators_status_bar">Bar</string>
+    <string name="modifier_indicators_status_bar_description">Compact symbols at the left edge of the keyboard bar</string>
+    <string name="modifier_indicators_off_state">All modifier indicators are off</string>
     <string name="status_bar_state_on">On</string>
     <string name="status_bar_state_off">Off</string>
     <string name="status_bar_button_clipboard_state_empty">Empty</string>
     <string name="status_bar_button_clipboard_state_items">%1$d items</string>
     <string name="sym_key_content_description">%1$s, %2$s</string>
     <string name="status_bar_button_minimal_ui_description">Switch to or from the compact bar</string>
-    <string name="status_bar_buttons_reset">Reset</string>
-    <string name="text_expansion_title">Text expansion</string>
+    <string name="status_bar_buttons_reset">Reset bar</string>
+    <string name="text_expansion_title">Snippets</string>
     <string name="text_expansion_description">Type a short code to insert text, emoji or symbols</string>
-    <string name="snippets_title">Snippets</string>
-    <string name="snippets_enable_title">Enable snippets</string>
-    <string name="snippets_enable_description">Expand global text snippets after a shared prefix.</string>
+    <string name="snippets_title">Your snippets</string>
+    <string name="snippets_enable_title">Turn on your snippets</string>
+    <string name="snippets_enable_description">Type the prefix and a shortcut to insert your text</string>
     <string name="snippets_prefix_title">Snippet prefix</string>
-    <string name="snippets_prefix_description">One printable symbol. A colon is reserved for emoji and symbol shortcodes.</string>
-    <string name="snippets_prefix_error">Choose one non-whitespace symbol other than a colon.</string>
+    <string name="snippets_prefix_description">One symbol other than a colon, which emoji and symbols use</string>
+    <string name="snippets_prefix_error">Use one symbol other than a colon or a space</string>
     <string name="snippets_manage_title">Manage snippets</string>
-    <string name="snippets_manage_description">Add global shortcuts and multiline replacement text.</string>
+    <string name="snippets_manage_description">Add shortcuts and the text they insert</string>
     <string name="snippets_add">Add snippet</string>
     <string name="snippets_edit">Edit snippet</string>
     <string name="snippets_delete">Delete snippet</string>
     <string name="snippets_empty">No snippets yet.</string>
     <string name="snippets_shortcut_label">Shortcut</string>
-    <string name="snippets_shortcut_help">Use 1–40 letters, numbers, or underscores.</string>
-    <string name="snippets_value_label">Replacement text</string>
+    <string name="snippets_shortcut_help">Use 1–40 letters, numbers or underscores</string>
+    <string name="snippets_value_label">Text to insert</string>
     <string name="snippets_save">Save</string>
     <string name="expansion_presentation_title">Show matches in</string>
     <string name="expansion_presentation_off">Off</string>
     <string name="expansion_presentation_popup">Floating popup</string>
     <string name="expansion_presentation_bar">Suggestion bar</string>
     <string name="expansion_space_title">Expand exact match with Space</string>
-    <string name="expansion_space_description">Press Space to expand a unique exact shortcut and keep the trailing space. Prefix matches are ignored.</string>
-    <string name="expansion_prefix_space_title">Accept prefix match with Space</string>
-    <string name="expansion_prefix_space_description">Press Space to accept the highlighted match when the typed shortcut is not an exact match.</string>
+    <string name="expansion_space_description">Press Space after a complete shortcut to insert its text</string>
+    <string name="expansion_prefix_space_title">Accept partial match with Space</string>
+    <string name="expansion_prefix_space_description">Press Space to accept the highlighted match for a partial shortcut</string>
     <string name="expansion_tab_title">Accept with Tab</string>
-    <string name="expansion_tab_description">Use Tab to accept the highlighted or unique exact match.</string>
+    <string name="expansion_tab_description">Press Tab to accept the highlighted or exact match</string>
     <string name="expansion_enter_title">Accept with Enter</string>
-    <string name="expansion_enter_description">Use Enter to accept the highlighted or unique exact match.</string>
+    <string name="expansion_enter_description">Press Enter to accept the highlighted or exact match</string>
     <string name="emoji_symbols_title">Emoji &amp; symbols</string>
-    <string name="emoji_shortcodes_enable_title">Enable emoji shortcodes</string>
-    <string name="emoji_shortcodes_enable_description">Type :name to search Unicode emoji.</string>
-    <string name="symbol_shortcodes_enable_title">Enable symbol shortcodes</string>
-    <string name="symbol_shortcodes_enable_description">Type :name to search typographic and mathematical symbols.</string>
+    <string name="emoji_shortcodes_enable_title">Turn on emoji shortcodes</string>
+    <string name="emoji_shortcodes_enable_description">Type :name to search emoji</string>
+    <string name="symbol_shortcodes_enable_title">Turn on symbol shortcodes</string>
+    <string name="symbol_shortcodes_enable_description">Type :name to search typographic and math symbols</string>
     <string name="emoji_symbols_close_title">Expand :name:</string>
-    <string name="emoji_symbols_close_description">A closing colon expands a unique exact match. Collisions stay selectable.</string>
+    <string name="emoji_symbols_close_description">Type a closing colon to insert an exact match</string>
 
     <!-- Settings search and shareable setting links -->
-    <string name="settings_search_hint">Search Settings</string>
+    <string name="settings_search_hint">Search settings</string>
     <string name="settings_search_no_results">No matching settings</string>
     <string name="settings_link_copy">Copy link</string>
     <string name="settings_link_copy_markdown">Copy Markdown</string>
@@ -930,20 +907,20 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
 
     <!-- Invisible search keywords per settings entry; never rendered, only
          consumed by the settings search. -->
-    <string name="kw_main_keyboards_devices">keyboards, devices, hardware, bluetooth, physical keyboard, clicks</string>
+    <string name="kw_main_keyboards_devices">keyboards, devices, on-screen keyboard, keyboard switching, keyboard profile</string>
     <string name="kw_main_modifiers">LED, LEDs, lights, indicators, shift, ctrl, alt, sym</string>
     <string name="kw_main_text_input">typing, text, punctuation, quotes, spacing, capitalization</string>
     <string name="kw_main_auto_correction">correction, autocorrect, spelling, suggestions, replacements, dictionaries</string>
     <string name="kw_main_keyboard_theme">theme, themes, colors, dark, light, presets, hardware keyboard, on-screen keyboard, Numen Dark, Numen Light, Cloud Tap, Moon Tap, Classic Cloud, Classic Midnight</string>
-    <string name="kw_main_customization">customize, customization, appearance</string>
+    <string name="kw_main_customization">sound, sounds, vibration, haptics, click, typing sounds</string>
     <string name="kw_main_advanced">advanced, backup, restore, debug, expert</string>
     <string name="kw_main_accessibility">accessibility, delay, bounce keys, overlapping keys, screen reader</string>
     <string name="kw_main_about">about, version, support, ko-fi, donate</string>
     <string name="kw_text_input_auto_space_punctuation">spacing, space, punctuation</string>
     <string name="kw_text_input_spaced_hyphen">hyphen, dash, en dash, punctuation</string>
     <string name="kw_text_input_smart_quotes">quotation marks, apostrophe, curly quotes, typography</string>
-    <string name="kw_text_input_shift_backspace">shift, backspace, delete word</string>
-    <string name="kw_text_input_alt_backspace">alt, backspace, delete word</string>
+    <string name="kw_text_input_shift_backspace">shift, backspace, delete forward, forward delete</string>
+    <string name="kw_text_input_alt_backspace">alt, backspace, delete forward, forward delete</string>
     <string name="kw_text_input_backspace_start">backspace, delete line, start of text</string>
     <string name="kw_keyboards_devices_on_screen">on-screen keyboard, software keyboard, virtual keyboard</string>
     <string name="kw_keyboards_devices_built_in">built-in keyboards, layouts, hardware, profiles</string>
@@ -969,17 +946,16 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="kw_indicator_status_bar">LED, lights, symbols, indicators, numen</string>
     <string name="titan2_elite_top_corner_title">Upper button corners</string>
     <string name="titan2_elite_top_corner_description">How round the top outer corner of the edge buttons is</string>
-    <string name="titan2_elite_max_icon_shrink_title">Shrink icons up to %1$d%%</string>
-    <string name="titan2_elite_max_icon_shrink_description">Shrink edge button icons only as much as needed; 0% never shrinks</string>
+    <string name="titan2_elite_max_icon_shrink_title">Shrink corner icons up to %1$d%%</string>
+    <string name="titan2_elite_max_icon_shrink_description">Shrink icons on the corner buttons only when they don’t fit (0% keeps them full size)</string>
     <!-- Settings main list: one-line summaries -->
     <string name="settings_row_autocorrect_description">Typo fixes, suggestions and your personal dictionary</string>
     <string name="settings_row_text_input_description">Capitalization, punctuation, snippets and delete keys</string>
-    <string name="settings_row_devices_description">On-screen and built-in keyboards, and when the bar shows</string>
-    <string name="settings_row_sound_variations_description">Typing sounds, haptics and key variations</string>
+    <string name="settings_row_keyboard_theme_description">Colors for the bar and indicators</string>
     <string name="settings_row_nav_mode_description">Letter keys as arrows and editing keys, with Ctrl</string>
     <string name="settings_row_enter_description">Send or start a new line, app by app</string>
     <string name="settings_row_accessibility_description">Bounce keys and TalkBack announcements</string>
-    <string name="settings_row_advanced_description">Backup &amp; restore, clipboard and diagnostics</string>
+    <string name="settings_row_advanced_description">Backup, restore, clipboard and diagnostics</string>
 
     <!-- Numen welcome (first run): the little spirit (numen) of the keyboard -->
     <string name="numen_mascot_greeting">Hi!</string>
@@ -989,7 +965,7 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="numen_tutorial_select_description">Tap the button below and pick Numen as your keyboard.</string>
     <string name="numen_tutorial_tip_sym">Show the keyboard bar</string>
     <string name="numen_tutorial_tip_undo">Undo the last correction</string>
-    <string name="numen_tutorial_tip_shortcuts">Open your apps with SYM + a key</string>
+    <string name="numen_tutorial_tip_shortcuts">Open your apps with SYM plus a key</string>
     <string name="numen_tutorial_tip_settings">Everything else is in Settings</string>
     <string name="numen_tutorial_done">Start typing</string>
     <string name="numen_tutorial_ready_title">You’re all set</string>
@@ -1004,8 +980,6 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="home_setup_select_action">Choose</string>
     <string name="home_setup_ready">Numen is your keyboard</string>
     <string name="home_setup_switch">Switch</string>
-    <string name="home_aggressive_description">Fix bigger slips, like missing letters and spaces</string>
-    <string name="home_autocorrect_description">Fix typos when you press Space</string>
     <string name="home_auto_show_description">Show the bar whenever a text field opens</string>
     <string name="home_stats_empty">Start typing. Your stats will show up here.</string>
     <string name="home_stats_words">words</string>
@@ -1016,8 +990,41 @@ Each key can be configured as Keycode, Action, Native Ctrl, or None. Use overrid
     <string name="home_stats_reset">Reset</string>
     <string name="home_stats_reset_title">Reset typing stats?</string>
     <string name="home_stats_reset_body">Words, typos fixed, speed and favorite word go back to zero.</string>
-    <string name="settings_key_shortcuts_title">Key shortcuts</string>
-    <string name="settings_key_shortcuts_description">Choose what SYM + a key opens: apps and actions</string>
     <string name="home_diagnostics_title">Diagnostics</string>
     <string name="home_diagnostics_description">Key presses and autocorrect log</string>
+    <!-- Layout polish: labels for rows that used hardcoded text or put values in titles -->
+    <string name="settings_accessibility_bounce_keys_delay_label">Wait time</string>
+    <string name="quick_launcher_entry_appearance_title">Entry appearance</string>
+    <string name="quick_launcher_entry_appearance_description">How entries look in the app search list</string>
+    <string name="quick_launcher_customize_entries_description">Favorites, hidden entries and nicknames</string>
+    <string name="quick_launcher_text_field_shortcuts_title">App search while typing</string>
+    <string name="quick_launcher_ranking_info_description">How app search orders its results</string>
+    <string name="clipboard_retention_choice_description">How long to keep copied items</string>
+    <string name="clipboard_retention_never">Forever</string>
+    <string name="clipboard_retention_15_minutes">15 minutes</string>
+    <string name="clipboard_retention_1_hour">1 hour</string>
+    <string name="clipboard_retention_2_hours">2 hours</string>
+    <string name="clipboard_retention_1_day">1 day</string>
+    <string name="clipboard_retention_custom_minutes">%1$d min</string>
+    <string name="tap_haptic_duration_label">Custom vibration</string>
+    <string name="settings_value_milliseconds">%1$d ms</string>
+    <string name="copy">Copy</string>
+    <string name="apply">Apply</string>
+    <string name="quick_launcher_customize_search_hint">Search entries</string>
+    <string name="quick_launcher_filter_all">All</string>
+    <string name="quick_launcher_filter_favorites">Favorites</string>
+    <string name="quick_launcher_customize_no_entries">No entries in the selected sources</string>
+    <string name="quick_launcher_customize_no_matches">No entries match “%1$s”</string>
+    <string name="quick_launcher_nickname">Nickname</string>
+    <string name="quick_launcher_color_automatic">Automatic</string>
+    <string name="quick_launcher_color_automatic_menu">Automatic color</string>
+    <string name="quick_launcher_color_heading">Color</string>
+    <string name="keyboard_theme_delete_theme_title">Delete theme?</string>
+    <string name="keyboard_theme_delete_theme_confirmation">Delete the theme “%1$s”? The keyboard keeps its current colors.</string>
+    <string name="keyboard_theme_export_title">Export theme</string>
+    <string name="keyboard_theme_color_presets">Presets</string>
+    <string name="keyboard_theme_hex_color">Hex color</string>
+    <string name="variation_row_alt">Alt</string>
+    <string name="variation_add_key">Add a key</string>
+    <string name="variation_remove_last_key">Remove last key</string>
 </resources>

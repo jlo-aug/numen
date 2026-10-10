@@ -101,8 +101,8 @@ android {
             // Numen: a distinct app (Pastiera's forking policy requires its own identity), with
             // its own version line.
             applicationId = "app.numen.keyboard"
-            versionCode = nightlyVersionCode ?: 120
-            versionName = "1.2.0"
+            versionCode = nightlyVersionCode ?: 121
+            versionName = "1.2.1"
             manifestPlaceholders["appLabel"] = "Numen"
             manifestPlaceholders["imeLabel"] = "Numen"
             // Numen's own deep links and actions.

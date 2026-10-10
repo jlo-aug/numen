@@ -19,8 +19,8 @@ enum class CommandSourceId(val storageValue: String, val displayLabel: String) {
     Apps("apps", "Apps"),
     Pastiera("pastiera", it.palsoftware.pastiera.Branding.appName),
     AppActions("app_actions", "App actions"),
-    DeviceControl("device_control", "Device control"),
-    NavActions("nav_actions", "Navigation");
+    DeviceControl("device_control", "Phone controls"),
+    NavActions("nav_actions", "Arrow and editing keys");
 
     companion object {
         fun fromStorageValue(value: String?): CommandSourceId? {

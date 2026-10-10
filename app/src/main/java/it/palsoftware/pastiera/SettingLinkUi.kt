@@ -167,7 +167,16 @@ fun settingEntryBreadcrumb(entry: SettingEntry): String {
     }
     val deviceSubtitle = SettingLinkRegistry.keyboardsDevicesSubtitles[entry.route.keyboardsDevicesDestination]
         ?.let(context::getString)
-    return listOfNotNull(root, screen, subtitle, deviceSubtitle).joinToString(" › ")
+    // Customization pages (Keyboard bar, App shortcuts, ...) open straight from the main
+    // list, so they are not shown under the Sound & vibration title.
+    val parent = if (entry.route.destination == SettingsDestination.Customization && subtitle != null) {
+        entry.route.customizationDestination
+            ?.let(SettingLinkRegistry.customizationParents::get)
+            ?.let(context::getString)
+    } else {
+        screen
+    }
+    return listOfNotNull(root, parent, subtitle, deviceSubtitle).joinToString(" › ")
 }
 
 /**
@@ -395,14 +404,12 @@ fun SettingSearchResultRow(
             Text(
                 text = stringResource(entry.titleRes),
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 1
+                fontWeight = FontWeight.Medium
             )
             Text(
                 text = settingEntryBreadcrumb(entry),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 1
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
     }

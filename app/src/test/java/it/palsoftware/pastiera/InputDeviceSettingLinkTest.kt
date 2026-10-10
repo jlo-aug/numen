@@ -27,6 +27,8 @@ class InputDeviceSettingLinkTest {
     @Test
     fun hiddenPopupPositionFallsBackToItsEnablingControl() {
         val position = requireNotNull(SettingLinkRegistry.byId("on_screen.layer_popup_below"))
+        // On-screen keyboard rows are listed only once one of them was changed.
+        SettingsManager.setSoftwareKeyboardNumberRowEnabled(context, false)
         SettingsManager.setSoftwareKeyboardLongPressLayerPopupEnabled(context, false)
 
         assertFalse(position.isAvailable(context))

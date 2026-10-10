@@ -24,8 +24,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
-import androidx.compose.material.icons.automirrored.filled.ManageSearch
-import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.automirrored.filled.VolumeUp
 import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.SmartButton
 import androidx.compose.material.icons.filled.Palette
@@ -33,7 +32,6 @@ import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.TouchApp
 import androidx.compose.material.icons.filled.Spellcheck
-import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material.icons.filled.Engineering
 import androidx.activity.ComponentActivity
 import androidx.compose.animation.*
@@ -97,7 +95,7 @@ fun SettingsScreen(
     val context = LocalContext.current
     val activity = context as? ComponentActivity
 
-    val currentEntry = remember { context.settingsActivity().intent.settingsPage() }
+    val currentEntry = remember { context.settingsActivity().intent.settingsPage(context) }
     val currentDestination = currentEntry.destination
     var highlightSettingId by rememberSaveable { mutableStateOf<String?>(null) }
     var linkSheetEntry by remember { mutableStateOf<SettingEntry?>(null) }
@@ -159,10 +157,37 @@ fun SettingsScreen(
     }
 
 
+    @Composable
+    fun ModifiersScreen() {
+        ModifierSettingsScreen(
+            modifier = modifier,
+            onBack = { navigateBack() },
+            onOpenSymLayers = {
+                context.startActivity(Intent(context, SymCustomizationActivity::class.java))
+            },
+            onOpenNavMode = { navigateToNavMode(null) },
+            onOpenOnScreenKeyboard = {
+                openSettingsPage(context, SettingsPage(
+                    SettingsDestination.KeyboardsDevices,
+                    keyboardsDevicesDestination = KeyboardsDevicesDestination.OnScreen
+                ))
+            },
+            onOpenBuiltInKeyboard = {
+                openSettingsPage(context, SettingsPage(
+                    SettingsDestination.KeyboardsDevices,
+                    keyboardsDevicesDestination = KeyboardsDevicesDestination.BuiltIn
+                ))
+            }
+        )
+    }
+
     CompositionLocalProvider(
         LocalSettingHighlightId provides highlightSettingId,
         LocalSettingLinkLongPress provides ({ id -> linkSheetEntry = SettingLinkRegistry.byId(id) })
     ) {
+    // One background behind every settings page, so screens without a Scaffold do not
+    // show the window color between rows (lavender/white bands).
+    Surface(modifier = Modifier.fillMaxSize(), color = MaterialTheme.colorScheme.background) {
     val entry = currentEntry
         when (entry.destination) {
             SettingsDestination.Main -> {
@@ -175,11 +200,10 @@ fun SettingsScreen(
                         })
                     },
                     onModifiersClick = { navigateTo(SettingsDestination.Modifiers) },
-                    onKeyboardsDevicesClick = { navigateTo(SettingsDestination.KeyboardsDevices) },
                     onTextInputClick = { navigateTo(SettingsDestination.TextInput) },
                     onAccessibilityClick = { navigateTo(SettingsDestination.Accessibility) },
                     onAutoCorrectionClick = { navigateTo(SettingsDestination.AutoCorrection) },
-                    onCustomizationClick = { openCustomization(null) },
+                    onSoundsClick = { openCustomization(SettingsActivity.CUSTOMIZATION_DESTINATION_SOUNDS) },
                     onStatusBarButtonsClick = {
                         openCustomization(SettingsActivity.CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS)
                     },
@@ -204,30 +228,29 @@ fun SettingsScreen(
                 )
             }
             SettingsDestination.KeyboardsDevices -> {
-                KeyboardsDevicesSettingsScreen(
-                    modifier = modifier,
-                    onBack = { navigateBack() },
-                    onNavModeSettingsClick = { keyCode ->
-                        navigateToNavMode(keyCode)
-                    },
-                    onOpenKeyboardTheme = {
-                        openCustomization(
-                            SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME,
-                            SettingsActivity.KEYBOARD_THEME_TARGET_SOFTWARE
-                        )
-                    },
-                    destination = entry.keyboardsDevicesDestination,
-                    onDestinationChange = { destination ->
-                        if (destination == KeyboardsDevicesDestination.Main) navigateBack()
-                        else openSettingsPage(context, entry.copy(keyboardsDevicesDestination = destination))
-                    }
-                )
+                // Keyboard & Devices is gone; its leftovers live in Keys & modifiers.
+                when (entry.keyboardsDevicesDestination) {
+                    KeyboardsDevicesDestination.Main -> ModifiersScreen()
+                    KeyboardsDevicesDestination.OnScreen -> VirtualKeyboardBehaviorSettingsScreen(
+                        modifier = modifier,
+                        onBack = { navigateBack() },
+                        onOpenKeyboardTheme = {
+                            openCustomization(
+                                SettingsActivity.CUSTOMIZATION_DESTINATION_KEYBOARD_THEME,
+                                SettingsActivity.KEYBOARD_THEME_TARGET_SOFTWARE
+                            )
+                        }
+                    )
+                    KeyboardsDevicesDestination.BuiltIn -> HardwareKeyboardSettingsScreen(
+                        modifier = modifier,
+                        onBack = { navigateBack() }
+                    )
+                }
             }
             SettingsDestination.TextInput -> {
                 TextInputSettingsScreen(
                     modifier = modifier,
-                    onBack = { navigateBack() },
-                    onNavModeSettingsClick = { navigateToNavMode(null) }
+                    onBack = { navigateBack() }
                 )
             }
             SettingsDestination.Accessibility -> {
@@ -248,8 +271,7 @@ fun SettingsScreen(
                     onBack = { navigateBack() },
                     initialDestination = entry.customizationDestination,
                     initialKeyboardThemeTarget = entry.keyboardThemeTarget,
-                    initialKeyboardThemeTab = entry.keyboardThemeTab,
-                    onOpenModifiers = { navigateTo(SettingsDestination.Modifiers) }
+                    initialKeyboardThemeTab = entry.keyboardThemeTab
                 )
             }
             SettingsDestination.NavMode -> {
@@ -271,24 +293,9 @@ fun SettingsScreen(
                     onBack = { navigateBack() }
                 )
             }
-            SettingsDestination.Modifiers -> {
-                ModifierSettingsScreen(
-                    modifier = modifier,
-                    onBack = { navigateBack() },
-                    onOpenSymLayers = {
-                        context.startActivity(
-Intent(context, SymCustomizationActivity::class.java)
-                        )
-                    },
-                    onOpenSymShortcuts = {
-                        openCustomization(SettingsActivity.CUSTOMIZATION_DESTINATION_LAUNCHER_SHORTCUTS)
-                    },
-                    onOpenNavMode = {
-                        navigateToNavMode(null)
-                    }
-                )
-            }
+            SettingsDestination.Modifiers -> ModifiersScreen()
         }
+    }
     }
 
     // Share/copy sheet for the settings entry currently being long-pressed
@@ -304,11 +311,10 @@ private fun SettingsMainScreen(
     modifier: Modifier,
     context: Context,
     onModifiersClick: () -> Unit,
-    onKeyboardsDevicesClick: () -> Unit,
     onTextInputClick: () -> Unit,
     onAccessibilityClick: () -> Unit,
     onAutoCorrectionClick: () -> Unit,
-    onCustomizationClick: () -> Unit,
+    onSoundsClick: () -> Unit,
     onStatusBarButtonsClick: () -> Unit,
     onKeyboardThemeClick: () -> Unit,
     onQuickLauncherClick: () -> Unit,
@@ -397,15 +403,6 @@ private fun SettingsMainScreen(
                         .fillMaxWidth()
                         .verticalScroll(rememberScrollState())
                 ) {
-            // The most-used setup in Numen: what SYM + a key opens.
-            SettingsCategoryRow(
-                icon = Icons.Filled.Apps,
-                title = stringResource(R.string.settings_key_shortcuts_title),
-                description = stringResource(R.string.settings_key_shortcuts_description),
-                onClick = { it.palsoftware.pastiera.ui.openKeyShortcuts(context) }
-            )
-        
-
             // Typing: what the keys type.
             SettingsGroupDivider(stringResource(R.string.settings_group_typing))
 
@@ -425,7 +422,7 @@ private fun SettingsMainScreen(
             )
             SettingsCategoryRow(
                 icon = Icons.AutoMirrored.Filled.KeyboardReturn,
-                title = stringResource(R.string.app_enter_behaviour_title),
+                title = stringResource(R.string.settings_category_enter_key),
                 description = stringResource(R.string.settings_row_enter_description),
                 linkId = SettingLinkIds.MAIN_APP_ENTER_BEHAVIOR,
                 onClick = onEnterBehaviorClick
@@ -442,7 +439,7 @@ private fun SettingsMainScreen(
                 onClick = onModifiersClick
             )
             SettingsCategoryRow(
-                icon = Icons.AutoMirrored.Filled.ManageSearch,
+                icon = Icons.Filled.Apps,
                 title = stringResource(R.string.starter_launcher_shortcuts_title),
                 description = stringResource(R.string.starter_launcher_shortcuts_description),
                 linkId = SettingLinkIds.MAIN_LAUNCHER_SHORTCUTS,
@@ -456,7 +453,7 @@ private fun SettingsMainScreen(
                 onClick = onNavModeClick
             )
 
-            // Keyboard bar: how it looks and sounds when shown.
+            // Look & sound: the keyboard bar, its colors and typing feedback.
             SettingsGroupDivider(stringResource(R.string.settings_group_customization))
 
             SettingsCategoryRow(
@@ -469,22 +466,16 @@ private fun SettingsMainScreen(
             SettingsCategoryRow(
                 icon = Icons.Filled.Palette,
                 title = stringResource(R.string.keyboard_theme_title),
+                description = stringResource(R.string.settings_row_keyboard_theme_description),
                 linkId = SettingLinkIds.MAIN_KEYBOARD_THEME,
                 onClick = onKeyboardThemeClick
             )
             SettingsCategoryRow(
-                icon = Icons.Filled.Tune,
-                title = stringResource(R.string.settings_category_customization),
-                description = stringResource(R.string.settings_row_sound_variations_description),
+                icon = Icons.AutoMirrored.Filled.VolumeUp,
+                title = stringResource(R.string.settings_category_sounds),
+                description = stringResource(R.string.settings_sounds_description),
                 linkId = SettingLinkIds.MAIN_CUSTOMIZATION,
-                onClick = onCustomizationClick
-            )
-            SettingsCategoryRow(
-                icon = Icons.Filled.Keyboard,
-                title = stringResource(R.string.keyboards_devices_title),
-                description = stringResource(R.string.settings_row_devices_description),
-                linkId = SettingLinkIds.MAIN_KEYBOARDS_DEVICES,
-                onClick = onKeyboardsDevicesClick
+                onClick = onSoundsClick
             )
 
             // System: everything else.
@@ -504,9 +495,6 @@ private fun SettingsMainScreen(
                 linkId = SettingLinkIds.MAIN_ADVANCED,
                 onClick = onAdvancedClick
             )
-
-            SettingsGroupDivider(stringResource(R.string.settings_group_pastiera))
-
             SettingsCategoryRow(
                 icon = Icons.Filled.Info,
                 title = stringResource(R.string.about_title),
@@ -557,13 +545,9 @@ private fun SettingsCategoryRow(
                     tint = iconTint,
                     modifier = Modifier.size(24.dp)
                 )
-            } else if (icon != null) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = iconTint,
-                    modifier = Modifier.size(24.dp)
-                )
+            } else {
+                // Keeps the icon column even without an icon, so titles line up.
+                it.palsoftware.pastiera.ui.SettingsRowIcon(icon, tint = iconTint)
             }
             Column(modifier = Modifier.weight(1f)) {
                 Text(
@@ -574,16 +558,13 @@ private fun SettingsCategoryRow(
                         MaterialTheme.colorScheme.onSurface
                     } else {
                         MaterialTheme.colorScheme.onSurfaceVariant
-                    },
-                    maxLines = 1
+                    }
                 )
                 if (description != null) {
                     Text(
                         text = description,
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 2,
-                        overflow = TextOverflow.Ellipsis
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

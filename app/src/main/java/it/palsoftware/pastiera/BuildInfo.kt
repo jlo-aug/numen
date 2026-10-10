@@ -11,6 +11,6 @@ object BuildInfo {
      */
     fun getBuildInfoString(): String {
         val version = BuildConfig.VERSION_NAME
-        return "Ver. $version"
+        return "Version $version"
     }
 }

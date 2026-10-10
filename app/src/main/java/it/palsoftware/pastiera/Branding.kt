@@ -6,8 +6,8 @@ package it.palsoftware.pastiera
  */
 object Branding {
     val appName: String = "Numen"
-    val launcherName: String = "KeyLaunches"
-    val launcherSubtitle: String = "Open KeyLaunches search"
+    val launcherName: String = "App search"
+    val launcherSubtitle: String = "Search your apps"
     val compactBarName: String = "Compact bar"
 
     /** Built-in theme names stay stable identifiers ("Pastiera Dark"); only their label changes. */

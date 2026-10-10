@@ -1,5 +1,23 @@
 # Changelog
 
+## Numen 1.2.1 (October 2026)
+
+- Simpler out of the box: the keyboard bar shows just emoji on the left and the microphone on the
+  right, with no accent row and no suggestion row. SYM opens the symbols page, then the full emoji
+  picker. Your own saved settings are never changed; these are the defaults for new installs and
+  for anything you haven't set yourself.
+- Settings rebuilt for the Titan 2 Elite: four groups (Typing, Keys, Look & sound, System), plain
+  names, and nothing cut off on the square screen. Settings for other keyboards and devices are
+  gone; one you had changed stays visible so you can set it back.
+- One place for app shortcuts (was KeyLaunches, now "App shortcuts" and "App search"), and the two
+  Alt-after-Space switches now sit together in Keys & modifiers.
+- Autocorrect fixes a long word one letter off at the start of a sentence ("Yesterdar" ->
+  "Yesterday"), while names are still left alone.
+- About shows the right version and no longer reports the wrong device.
+- Plainer names throughout: "Autocorrect", "Snippets" (was text expansion), "Accent row" (was
+  variations), and the SYM pages "Symbols", "Emoji" and "Titan symbols".
+- About credits now list every data source the app ships with.
+
 ## Numen 1.2 (October 2026)
 
 - Number lock: double-tap Alt to type numbers and symbols, and it now stays on after Space until

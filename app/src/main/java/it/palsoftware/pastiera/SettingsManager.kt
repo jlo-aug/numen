@@ -1929,6 +1929,9 @@ object SettingsManager {
             .apply()
     }
 
+    fun getDefaultAccessibilitySuggestionsAnnouncementDelayMs(): Long =
+        DEFAULT_ACCESSIBILITY_SUGGESTIONS_ANNOUNCEMENT_DELAY_MS
+
     fun getMinAccessibilitySuggestionsAnnouncementDelayMs(): Long =
         MIN_ACCESSIBILITY_SUGGESTIONS_ANNOUNCEMENT_DELAY_MS
 

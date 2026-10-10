@@ -134,7 +134,10 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
         route = SettingRoute(
             destination = SettingsDestination.Customization,
             customizationDestination = "launcher_shortcut_behavior"
-        )
+        ),
+        // The layout is always QWERTY; the switch shows only if it was turned off.
+        availabilityCheck = { !SettingsManager.getQuickLauncherRespectKeyboardLayout(it) },
+        unavailableFallbackId = "quick_launcher.behavior"
     ),
     SettingEntry(
         id = "quick_launcher.typo_tolerant_ranking",
@@ -590,15 +593,6 @@ internal fun customizationSettingEntries(): List<SettingEntry> = listOf(
             customizationDestination = "keyboard_theme",
             keyboardThemeTarget = SettingsManager.KeyboardThemeTarget.SOFTWARE,
             keyboardThemeTab = KeyboardThemeEditorTab.Keys
-        )
-    ),
-    SettingEntry(
-        id = "keyboard_theme.preview_viewport",
-        titleRes = R.string.setting_link_theme_preview_viewport,
-        route = SettingRoute(
-            destination = SettingsDestination.Customization,
-            customizationDestination = "keyboard_theme",
-            keyboardThemeTarget = SettingsManager.KeyboardThemeTarget.SOFTWARE
         )
     ),
     SettingEntry(

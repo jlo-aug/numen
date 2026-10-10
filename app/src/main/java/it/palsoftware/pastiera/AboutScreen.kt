@@ -33,7 +33,6 @@ import java.io.IOException
 import android.content.Intent
 import android.net.Uri
 import android.graphics.BitmapFactory
-import it.palsoftware.pastiera.inputmethod.DeviceSpecific
 
 /**
  * About screen displaying credits and acknowledgments from Markdown file.
@@ -94,9 +93,11 @@ fun AboutScreen(
         ) {
             // Numen's modification notice and links are in its credits (assets/common/about_credits.md).
 
+            // Same card fill as the Home screen, with regular text so it does not look disabled.
             Surface(
                 modifier = Modifier.fillMaxWidth(),
-                color = MaterialTheme.colorScheme.surfaceVariant,
+                color = MaterialTheme.colorScheme.surfaceContainer,
+                contentColor = MaterialTheme.colorScheme.onSurface,
                 shape = MaterialTheme.shapes.medium
             ) {
                 Column(modifier = Modifier.padding(16.dp)) {
@@ -106,18 +107,8 @@ fun AboutScreen(
                         fontWeight = FontWeight.Medium
                     )
                     Text(
-                        text = BuildInfo.getBuildInfoString(),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    Text(
-                        text = stringResource(
-                            R.string.settings_device_keyboard_info,
-                            DeviceSpecific.deviceName(),
-                            DeviceSpecific.keyboardName()
-                        ),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                        text = stringResource(R.string.about_version, BuildConfig.VERSION_NAME),
+                        style = MaterialTheme.typography.bodyMedium
                     )
                 }
             }

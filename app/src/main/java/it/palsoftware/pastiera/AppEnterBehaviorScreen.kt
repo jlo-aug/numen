@@ -16,7 +16,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.Chat
+import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
 import androidx.compose.material.icons.automirrored.filled.Send
+import it.palsoftware.pastiera.ui.SettingsRowIcon
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material.icons.filled.WarningAmber
@@ -148,14 +151,15 @@ fun AppEnterBehaviorScreen(
         }
         Column(modifier = Modifier.fillMaxWidth().verticalScroll(rememberScrollState())) {
 
-        Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.enabled")) {
+        Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.enabled"), color = MaterialTheme.colorScheme.background) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                SettingsRowIcon(Icons.AutoMirrored.Filled.KeyboardReturn)
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.app_enter_behaviour_enable_title),
@@ -205,7 +209,7 @@ fun AppEnterBehaviorScreen(
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 8.dp),
+                    .padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
                 color = MaterialTheme.colorScheme.tertiaryContainer,
                 contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                 shape = MaterialTheme.shapes.medium
@@ -236,13 +240,9 @@ fun AppEnterBehaviorScreen(
             }
         }
 
-        Text(
+        it.palsoftware.pastiera.ui.SettingsSectionLabel(
             text = stringResource(R.string.app_enter_behaviour_overrides_title),
-            style = MaterialTheme.typography.titleMedium,
-            fontWeight = FontWeight.Medium,
-            color = MaterialTheme.colorScheme.onSurface,
-            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)
-                .settingRow("app_enter_behavior.overrides")
+            modifier = Modifier.settingRow("app_enter_behavior.overrides")
         )
 
         overrides.forEach { override ->
@@ -291,7 +291,7 @@ fun AppEnterBehaviorScreen(
             )
         }
 
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(modifier = Modifier.navigationBarsPadding().height(24.dp))
         }
     }
 
@@ -333,8 +333,13 @@ private fun EnterPresetSelector(
     onPresetSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.preset")) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+    Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.preset"), color = MaterialTheme.colorScheme.background) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+        SettingsRowIcon(Icons.AutoMirrored.Filled.Chat)
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.app_enter_behaviour_preset_title),
                 style = MaterialTheme.typography.titleMedium,
@@ -377,7 +382,7 @@ private fun EnterPresetSelector(
                 }
             }
         }
-    }
+    }    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -387,8 +392,13 @@ private fun EnterAdditionalSendShortcutSelector(
     onShortcutSelected: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.additional_send_shortcut")) {
-        Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp)) {
+    Surface(modifier = Modifier.fillMaxWidth().settingRow("app_enter_behavior.additional_send_shortcut"), color = MaterialTheme.colorScheme.background) {
+        Row(
+            modifier = Modifier.padding(horizontal = 16.dp, vertical = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+        SettingsRowIcon(Icons.AutoMirrored.Filled.Send)
+        Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = stringResource(R.string.app_enter_behaviour_additional_send_shortcut_label),
                 style = MaterialTheme.typography.titleMedium,
@@ -431,7 +441,7 @@ private fun EnterAdditionalSendShortcutSelector(
                 }
             }
         }
-    }
+    }    }
 }
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
@@ -465,30 +475,38 @@ private fun EnterBehaviorOverrideRow(
     Surface(
         modifier = Modifier
             .fillMaxWidth()
-            .bringIntoViewRequester(bringIntoViewRequester)
+            .bringIntoViewRequester(bringIntoViewRequester),
+        color = MaterialTheme.colorScheme.background
     ) {
         Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp)) {
+            // App icon on the 24 dp icon column, so the app name starts at the title column.
             Row(verticalAlignment = Alignment.CenterVertically) {
-                AppIcon(app = app, modifier = Modifier.size(36.dp))
+                AppIcon(app = app, modifier = Modifier.size(24.dp))
                 Column(
                     modifier = Modifier
                         .weight(1f)
-                        .padding(horizontal = 12.dp)
+                        .padding(start = 12.dp, end = 12.dp)
                 ) {
                     Text(
                         text = app.label,
-                        style = MaterialTheme.typography.titleSmall,
+                        style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Medium,
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
-                    Text(
-                        text = app.packageName,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
+                    if (editable) {
+                        ManualEnterBehaviorStatus(
+                            behavior = behavior,
+                            sendStrategy = sendStrategy,
+                            additionalSendShortcut = additionalSendShortcut
+                        )
+                    } else {
+                        Text(
+                            text = knownEnterBehaviorStatusText(app.packageName, behavior),
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
                 }
                 TextButton(
                     onClick = { showManualOverrideControls = !showManualOverrideControls },
@@ -504,14 +522,14 @@ private fun EnterBehaviorOverrideRow(
                 }
             }
 
-            if (editable) {
-                ManualEnterBehaviorStatus(
+            // Details and manual controls start at the title column (16 + 36 = 52 dp).
+            Column(modifier = Modifier.padding(start = 36.dp)) {
+            if (!editable) {
+                KnownEnterBehaviorDetails(
+                    packageName = app.packageName,
                     behavior = behavior,
-                    sendStrategy = sendStrategy,
-                    additionalSendShortcut = additionalSendShortcut
+                    showDetails = showManualOverrideControls
                 )
-            } else {
-                KnownEnterBehaviorStatus(app.packageName, behavior)
                 if (showManualOverrideControls) {
                     Text(
                         text = stringResource(R.string.app_enter_behaviour_manual_override_note),
@@ -634,6 +652,7 @@ private fun EnterBehaviorOverrideRow(
                     }
                 }
             }
+            }
         }
     }
 }
@@ -651,8 +670,7 @@ private fun ManualEnterBehaviorStatus(
             getEnterSendStrategyLabel(sendStrategy)
         ),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 4.dp)
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     if (additionalSendShortcut != SettingsManager.ENTER_ADDITIONAL_SEND_SHORTCUT_NONE) {
         Text(
@@ -661,8 +679,7 @@ private fun ManualEnterBehaviorStatus(
                 getEnterAdditionalSendShortcutLabel(additionalSendShortcut)
             ),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 2.dp)
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -739,14 +756,7 @@ private fun AddEnterBehaviorAppDialog(
                                         .weight(1f)
                                         .padding(start = 12.dp)
                                 ) {
-                                    Text(app.label, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                                    Text(
-                                        text = app.packageName,
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    Text(app.label, maxLines = 2, overflow = TextOverflow.Ellipsis)
                                 }
                                 Checkbox(
                                     checked = selected,
@@ -827,23 +837,9 @@ private fun enterBehaviorOptions(): List<String> {
 }
 
 @Composable
-private fun KnownEnterBehaviorStatus(packageName: String, behavior: String) {
+private fun knownEnterBehaviorStatusText(packageName: String, behavior: String): String {
     val behaviorText = getEnterBehaviorLabel(behavior)
-    val strategyLabel = when {
-        packageName == DISCORD_PACKAGE_NAME &&
-            behavior == SettingsManager.ENTER_BEHAVIOR_ENTER_SEND_SHIFT_NEWLINE ->
-            stringResource(R.string.app_enter_behaviour_strategy_none_label)
-        packageName == DISCORD_PACKAGE_NAME &&
-            behavior == SettingsManager.ENTER_BEHAVIOR_ENTER_NEWLINE_CTRL_SEND ->
-            stringResource(R.string.app_enter_behaviour_strategy_plain_enter_label)
-        behavior == SettingsManager.ENTER_BEHAVIOR_APP_DEFAULT ->
-            stringResource(R.string.app_enter_behaviour_strategy_none_label)
-        packageName in favoriteEnterBehaviorApps ->
-            stringResource(R.string.app_enter_behaviour_strategy_app_action_label)
-        else ->
-            stringResource(R.string.app_enter_behaviour_strategy_unconfigured_label)
-    }
-    val statusText = when {
+    return when {
         packageName == DISCORD_PACKAGE_NAME &&
             behavior == SettingsManager.ENTER_BEHAVIOR_ENTER_SEND_SHIFT_NEWLINE ->
             stringResource(R.string.app_enter_behaviour_status_native_result)
@@ -858,6 +854,24 @@ private fun KnownEnterBehaviorStatus(packageName: String, behavior: String) {
             stringResource(R.string.app_enter_behaviour_status_experimental_result, behaviorText)
         else ->
             stringResource(R.string.app_enter_behaviour_status_not_active, behaviorText)
+    }
+}
+
+@Composable
+private fun KnownEnterBehaviorDetails(packageName: String, behavior: String, showDetails: Boolean) {
+    val strategyLabel = when {
+        packageName == DISCORD_PACKAGE_NAME &&
+            behavior == SettingsManager.ENTER_BEHAVIOR_ENTER_SEND_SHIFT_NEWLINE ->
+            stringResource(R.string.app_enter_behaviour_strategy_none_label)
+        packageName == DISCORD_PACKAGE_NAME &&
+            behavior == SettingsManager.ENTER_BEHAVIOR_ENTER_NEWLINE_CTRL_SEND ->
+            stringResource(R.string.app_enter_behaviour_strategy_plain_enter_label)
+        behavior == SettingsManager.ENTER_BEHAVIOR_APP_DEFAULT ->
+            stringResource(R.string.app_enter_behaviour_strategy_none_label)
+        packageName in favoriteEnterBehaviorApps ->
+            stringResource(R.string.app_enter_behaviour_strategy_app_action_label)
+        else ->
+            stringResource(R.string.app_enter_behaviour_strategy_unconfigured_label)
     }
     val strategyText = when {
         packageName == DISCORD_PACKAGE_NAME &&
@@ -883,30 +897,27 @@ private fun KnownEnterBehaviorStatus(packageName: String, behavior: String) {
             stringResource(R.string.app_enter_behaviour_strategy_not_tested_detail)
     }
 
-    Surface(
-        color = MaterialTheme.colorScheme.secondaryContainer,
-        contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-        shape = MaterialTheme.shapes.small,
-        modifier = Modifier.padding(top = 8.dp)
-    ) {
+    // The technical details (how Numen sends, what was tested) stay behind "Change manually".
+    if (showDetails) {
+        Surface(
+            color = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
+            shape = MaterialTheme.shapes.small,
+            modifier = Modifier.padding(top = 8.dp)
+        ) {
+            Text(
+                text = strategyLabel,
+                style = MaterialTheme.typography.labelMedium,
+                modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            )
+        }
         Text(
-            text = strategyLabel,
-            style = MaterialTheme.typography.labelMedium,
-            modifier = Modifier.padding(horizontal = 10.dp, vertical = 4.dp)
+            text = strategyText,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 2.dp, bottom = 4.dp)
         )
     }
-    Text(
-        text = statusText,
-        style = MaterialTheme.typography.bodyMedium,
-        color = MaterialTheme.colorScheme.onSurface,
-        modifier = Modifier.padding(top = 4.dp)
-    )
-    Text(
-        text = strategyText,
-        style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
-        modifier = Modifier.padding(top = 2.dp)
-    )
 }
 
 @Composable

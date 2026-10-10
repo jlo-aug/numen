@@ -27,6 +27,7 @@ class SettingsActivity : ComponentActivity() {
         const val CUSTOMIZATION_DESTINATION_APP_ENTER_BEHAVIOR = "app_enter_behavior"
         const val CUSTOMIZATION_DESTINATION_STATUS_BAR_BUTTONS = "status_bar_buttons"
         const val CUSTOMIZATION_DESTINATION_KEYBOARD_THEME = "keyboard_theme"
+        const val CUSTOMIZATION_DESTINATION_SOUNDS = "sounds"
         const val EXTRA_KEYBOARD_THEME_TARGET = "it.palsoftware.pastiera.KEYBOARD_THEME_TARGET"
         const val KEYBOARD_THEME_TARGET_SOFTWARE = "software"
     }
@@ -38,7 +39,7 @@ class SettingsActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        intent.putSettingsPage(intent.settingsPage())
+        intent.putSettingsPage(intent.settingsPage(this))
         enableEdgeToEdge()
         settingLinkRequest.value = if (savedInstanceState == null) {
             resolveSettingLinkId(intent)?.let(::newSettingLinkRequest)

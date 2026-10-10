@@ -9,6 +9,7 @@ import android.view.KeyEvent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
@@ -21,7 +22,24 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.ManageSearch
 import androidx.compose.material.icons.automirrored.filled.VolumeUp
+import androidx.compose.material.icons.automirrored.filled.Launch
+import androidx.compose.material.icons.filled.Animation
+import androidx.compose.material.icons.filled.Apps
 import androidx.compose.material.icons.filled.Bolt
+import androidx.compose.material.icons.filled.FilterList
+import androidx.compose.material.icons.filled.Keyboard
+import androidx.compose.material.icons.filled.Palette
+import androidx.compose.material.icons.filled.Spellcheck
+import androidx.compose.material.icons.filled.ViewCompact
+import androidx.compose.material.icons.filled.WidthNormal
+import androidx.compose.ui.graphics.vector.ImageVector
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSliderRow
+import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
+import androidx.compose.material.icons.automirrored.filled.Help
+import androidx.compose.material.icons.automirrored.filled.Shortcut
+import androidx.compose.material.icons.filled.FindReplace
+import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.LineWeight
 import androidx.compose.material.icons.filled.Edit
@@ -69,8 +87,7 @@ fun CustomizationSettingsScreen(
     onBack: () -> Unit,
     initialDestination: String? = null,
     initialKeyboardThemeTarget: String? = null,
-    initialKeyboardThemeTab: String? = null,
-    onOpenModifiers: () -> Unit = {}
+    initialKeyboardThemeTab: String? = null
 ) {
     val context = LocalContext.current
     val prefs = remember { SettingsManager.getPreferences(context) }
@@ -237,123 +254,12 @@ fun CustomizationSettingsScreen(
 
     val destination = currentDestination
         when (destination) {
-            CustomizationDestination.Main -> {
-                Scaffold(
-                    topBar = {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .windowInsetsPadding(WindowInsets.statusBars),
-                            tonalElevation = 1.dp
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                IconButton(onClick = { navigateBack() }) {
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = stringResource(R.string.settings_back_content_description)
-                                    )
-                                }
-                                Text(
-                                    text = stringResource(R.string.settings_category_customization),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
-                    }
-                ) { paddingValues ->
-                    Column(
-                        modifier = modifier
-                            .fillMaxWidth()
-                            .padding(paddingValues)
-                            .verticalScroll(rememberScrollState())
-                    ) {
-                        // Variations Customization
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .settingRow("customization.variations") { navigateTo(CustomizationDestination.Variations) }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Tune,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.variation_customize_title),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                        // Sound Settings
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .settingRow("customization.sounds") { navigateTo(CustomizationDestination.Sounds) }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.VolumeUp,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.settings_category_sounds),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.settings_sounds_description),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                    }
-                }
+            // Sound & vibration has a single page, so the main list opens it directly.
+            CustomizationDestination.Main, CustomizationDestination.Sounds -> {
+                SoundSettingsScreen(
+                    modifier = modifier,
+                    onBack = { navigateBack() }
+                )
             }
 
             CustomizationDestination.Variations -> {
@@ -510,8 +416,7 @@ fun CustomizationSettingsScreen(
                 StatusBarButtonsScreen(
                     modifier = modifier,
                     onBack = { navigateBack() },
-                    onCustomizeVariations = { navigateTo(CustomizationDestination.Variations) },
-                    onOpenModifiers = onOpenModifiers
+                    onCustomizeVariations = { navigateTo(CustomizationDestination.Variations) }
                 )
             }
 
@@ -536,13 +441,6 @@ fun CustomizationSettingsScreen(
                     initialTab = KeyboardThemeEditorTab.values().firstOrNull { tab ->
                         tab.name.equals(initialKeyboardThemeTab, ignoreCase = true)
                     }
-                )
-            }
-
-            CustomizationDestination.Sounds -> {
-                SoundSettingsScreen(
-                    modifier = modifier,
-                    onBack = { navigateBack() }
                 )
             }
         }
@@ -598,23 +496,23 @@ private fun StarterLauncherShortcutsSettingsScreen(
             }
         }
     ) { paddingValues ->
+        // Flat, full-width rows like the other settings screens.
         Column(
             modifier = modifier
                 .fillMaxWidth()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             Text(
                 text = stringResource(R.string.starter_launcher_shortcuts_intro),
-                style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                modifier = Modifier.padding(start = 52.dp, end = 16.dp, top = 12.dp, bottom = 12.dp)
             )
 
             if (quickLauncherDefaultBlocked) {
                 Surface(
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp, end = 16.dp, top = 4.dp, bottom = 4.dp),
                     color = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
                     shape = MaterialTheme.shapes.medium
@@ -628,6 +526,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
             }
 
             LauncherShortcutTriggerRow(
+                flat = true,
                 icon = {
                     Icon(
                         imageVector = Icons.Filled.LineWeight,
@@ -644,14 +543,8 @@ private fun StarterLauncherShortcutsSettingsScreen(
             )
 
             LauncherShortcutTriggerRow(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.Bolt,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
+                flat = true,
+                icon = { SettingsRowIcon(Icons.AutoMirrored.Filled.Shortcut) },
                 linkId = "quick_launcher.sym_shortcuts",
                 title = stringResource(R.string.power_shortcuts_title),
                 description = stringResource(R.string.power_shortcuts_description),
@@ -660,6 +553,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
             )
             if (powerShortcutsEnabled) {
                 LauncherShortcutTriggerRow(
+                    flat = true,
                     icon = {},
                     title = stringResource(R.string.key_shortcuts_allow_in_text_fields_title),
                     linkId = "quick_launcher.sym_in_text_fields",
@@ -671,6 +565,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
             }
 
             LauncherShortcutTriggerRow(
+                flat = true,
                 icon = {
                     Icon(
                         painter = painterResource(R.drawable.keyboard_option_key_24),
@@ -687,6 +582,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
             )
             if (altKeyShortcutsEnabled) {
                 LauncherShortcutTriggerRow(
+                    flat = true,
                     icon = {},
                     title = stringResource(R.string.key_shortcuts_allow_in_text_fields_title),
                     linkId = "quick_launcher.alt_in_text_fields",
@@ -698,6 +594,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
             }
 
             StarterLauncherNavigationRow(
+                flat = true,
                 icon = {
                     Icon(
                         imageVector = Icons.Filled.Tune,
@@ -713,6 +610,7 @@ private fun StarterLauncherShortcutsSettingsScreen(
             )
 
             StarterLauncherNavigationRow(
+                flat = true,
                 icon = {
                     Icon(
                         imageVector = Icons.AutoMirrored.Filled.ManageSearch,
@@ -728,14 +626,8 @@ private fun StarterLauncherShortcutsSettingsScreen(
             )
 
             StarterLauncherNavigationRow(
-                icon = {
-                    Icon(
-                        imageVector = Icons.Filled.SmartButton,
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                },
+                flat = true,
+                icon = { SettingsRowIcon(Icons.Filled.Keyboard) },
                 linkId = "quick_launcher.assignments",
                 title = stringResource(R.string.launcher_shortcuts_configure),
                 description = if (quickLauncherShortcutKey != null) {
@@ -772,6 +664,9 @@ private fun StarterLauncherBehaviorScreen(
 ) {
     var showRankingInfo by remember { mutableStateOf(false) }
     var behaviorMenuExpanded by remember { mutableStateOf(false) }
+    // Numen's layout is always QWERTY, so this switch changes nothing unless it was
+    // turned off; it stays visible (for this visit) only then, to allow setting it back.
+    val showRespectKeyboardLayout = remember { !quickLauncherRespectKeyboardLayout }
     val behaviorOptions = listOf(
         SettingsManager.QUICK_LAUNCHER_BEHAVIOR_PASTIERA,
         SettingsManager.QUICK_LAUNCHER_BEHAVIOR_NIAGARA
@@ -783,61 +678,52 @@ private fun StarterLauncherBehaviorScreen(
         title = stringResource(R.string.quick_launcher_behaviour_title),
         onBack = onBack
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.provider"),
-            tonalElevation = 1.dp,
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+        LauncherSettingBlock(icon = Icons.Filled.Apps, linkId = "quick_launcher.provider") {
+            Text(
+                text = stringResource(R.string.quick_launcher_provider_title),
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            Text(
+                text = stringResource(R.string.quick_launcher_provider_description),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            ExposedDropdownMenuBox(
+                expanded = behaviorMenuExpanded,
+                onExpandedChange = { behaviorMenuExpanded = !behaviorMenuExpanded }
             ) {
-                Text(
-                    text = stringResource(R.string.quick_launcher_provider_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
+                OutlinedTextField(
+                    value = quickLauncherBehaviorLabel(quickLauncherBehavior),
+                    onValueChange = {},
+                    readOnly = true,
+                    singleLine = true,
+                    trailingIcon = {
+                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = behaviorMenuExpanded)
+                    },
+                    colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
+                    modifier = Modifier
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                        .fillMaxWidth()
                 )
-                Text(
-                    text = stringResource(R.string.quick_launcher_provider_description),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                ExposedDropdownMenuBox(
+                ExposedDropdownMenu(
                     expanded = behaviorMenuExpanded,
-                    onExpandedChange = { behaviorMenuExpanded = !behaviorMenuExpanded }
+                    onDismissRequest = { behaviorMenuExpanded = false }
                 ) {
-                    OutlinedTextField(
-                        value = quickLauncherBehaviorLabel(quickLauncherBehavior),
-                        onValueChange = {},
-                        readOnly = true,
-                        singleLine = true,
-                        trailingIcon = {
-                            ExposedDropdownMenuDefaults.TrailingIcon(expanded = behaviorMenuExpanded)
-                        },
-                        colors = ExposedDropdownMenuDefaults.outlinedTextFieldColors(),
-                        modifier = Modifier
-                            .menuAnchor(MenuAnchorType.PrimaryNotEditable)
-                            .fillMaxWidth()
-                    )
-                    ExposedDropdownMenu(
-                        expanded = behaviorMenuExpanded,
-                        onDismissRequest = { behaviorMenuExpanded = false }
-                    ) {
-                        behaviorOptions.forEach { behavior ->
-                            DropdownMenuItem(
-                                text = { Text(quickLauncherBehaviorLabel(behavior)) },
-                                onClick = {
-                                    behaviorMenuExpanded = false
-                                    onQuickLauncherBehaviorChanged(behavior)
-                                }
-                            )
-                        }
+                    behaviorOptions.forEach { behavior ->
+                        DropdownMenuItem(
+                            text = { Text(quickLauncherBehaviorLabel(behavior)) },
+                            onClick = {
+                                behaviorMenuExpanded = false
+                                onQuickLauncherBehaviorChanged(behavior)
+                            }
+                        )
                     }
                 }
             }
         }
         LauncherShortcutTriggerRow(
-            icon = { SettingsRowKeyboardIcon() },
+            icon = { SettingsRowIcon(Icons.AutoMirrored.Filled.Launch) },
             linkId = "quick_launcher.auto_start_single",
             title = stringResource(R.string.quick_launcher_auto_start_single_title),
             description = stringResource(R.string.quick_launcher_auto_start_single_description),
@@ -845,86 +731,80 @@ private fun StarterLauncherBehaviorScreen(
             onCheckedChange = onQuickLauncherAutoStartSingleChanged
         )
         LauncherShortcutTriggerRow(
-            icon = { SettingsRowKeyboardIcon() },
+            icon = { SettingsRowIcon(Icons.Filled.FilterList) },
             linkId = "quick_launcher.limit_results",
             title = stringResource(R.string.quick_launcher_limit_results_title),
             description = stringResource(R.string.quick_launcher_limit_results_description),
             checked = quickLauncherLimitResults,
             onCheckedChange = onQuickLauncherLimitResultsChanged
         )
+        if (showRespectKeyboardLayout) {
+            LauncherShortcutTriggerRow(
+                icon = { SettingsRowIcon(Icons.Filled.Keyboard) },
+                linkId = "quick_launcher.respect_keyboard_layout",
+                title = stringResource(R.string.quick_launcher_respect_keyboard_layout_title),
+                description = stringResource(R.string.quick_launcher_respect_keyboard_layout_description),
+                checked = quickLauncherRespectKeyboardLayout,
+                onCheckedChange = onQuickLauncherRespectKeyboardLayoutChanged
+            )
+        }
         LauncherShortcutTriggerRow(
-            icon = { SettingsRowKeyboardIcon() },
-            linkId = "quick_launcher.respect_keyboard_layout",
-            title = stringResource(R.string.quick_launcher_respect_keyboard_layout_title),
-            description = stringResource(R.string.quick_launcher_respect_keyboard_layout_description),
-            checked = quickLauncherRespectKeyboardLayout,
-            onCheckedChange = onQuickLauncherRespectKeyboardLayoutChanged
-        )
-        LauncherShortcutTriggerRow(
-            icon = { SettingsRowKeyboardIcon() },
+            icon = { SettingsRowIcon(Icons.Filled.FindReplace) },
             linkId = "quick_launcher.typo_tolerant_ranking",
             title = stringResource(R.string.quick_launcher_typo_tolerant_ranking_title),
             description = stringResource(R.string.quick_launcher_typo_tolerant_ranking_description),
             checked = quickLauncherTypoTolerantRanking,
             onCheckedChange = onQuickLauncherTypoTolerantRankingChanged
         )
-        TextButton(
-            onClick = { showRankingInfo = true },
-            modifier = Modifier.align(Alignment.End)
+        // Opens an explanation, like the Nav mode guide row.
+        StarterLauncherNavigationRow(
+            icon = { SettingsRowIcon(Icons.AutoMirrored.Filled.Help) },
+            title = stringResource(R.string.quick_launcher_ranking_info_button),
+            description = stringResource(R.string.quick_launcher_ranking_info_description),
+            onClick = { showRankingInfo = true }
+        )
+        SettingsSliderRow(
+            icon = Icons.Filled.Animation,
+            title = stringResource(R.string.quick_launcher_animation_duration_title),
+            value = stringResource(
+                R.string.quick_launcher_animation_duration_value,
+                quickLauncherAnimationDurationMs
+            ),
+            modifier = Modifier.settingRow("quick_launcher.animation_duration")
         ) {
-            Icon(
-                imageVector = Icons.Filled.Info,
-                contentDescription = null,
-                modifier = Modifier.size(18.dp)
+            Slider(
+                value = quickLauncherAnimationDurationMs.toFloat(),
+                onValueChange = { value ->
+                    val rounded = (value / 20f).toInt() * 20
+                    onQuickLauncherAnimationDurationChanged(rounded)
+                },
+                valueRange = SettingsManager.QUICK_LAUNCHER_ANIMATION_DURATION_MIN_MS.toFloat()..
+                    SettingsManager.QUICK_LAUNCHER_ANIMATION_DURATION_MAX_MS.toFloat(),
+                steps = 15
             )
-            Spacer(modifier = Modifier.width(6.dp))
-            Text(stringResource(R.string.quick_launcher_ranking_info_button))
         }
-        Surface(
-            modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.animation_duration"),
-            tonalElevation = 1.dp,
-            shape = MaterialTheme.shapes.medium
+        // How to open app search while typing: a plain row, not a floating card.
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .padding(horizontal = 16.dp, vertical = 8.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
-            ) {
+            SettingsRowIcon(Icons.Filled.SpaceBar)
+            Column(modifier = Modifier.weight(1f)) {
                 Text(
-                    text = stringResource(R.string.quick_launcher_animation_duration_title),
+                    text = stringResource(R.string.quick_launcher_text_field_shortcuts_title),
                     style = MaterialTheme.typography.titleMedium,
                     fontWeight = FontWeight.Medium
                 )
                 Text(
-                    text = stringResource(
-                        R.string.quick_launcher_animation_duration_value,
-                        quickLauncherAnimationDurationMs
-                    ),
+                    text = stringResource(R.string.quick_launcher_text_field_shortcuts_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
-                Slider(
-                    value = quickLauncherAnimationDurationMs.toFloat(),
-                    onValueChange = { value ->
-                        val rounded = (value / 20f).toInt() * 20
-                        onQuickLauncherAnimationDurationChanged(rounded)
-                    },
-                    valueRange = SettingsManager.QUICK_LAUNCHER_ANIMATION_DURATION_MIN_MS.toFloat()..
-                        SettingsManager.QUICK_LAUNCHER_ANIMATION_DURATION_MAX_MS.toFloat(),
-                    steps = 15
-                )
             }
-        }
-        Surface(
-            modifier = Modifier.fillMaxWidth(),
-            color = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer,
-            shape = MaterialTheme.shapes.medium
-        ) {
-            Text(
-                text = stringResource(R.string.quick_launcher_text_field_shortcuts_hint),
-                style = MaterialTheme.typography.bodySmall,
-                modifier = Modifier.padding(12.dp)
-            )
         }
     }
 
@@ -959,11 +839,11 @@ private fun QuickLauncherDisplayedEntriesSection(
     val context = LocalContext.current
     var showCustomizeDialog by remember { mutableStateOf(false) }
     val sourceLabels = mapOf(
-        CommandSourceId.Apps.storageValue to "Apps",
-        CommandSourceId.Pastiera.storageValue to "${Branding.appName} actions",
-        CommandSourceId.AppActions.storageValue to "App actions",
-        CommandSourceId.DeviceControl.storageValue to "Device control",
-        CommandSourceId.NavActions.storageValue to "Navigation actions"
+        CommandSourceId.Apps.storageValue to stringResource(R.string.setting_link_quick_launcher_source_apps),
+        CommandSourceId.Pastiera.storageValue to stringResource(R.string.setting_link_quick_launcher_source_pastiera),
+        CommandSourceId.AppActions.storageValue to stringResource(R.string.setting_link_quick_launcher_source_appactions),
+        CommandSourceId.DeviceControl.storageValue to stringResource(R.string.setting_link_quick_launcher_source_devicecontrol),
+        CommandSourceId.NavActions.storageValue to stringResource(R.string.setting_link_quick_launcher_source_navactions)
     )
 
     fun update(sourceId: String, quickLauncher: Boolean) {
@@ -978,80 +858,37 @@ private fun QuickLauncherDisplayedEntriesSection(
         )
     }
 
-    Surface(
-        modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.entries"),
-        tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.medium
-    ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+    LauncherGroupHeaderRow(
+        icon = Icons.AutoMirrored.Filled.ManageSearch,
+        title = stringResource(R.string.setting_link_quick_launcher_entries),
+        description = stringResource(R.string.quick_launcher_entries_description),
+        linkId = "quick_launcher.entries"
+    )
+    visibility.forEach { item ->
+        LauncherSubRow(
+            title = sourceLabels[item.sourceId] ?: item.sourceId,
+            linkId = when (item.sourceId) {
+                CommandSourceId.Apps.storageValue -> "quick_launcher.source.apps"
+                CommandSourceId.Pastiera.storageValue -> "quick_launcher.source.pastiera"
+                CommandSourceId.AppActions.storageValue -> "quick_launcher.source.app_actions"
+                CommandSourceId.DeviceControl.storageValue -> "quick_launcher.source.device_control"
+                CommandSourceId.NavActions.storageValue -> "quick_launcher.source.nav_actions"
+                else -> null
+            }
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Icon(
-                    imageVector = Icons.AutoMirrored.Filled.ManageSearch,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(28.dp)
-                )
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.setting_link_quick_launcher_entries),
-                        style = MaterialTheme.typography.titleMedium,
-                        fontWeight = FontWeight.Medium
-                    )
-                    Text(
-                        text = "Choose which sources appear in ${Branding.launcherName} search.",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                }
-            }
-            visibility.forEach { item ->
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 2.dp)
-                        .settingRow(when (item.sourceId) {
-                            CommandSourceId.Apps.storageValue -> "quick_launcher.source.apps"
-                            CommandSourceId.Pastiera.storageValue -> "quick_launcher.source.pastiera"
-                            CommandSourceId.AppActions.storageValue -> "quick_launcher.source.app_actions"
-                            CommandSourceId.DeviceControl.storageValue -> "quick_launcher.source.device_control"
-                            CommandSourceId.NavActions.storageValue -> "quick_launcher.source.nav_actions"
-                            else -> null
-                        }),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Text(
-                        text = sourceLabels[item.sourceId] ?: item.sourceId,
-                        modifier = Modifier.weight(1f),
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                    Switch(
-                        checked = item.quickLauncherEnabled,
-                        onCheckedChange = { update(item.sourceId, it) }
-                    )
-                }
-            }
-            Button(
-                onClick = { showCustomizeDialog = true },
-                modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.customize_entries")
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Edit,
-                    contentDescription = null,
-                    modifier = Modifier.size(18.dp)
-                )
-                Spacer(modifier = Modifier.width(6.dp))
-                Text("Customize entries")
-            }
+            Switch(
+                checked = item.quickLauncherEnabled,
+                onCheckedChange = { update(item.sourceId, it) }
+            )
         }
     }
+    StarterLauncherNavigationRow(
+        icon = { SettingsRowIcon(Icons.Filled.Edit) },
+        linkId = "quick_launcher.customize_entries",
+        title = stringResource(R.string.setting_link_quick_launcher_customize_entries),
+        description = stringResource(R.string.quick_launcher_customize_entries_description),
+        onClick = { showCustomizeDialog = true }
+    )
 
     if (showCustomizeDialog) {
         QuickLauncherCommandCustomizationDialog(
@@ -1145,12 +982,12 @@ private fun QuickLauncherCommandCustomizationDialog(
                 ) {
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
-                            text = "Customize entries",
+                            text = stringResource(R.string.setting_link_quick_launcher_customize_entries),
                             style = MaterialTheme.typography.titleLarge,
                             fontWeight = FontWeight.SemiBold
                         )
                         Text(
-                            text = "Favorites, hidden entries, and search aliases",
+                            text = stringResource(R.string.quick_launcher_customize_entries_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -1165,7 +1002,7 @@ private fun QuickLauncherCommandCustomizationDialog(
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = MaterialTheme.shapes.extraLarge,
-                    placeholder = { Text("Search entries") },
+                    placeholder = { Text(stringResource(R.string.quick_launcher_customize_search_hint)) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Filled.Search,
@@ -1188,12 +1025,12 @@ private fun QuickLauncherCommandCustomizationDialog(
                     FilterChip(
                         selected = selectedSource == null,
                         onClick = { selectedSource = null },
-                        label = { Text("All") }
+                        label = { Text(stringResource(R.string.quick_launcher_filter_all)) }
                     )
                     FilterChip(
                         selected = favoritesOnly,
                         onClick = { favoritesOnly = !favoritesOnly },
-                        label = { Text("Favorites") },
+                        label = { Text(stringResource(R.string.quick_launcher_filter_favorites)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Filled.Star,
@@ -1217,7 +1054,7 @@ private fun QuickLauncherCommandCustomizationDialog(
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No commands available for the selected sources.")
+                        Text(stringResource(R.string.quick_launcher_customize_no_entries))
                     }
                 } else if (entries.isEmpty()) {
                     Box(
@@ -1226,7 +1063,7 @@ private fun QuickLauncherCommandCustomizationDialog(
                             .weight(1f),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text("No entries match \"$query\".")
+                        Text(stringResource(R.string.quick_launcher_customize_no_matches, query))
                     }
                 } else {
                     LazyVerticalGrid(
@@ -1449,7 +1286,7 @@ private fun CommandCustomizationRow(
                     onValueChange = onCustomSearchChanged,
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
-                    label = { Text("Search alias") }
+                    label = { Text(stringResource(R.string.quick_launcher_nickname)) }
                 )
             }
         }
@@ -1485,35 +1322,21 @@ private fun StarterLauncherCosmeticScreen(
         title = stringResource(R.string.quick_launcher_cosmetic_title),
         onBack = onBack
     ) {
-        Surface(
-            modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.width"),
-            tonalElevation = 1.dp,
-            shape = MaterialTheme.shapes.medium
+        SettingsSliderRow(
+            icon = Icons.Filled.WidthNormal,
+            title = stringResource(R.string.quick_launcher_width_title),
+            value = stringResource(R.string.quick_launcher_width_value, quickLauncherWidthPercent),
+            modifier = Modifier.settingRow("quick_launcher.width")
         ) {
-            Column(
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.quick_launcher_width_title),
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium
-                )
-                Text(
-                    text = stringResource(R.string.quick_launcher_width_value, quickLauncherWidthPercent),
-                    style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-                Slider(
-                    value = quickLauncherWidthPercent.toFloat(),
-                    onValueChange = { onQuickLauncherWidthPercentChanged(it.toInt()) },
-                    valueRange = 50f..100f,
-                    steps = 9
-                )
-            }
+            Slider(
+                value = quickLauncherWidthPercent.toFloat(),
+                onValueChange = { onQuickLauncherWidthPercentChanged(it.toInt()) },
+                valueRange = 50f..100f,
+                steps = 9
+            )
         }
         LauncherShortcutTriggerRow(
-            icon = { SettingsRowKeyboardIcon() },
+            icon = { SettingsRowIcon(Icons.Filled.ViewCompact) },
             linkId = "quick_launcher.pill_mode",
             title = stringResource(R.string.quick_launcher_pill_mode_title),
             description = stringResource(R.string.quick_launcher_pill_mode_description),
@@ -1556,100 +1379,65 @@ private fun QuickLauncherFavoriteAppearanceSection(
     staticTopHighlightColor: Int,
     onStaticTopHighlightColorChanged: (Int) -> Unit
 ) {
-    Surface(
-        modifier = Modifier.fillMaxWidth(),
-        tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.medium
+    LauncherGroupHeaderRow(
+        icon = Icons.Filled.Palette,
+        title = stringResource(R.string.quick_launcher_entry_appearance_title),
+        description = stringResource(R.string.quick_launcher_entry_appearance_description)
+    )
+    LauncherSubRow(
+        title = stringResource(R.string.setting_link_quick_launcher_highlight_favorites),
+        linkId = "quick_launcher.highlight_favorites"
     ) {
-        Column(
-            modifier = Modifier.padding(horizontal = 12.dp, vertical = 10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp)
-        ) {
-            Text(
-                text = "Entry appearance",
-                style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium
-            )
-            Row(
-                modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.highlight_favorites"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                val favoriteHighlightColor = favoriteColor.takeUnless {
-                    it == SettingsManager.QUICK_LAUNCHER_DYNAMIC_FAVORITE_COLOR
-                }
-                Text(
-                    text = stringResource(R.string.setting_link_quick_launcher_highlight_favorites),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                ColorSwatchButton(
-                    linkId = "quick_launcher.favorite_color",
-                    color = favoriteHighlightColor,
-                    showDynamic = true,
-                    onColorChanged = {
-                        onFavoriteColorChanged(
-                            it ?: SettingsManager.QUICK_LAUNCHER_DYNAMIC_FAVORITE_COLOR
-                        )
-                    }
-                )
-                Switch(
-                    checked = highlightFavorites,
-                    onCheckedChange = onHighlightFavoritesChanged
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.icon_colors"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.setting_link_quick_launcher_icon_colors),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Switch(
-                    checked = iconColors,
-                    onCheckedChange = onIconColorsChanged
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.static_top_highlight"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.setting_link_quick_launcher_static_top_highlight),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                ColorSwatchButton(
-                    linkId = "quick_launcher.top_match_color",
-                    color = staticTopHighlightColor,
-                    showDynamic = false,
-                    onColorChanged = { it?.let(onStaticTopHighlightColorChanged) }
-                )
-                Switch(
-                    checked = staticTopHighlight,
-                    onCheckedChange = onStaticTopHighlightChanged
-                )
-            }
-            Row(
-                modifier = Modifier.fillMaxWidth().settingRow("quick_launcher.alias_first"),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                Text(
-                    text = stringResource(R.string.setting_link_quick_launcher_alias_first),
-                    modifier = Modifier.weight(1f),
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Switch(
-                    checked = showAliasFirst,
-                    onCheckedChange = onShowAliasFirstChanged
-                )
-            }
+        val favoriteHighlightColor = favoriteColor.takeUnless {
+            it == SettingsManager.QUICK_LAUNCHER_DYNAMIC_FAVORITE_COLOR
         }
+        ColorSwatchButton(
+            linkId = "quick_launcher.favorite_color",
+            color = favoriteHighlightColor,
+            showDynamic = true,
+            onColorChanged = {
+                onFavoriteColorChanged(
+                    it ?: SettingsManager.QUICK_LAUNCHER_DYNAMIC_FAVORITE_COLOR
+                )
+            }
+        )
+        Switch(
+            checked = highlightFavorites,
+            onCheckedChange = onHighlightFavoritesChanged
+        )
+    }
+    LauncherSubRow(
+        title = stringResource(R.string.setting_link_quick_launcher_icon_colors),
+        linkId = "quick_launcher.icon_colors"
+    ) {
+        Switch(
+            checked = iconColors,
+            onCheckedChange = onIconColorsChanged
+        )
+    }
+    LauncherSubRow(
+        title = stringResource(R.string.setting_link_quick_launcher_static_top_highlight),
+        linkId = "quick_launcher.static_top_highlight"
+    ) {
+        ColorSwatchButton(
+            linkId = "quick_launcher.top_match_color",
+            color = staticTopHighlightColor,
+            showDynamic = false,
+            onColorChanged = { it?.let(onStaticTopHighlightColorChanged) }
+        )
+        Switch(
+            checked = staticTopHighlight,
+            onCheckedChange = onStaticTopHighlightChanged
+        )
+    }
+    LauncherSubRow(
+        title = stringResource(R.string.setting_link_quick_launcher_alias_first),
+        linkId = "quick_launcher.alias_first"
+    ) {
+        Switch(
+            checked = showAliasFirst,
+            onCheckedChange = onShowAliasFirstChanged
+        )
     }
 }
 
@@ -1699,7 +1487,7 @@ private fun ColorSwatchButton(
                             horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
                             DynamicColorWheelSwatch()
-                            Text("Dynamic")
+                            Text(stringResource(R.string.quick_launcher_color_automatic))
                         }
                     },
                     onClick = {
@@ -1888,10 +1676,93 @@ private fun StarterLauncherSubScreen(
                 .fillMaxWidth()
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
-                .padding(horizontal = 16.dp, vertical = 8.dp),
-            verticalArrangement = Arrangement.spacedBy(6.dp),
+                .padding(vertical = 8.dp),
             content = content
         )
+    }
+}
+
+/** A flat settings row whose body is free-form (a slider, a dropdown, a list of switches). */
+@Composable
+private fun LauncherSettingBlock(
+    icon: ImageVector?,
+    linkId: String? = null,
+    content: @Composable ColumnScope.() -> Unit
+) {
+    Surface(modifier = Modifier.fillMaxWidth().settingRow(linkId)) {
+        Row(
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 10.dp),
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            SettingsRowIcon(icon, modifier = Modifier.padding(top = 2.dp))
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.spacedBy(6.dp),
+                content = content
+            )
+        }
+    }
+}
+
+/** First row of a group whose settings follow as sub-rows; its title is on the 52 dp column. */
+@Composable
+private fun LauncherGroupHeaderRow(
+    icon: ImageVector,
+    title: String,
+    description: String?,
+    linkId: String? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .settingRow(linkId)
+            .heightIn(min = 56.dp)
+            .padding(horizontal = 16.dp, vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SettingsRowIcon(icon)
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                fontWeight = FontWeight.Medium
+            )
+            if (description != null) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+/** A sub-row of a group: empty icon slot, title on the 88 dp column, controls at the end. */
+@Composable
+private fun LauncherSubRow(
+    title: String,
+    linkId: String? = null,
+    trailing: @Composable RowScope.() -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .settingRow(linkId)
+            .heightIn(min = 56.dp)
+            .padding(start = SettingsSubRowStartInset, end = 16.dp, top = 4.dp, bottom = 4.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(12.dp)
+    ) {
+        SettingsRowIcon(null)
+        Text(
+            text = title,
+            style = MaterialTheme.typography.titleMedium,
+            fontWeight = FontWeight.Medium,
+            modifier = Modifier.weight(1f)
+        )
+        trailing()
     }
 }
 
@@ -1903,40 +1774,43 @@ private fun LauncherShortcutTriggerRow(
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     indent: Boolean = false,
-    linkId: String? = null
+    linkId: String? = null,
+    flat: Boolean = true
 ) {
     Surface(
-        modifier = Modifier.fillMaxWidth().settingRow(linkId),
-        tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.medium
+        modifier = Modifier.fillMaxWidth().heightIn(min = if (flat) 64.dp else 0.dp).settingRow(linkId),
+        tonalElevation = if (flat) 0.dp else 1.dp,
+        shape = if (flat) RectangleShape else MaterialTheme.shapes.medium
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(
-                    start = if (indent) 48.dp else 12.dp,
-                    end = 12.dp,
+                    start = when {
+                        flat && indent -> 52.dp
+                        flat -> 16.dp
+                        indent -> 48.dp
+                        else -> 12.dp
+                    },
+                    end = if (flat) 16.dp else 12.dp,
                     top = 8.dp,
                     bottom = 8.dp
                 ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            if (!indent) {
-                icon()
-            }
+            // A sub-row keeps an empty icon slot so its title sits one step in.
+            if (indent) SettingsRowIcon(null) else icon()
             Column(modifier = Modifier.weight(1f)) {
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 3
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Switch(
@@ -1953,19 +1827,21 @@ private fun StarterLauncherNavigationRow(
     icon: @Composable () -> Unit,
     title: String,
     description: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    flat: Boolean = true
 ) {
     Surface(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = if (flat) 64.dp else 0.dp)
             .settingRow(linkId, onClick),
-        tonalElevation = 1.dp,
-        shape = MaterialTheme.shapes.medium
+        tonalElevation = if (flat) 0.dp else 1.dp,
+        shape = if (flat) RectangleShape else MaterialTheme.shapes.medium
     ) {
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 12.dp, vertical = 12.dp),
+                .padding(horizontal = if (flat) 16.dp else 12.dp, vertical = if (flat) 8.dp else 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
@@ -1974,14 +1850,12 @@ private fun StarterLauncherNavigationRow(
                 Text(
                     text = title,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Medium,
-                    maxLines = 1
+                    fontWeight = FontWeight.Medium
                 )
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             Icon(
@@ -1991,16 +1865,6 @@ private fun StarterLauncherNavigationRow(
             )
         }
     }
-}
-
-@Composable
-private fun SettingsRowKeyboardIcon() {
-    Icon(
-        imageVector = Icons.AutoMirrored.Filled.ManageSearch,
-        contentDescription = null,
-        tint = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.size(24.dp)
-    )
 }
 
 private fun keyLabel(keyCode: Int): String {

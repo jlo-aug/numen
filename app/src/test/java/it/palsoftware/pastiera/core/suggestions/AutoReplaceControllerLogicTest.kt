@@ -747,6 +747,14 @@ class AutoReplaceControllerLogicTest {
     }
 
     @Test
+    fun aLongEverydayWordOneLetterOffIsFixedAtASentenceStart() {
+        val words = arrayOf("yesterday" to 88, "Sami" to 90)
+        assertEquals("Yesterday ", typeWordAndSpace("Yesterdar", aggressive = true, *words))
+        assertEquals("Yesterday ", typeWordAndSpace("Yesterdar", aggressive = true, *words, before = "Ok. "))
+        assertEquals("yesterday ", typeWordAndSpace("yesterdar", aggressive = true, *words, before = "I saw him "))
+    }
+
+    @Test
     fun aLowercaseSlipBecomesARareNameOnlyByAClassicSlip() {
         val words = arrayOf("Derek" to 100, "Friday" to 113, "Oman" to 88, "plan" to 170)
         assertEquals("Friday ", typeWordAndSpace("frday", aggressive = true, *words))

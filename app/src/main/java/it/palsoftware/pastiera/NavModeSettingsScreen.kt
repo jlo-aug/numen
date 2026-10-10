@@ -12,24 +12,25 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.ui.res.painterResource
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowLeft
-import androidx.compose.material.icons.automirrored.filled.KeyboardArrowRight
-import androidx.compose.material.icons.filled.KeyboardArrowDown
-import androidx.compose.material.icons.filled.KeyboardArrowUp
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.RadioButtonUnchecked
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.Help
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.style.TextDecoration
@@ -120,25 +121,18 @@ fun NavModeSettingsScreen(
         Surface(
             modifier = Modifier
                 .fillMaxWidth()
-                .clickable { showNavModeGuide = true }
+                .clickable { showNavModeGuide = true },
+            color = MaterialTheme.colorScheme.background
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(16.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Icon(
-                    imageVector = Icons.Filled.Info,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(22.dp)
-                )
-                Column(
-                    modifier = Modifier
-                        .weight(1f)
-                        .padding(start = 12.dp)
-                ) {
+                SettingsRowIcon(Icons.AutoMirrored.Filled.Help)
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.nav_mode_guide_title),
                         style = MaterialTheme.typography.titleMedium,
@@ -150,20 +144,27 @@ fun NavModeSettingsScreen(
                         color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
+                Icon(
+                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
             }
         }
 
         // Enable/Disable toggle
         Surface(
-            modifier = Modifier.fillMaxWidth().settingRow("nav_mode.enabled")
+            modifier = Modifier.fillMaxWidth().settingRow("nav_mode.enabled"),
+            color = MaterialTheme.colorScheme.background
         ) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(16.dp),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.SpaceBetween
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
+                SettingsRowIcon(painterResource(R.drawable.navigation_24))
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = stringResource(R.string.nav_mode_enable_title),
@@ -188,15 +189,17 @@ fun NavModeSettingsScreen(
 
         if (navModeEnabled) {
             Surface(
-                modifier = Modifier.fillMaxWidth().settingRow("nav_mode.ctrl_hold")
+                modifier = Modifier.fillMaxWidth().settingRow("nav_mode.ctrl_hold"),
+                color = MaterialTheme.colorScheme.background
             ) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(16.dp),
+                        .padding(start = SettingsSubRowStartInset, end = 16.dp, top = 16.dp, bottom = 16.dp),
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    SettingsRowIcon(null)
                     Column(modifier = Modifier.weight(1f)) {
                         Text(
                             text = stringResource(R.string.nav_mode_ctrl_hold_title),
@@ -271,7 +274,7 @@ fun NavModeSettingsScreen(
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 8.dp, vertical = 6.dp)
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
             ) {
                 val density = LocalDensity.current
                 val maxKeysInRow = keyboardRows.maxOf { it.size }
@@ -283,7 +286,10 @@ fun NavModeSettingsScreen(
                 val exactSizePx = if (maxKeysInRow > 0) availableForKeys / maxKeysInRow else desiredSizePx
                 val finalSizePx = min(desiredSizePx, exactSizePx)
                 val keySize = with(density) { finalSizePx.toDp() }
-                val keyHeight = keySize * 1.25f
+                // Tall enough for the letter and its action label at the user's font size
+                // (line heights in KeyButton: 16 sp + 13 sp, plus padding and border).
+                val legendHeight = ((KEY_LETTER_LINE_HEIGHT_SP + KEY_LEGEND_LINE_HEIGHT_SP) * density.fontScale + 12f).dp
+                val keyHeight = maxOf(keySize * 1.3f, 48.dp, legendHeight)
 
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -297,7 +303,6 @@ fun NavModeSettingsScreen(
                             keyHeight = keyHeight,
                             spacing = spacing,
                             mappings = keyMappings,
-                            defaultMappings = defaultMappings,
                             onKeyClick = { keyCode ->
                                 selectedKeyCode = keyCode
                             }
@@ -305,13 +310,15 @@ fun NavModeSettingsScreen(
                     }
                 }
             }
-            // Revert to default button
+            // Revert to default button, kept clear of the gesture bar.
             Surface(
-                modifier = Modifier.fillMaxWidth()
+                modifier = Modifier.fillMaxWidth(),
+                color = MaterialTheme.colorScheme.background
             ) {
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .navigationBarsPadding()
                         .padding(16.dp),
                     verticalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
@@ -356,7 +363,6 @@ private fun KeyboardRow(
     keyHeight: Dp,
     spacing: Dp,
     mappings: Map<Int, KeyMappingLoader.CtrlMapping>,
-    defaultMappings: Map<Int, KeyMappingLoader.CtrlMapping>,
     onKeyClick: (Int) -> Unit
 ) {
     Row(
@@ -371,7 +377,6 @@ private fun KeyboardRow(
             KeyButton(
                 keyCode = keyCode,
                 mapping = mappings[keyCode],
-                hasDefault = defaultMappings.containsKey(keyCode),
                 onClick = { onKeyClick(keyCode) },
                 modifier = Modifier
                     .width(keySize)
@@ -385,12 +390,12 @@ private fun KeyboardRow(
 private fun KeyButton(
     keyCode: Int,
     mapping: KeyMappingLoader.CtrlMapping?,
-    hasDefault: Boolean,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val keyLabel = getKeyLabel(keyCode)
-    val mappingLabel = mapping?.let { getMappingLabelShort(it) }
+    val mappingLabel = mapping?.let { keyFaceLabel(it) }
+    val mappingDescription = mapping?.let { mappingDisplayName(it) }
     val hasMapping = mapping != null && mapping.type != "none"
     val backgroundColor = if (hasMapping) {
         MaterialTheme.colorScheme.primaryContainer.copy(alpha = 0.3f)
@@ -412,39 +417,6 @@ private fun KeyButton(
     } else {
         MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.7f)
     }
-    val mappingIcon: ImageVector?
-    val mappingIconDesc: String?
-    if (mapping?.type == "keycode") {
-        when (mapping.value) {
-            "DPAD_UP" -> {
-                mappingIcon = Icons.Filled.KeyboardArrowUp
-                mappingIconDesc = mappingLabel
-            }
-            "DPAD_DOWN" -> {
-                mappingIcon = Icons.Filled.KeyboardArrowDown
-                mappingIconDesc = mappingLabel
-            }
-            "DPAD_LEFT" -> {
-                mappingIcon = Icons.AutoMirrored.Filled.KeyboardArrowLeft
-                mappingIconDesc = mappingLabel
-            }
-            "DPAD_RIGHT" -> {
-                mappingIcon = Icons.AutoMirrored.Filled.KeyboardArrowRight
-                mappingIconDesc = mappingLabel
-            }
-            "DPAD_CENTER" -> {
-                mappingIcon = Icons.Filled.RadioButtonUnchecked
-                mappingIconDesc = mappingLabel
-            }
-            else -> {
-                mappingIcon = null
-                mappingIconDesc = null
-            }
-        }
-    } else {
-        mappingIcon = null
-        mappingIconDesc = null
-    }
 
     Surface(
         modifier = modifier
@@ -461,7 +433,10 @@ private fun KeyButton(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 3.dp, vertical = 3.dp),
+                .padding(horizontal = 1.dp, vertical = 3.dp)
+                .semantics(mergeDescendants = true) {
+                    if (mappingDescription != null) contentDescription = "$keyLabel: $mappingDescription"
+                },
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
@@ -470,44 +445,64 @@ private fun KeyButton(
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold,
                 fontSize = 13.sp,
+                lineHeight = KEY_LETTER_LINE_HEIGHT_SP.sp,
                 color = keyTextColor,
                 maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
+                softWrap = false,
                 textAlign = TextAlign.Center
             )
-            if (mappingIcon != null) {
-                Icon(
-                    imageVector = mappingIcon,
-                    contentDescription = mappingIconDesc,
-                    tint = mappingTextColor,
-                    modifier = Modifier.size(18.dp)
-                )
-            } else if (mappingLabel != null) {
-                Text(
-                    text = mappingLabel,
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 11.sp,
-                    color = mappingTextColor,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
-            } else if (hasDefault) {
-                Text(
-                    text = stringResource(R.string.nav_mode_default),
-                    style = MaterialTheme.typography.labelSmall,
-                    fontSize = 9.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.6f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis,
-                    textAlign = TextAlign.Center
-                )
+            if (mappingLabel != null) {
+                KeyLegendText(text = mappingLabel, color = mappingTextColor)
             }
         }
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
+private const val KEY_LETTER_LINE_HEIGHT_SP = 16f
+private const val KEY_LEGEND_LINE_HEIGHT_SP = 13f
+private const val KEY_LEGEND_MAX_FONT_SP = 11f
+private const val KEY_LEGEND_MIN_FONT_SP = 7f
+
+/**
+ * The action label under a key's letter. Shrinks (down to 7 sp) until it fits the key's
+ * width, so large font sizes never cut it off at the key border.
+ */
+@Composable
+private fun KeyLegendText(text: String, color: androidx.compose.ui.graphics.Color) {
+    val measurer = rememberTextMeasurer()
+    val baseStyle = MaterialTheme.typography.labelSmall.copy(
+        letterSpacing = 0.sp,
+        lineHeight = KEY_LEGEND_LINE_HEIGHT_SP.sp,
+        textAlign = TextAlign.Center
+    )
+    BoxWithConstraints(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+        val maxWidthPx = constraints.maxWidth
+        val fontSize = remember(text, maxWidthPx, baseStyle) {
+            var size = KEY_LEGEND_MAX_FONT_SP
+            while (size > KEY_LEGEND_MIN_FONT_SP &&
+                measurer.measure(
+                    text = text,
+                    style = baseStyle.copy(fontSize = size.sp),
+                    softWrap = false,
+                    maxLines = 1
+                ).size.width > maxWidthPx
+            ) {
+                size -= 0.5f
+            }
+            size
+        }
+        Text(
+            text = text,
+            style = baseStyle.copy(fontSize = fontSize.sp),
+            color = color,
+            maxLines = 1,
+            softWrap = false,
+            overflow = TextOverflow.Clip
+        )
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalLayoutApi::class)
 @Composable
 private fun KeyMappingDialog(
     keyCode: Int,
@@ -521,7 +516,7 @@ private fun KeyMappingDialog(
     var selectedType by remember { mutableStateOf<String?>(currentMapping?.type) }
     var selectedValue by remember { mutableStateOf<String?>(currentMapping?.value) }
     val commandTargets = remember { CommandRegistry(context).getCommands(CommandSurface.NavMode) }
-    val defaultLabel = defaultMapping?.let { getMappingLabel(it) }
+    val defaultLabel = defaultMapping?.let { mappingDisplayName(it) }
     val dialogMaxHeight = LocalConfiguration.current.screenHeightDp.dp * 0.9f
     val gridMaxHeight = dialogMaxHeight * 0.6f
 
@@ -562,10 +557,9 @@ private fun KeyMappingDialog(
                         style = MaterialTheme.typography.labelLarge,
                         fontWeight = FontWeight.Medium
                     )
-                    Row(
+                    FlowRow(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         FilterChip(
                             selected = selectedType == "keycode",
@@ -597,7 +591,7 @@ private fun KeyMappingDialog(
                                 selectedType = "command"
                                 selectedValue = null
                             },
-                            label = { Text("Command") }
+                            label = { Text(stringResource(R.string.nav_mode_command)) }
                         )
                         FilterChip(
                             selected = selectedType == "none",
@@ -607,24 +601,22 @@ private fun KeyMappingDialog(
                             },
                             label = { Text(stringResource(R.string.nav_mode_none)) }
                         )
-                        if (defaultLabel != null) {
-                            TextButton(
-                                onClick = {
-                                    selectedType = defaultMapping?.type
-                                    selectedValue = defaultMapping?.value
-                                },
-                                modifier = Modifier.weight(1f),
-                                contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.nav_mode_use_default, defaultLabel),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis,
-                                    textDecoration = TextDecoration.Underline
-                                )
-                            }
+                    }
+                    if (defaultLabel != null) {
+                        TextButton(
+                            onClick = {
+                                selectedType = defaultMapping?.type
+                                selectedValue = defaultMapping?.value
+                            },
+                            contentPadding = PaddingValues(horizontal = 6.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text = stringResource(R.string.nav_mode_use_default, defaultLabel),
+                                style = MaterialTheme.typography.labelMedium,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                                maxLines = 2,
+                                textDecoration = TextDecoration.Underline
+                            )
                         }
                     }
 
@@ -645,7 +637,7 @@ private fun KeyMappingDialog(
                                 FilterChip(
                                     selected = selectedValue == keycode,
                                     onClick = { selectedValue = keycode },
-                                    label = { Text(keycode) },
+                                    label = { Text(keycodeDisplayName(keycode)) },
                                     modifier = Modifier.fillMaxWidth()
                                 )
                             }
@@ -775,17 +767,6 @@ private fun getKeyLabel(keyCode: Int): String {
     }
 }
 
-private fun getMappingLabel(mapping: KeyMappingLoader.CtrlMapping): String? {
-    return when (mapping.type) {
-        "keycode" -> mapping.value
-        "action" -> mapping.value
-        "command" -> mapping.value
-        "native_ctrl" -> "Ctrl"
-        "none" -> null // Don't show label for "none"
-        else -> null
-    }
-}
-
 private fun commandLabel(command: CommandTarget): String {
     return "${command.source.displayLabel}: ${command.label}"
 }
@@ -804,6 +785,8 @@ private fun getActionLabel(action: String): String {
         "move_word_right" -> stringResource(R.string.nav_mode_action_move_word_right)
         "expand_selection_word_left" -> stringResource(R.string.nav_mode_action_expand_selection_word_left)
         "expand_selection_word_right" -> stringResource(R.string.nav_mode_action_expand_selection_word_right)
+        "page_start" -> stringResource(R.string.nav_mode_action_page_start)
+        "page_end" -> stringResource(R.string.nav_mode_action_page_end)
         "toggle_minimal_ui" -> stringResource(R.string.nav_mode_action_toggle_pastierina)
         "media_play_pause" -> stringResource(R.string.nav_mode_action_media_play_pause)
         "media_previous" -> stringResource(R.string.nav_mode_action_media_previous)
@@ -812,48 +795,90 @@ private fun getActionLabel(action: String): String {
     }
 }
 
+/** Plain name of a mapping, used in the key editor and for screen readers. */
 @Composable
-private fun getMappingLabelShort(mapping: KeyMappingLoader.CtrlMapping): String? {
+private fun mappingDisplayName(mapping: KeyMappingLoader.CtrlMapping): String? {
+    return when (mapping.type) {
+        "keycode" -> keycodeDisplayName(mapping.value)
+        "action" -> getActionLabel(mapping.value)
+        "command" -> commandShortName(mapping.value)
+        "native_ctrl" -> stringResource(R.string.nav_mode_native_ctrl)
+        else -> null
+    }
+}
+
+@Composable
+private fun keycodeDisplayName(keycode: String): String {
+    return when (keycode) {
+        "DPAD_UP" -> stringResource(R.string.nav_mode_keycode_up)
+        "DPAD_DOWN" -> stringResource(R.string.nav_mode_keycode_down)
+        "DPAD_LEFT" -> stringResource(R.string.nav_mode_keycode_left)
+        "DPAD_RIGHT" -> stringResource(R.string.nav_mode_keycode_right)
+        "DPAD_CENTER" -> stringResource(R.string.nav_mode_keycode_center)
+        "MOVE_HOME" -> stringResource(R.string.nav_mode_keycode_home)
+        "MOVE_END" -> stringResource(R.string.nav_mode_keycode_end)
+        "PAGE_UP" -> stringResource(R.string.nav_mode_keycode_page_up)
+        "PAGE_DOWN" -> stringResource(R.string.nav_mode_keycode_page_down)
+        "ESCAPE" -> stringResource(R.string.nav_mode_keycode_escape)
+        "TAB" -> stringResource(R.string.nav_mode_keycode_tab)
+        "FORWARD_DEL" -> stringResource(R.string.nav_mode_keycode_forward_delete)
+        else -> keycode
+    }
+}
+
+private fun commandShortName(commandId: String): String {
+    return commandId.substringAfterLast('.').replace('_', ' ').replaceFirstChar { it.uppercase() }
+}
+
+/**
+ * Up to five characters printed on a key in the Nav Mode keyboard picture.
+ * The full name is in the key editor and is read by screen readers.
+ */
+private fun keyFaceLabel(mapping: KeyMappingLoader.CtrlMapping): String? {
     return when (mapping.type) {
         "keycode" -> when (mapping.value) {
-            "DPAD_UP" -> stringResource(R.string.nav_mode_keycode_up)
-            "DPAD_DOWN" -> stringResource(R.string.nav_mode_keycode_down)
-            "DPAD_LEFT" -> stringResource(R.string.nav_mode_keycode_left)
-            "DPAD_RIGHT" -> stringResource(R.string.nav_mode_keycode_right)
-            "DPAD_CENTER" -> stringResource(R.string.nav_mode_keycode_center)
-            "MOVE_HOME" -> stringResource(R.string.nav_mode_keycode_home)
-            "MOVE_END" -> stringResource(R.string.nav_mode_keycode_end)
-            "PAGE_UP" -> stringResource(R.string.nav_mode_keycode_page_up)
-            "PAGE_DOWN" -> stringResource(R.string.nav_mode_keycode_page_down)
-            "ESCAPE" -> stringResource(R.string.nav_mode_keycode_escape)
-            "TAB" -> stringResource(R.string.nav_mode_keycode_tab)
-            "FORWARD_DEL" -> stringResource(R.string.nav_mode_keycode_forward_delete)
-            else -> mapping.value
+            "DPAD_UP" -> "↑"
+            "DPAD_DOWN" -> "↓"
+            "DPAD_LEFT" -> "←"
+            "DPAD_RIGHT" -> "→"
+            "DPAD_CENTER" -> "OK"
+            "MOVE_HOME" -> "Home"
+            "MOVE_END" -> "End"
+            "PAGE_UP" -> "PgUp"
+            "PAGE_DOWN" -> "PgDn"
+            "ESCAPE" -> "Esc"
+            "TAB" -> "Tab"
+            "FORWARD_DEL" -> "Del"
+            else -> mapping.value.take(5)
         }
         "action" -> when (mapping.value) {
-            "copy" -> stringResource(R.string.nav_mode_action_copy)
-            "paste" -> stringResource(R.string.nav_mode_action_paste)
-            "cut" -> stringResource(R.string.nav_mode_action_cut)
-            "undo" -> stringResource(R.string.nav_mode_action_undo)
-            "select_all" -> stringResource(R.string.nav_mode_action_select_all)
-            "expand_selection_left" -> stringResource(R.string.nav_mode_action_expand_selection_left)
-            "expand_selection_right" -> stringResource(R.string.nav_mode_action_expand_selection_right)
-            "move_word_left" -> stringResource(R.string.nav_mode_action_move_word_left)
-            "move_word_right" -> stringResource(R.string.nav_mode_action_move_word_right)
-            "expand_selection_word_left" -> stringResource(R.string.nav_mode_action_expand_selection_word_left)
-            "expand_selection_word_right" -> stringResource(R.string.nav_mode_action_expand_selection_word_right)
-            "page_start" -> stringResource(R.string.nav_mode_action_page_start)
-            "page_end" -> stringResource(R.string.nav_mode_action_page_end)
-            "toggle_minimal_ui" -> stringResource(R.string.nav_mode_action_toggle_pastierina)
-            "media_play_pause" -> stringResource(R.string.nav_mode_action_media_play_pause)
-            "media_previous" -> stringResource(R.string.nav_mode_action_media_previous)
-            "media_next" -> stringResource(R.string.nav_mode_action_media_next)
-            else -> mapping.value
+            "copy" -> "Copy"
+            "paste" -> "Paste"
+            "cut" -> "Cut"
+            "undo" -> "Undo"
+            "select_all" -> "All"
+            "expand_selection_left" -> "←Sel"
+            "expand_selection_right" -> "Sel→"
+            "move_word_left" -> "←Wd"
+            "move_word_right" -> "Wd→"
+            "expand_selection_word_left" -> "«Sel"
+            "expand_selection_word_right" -> "Sel»"
+            "page_start" -> "Top"
+            "page_end" -> "Btm"
+            "toggle_minimal_ui" -> "Bar"
+            "media_play_pause" -> "Play"
+            "media_previous" -> "Prev"
+            "media_next" -> "Next"
+            else -> mapping.value.take(5)
         }
-        "command" -> mapping.value.substringAfterLast('.').replace('_', ' ')
+        "command" -> when (mapping.value) {
+            "pastiera.toggle_software_keyboard_mode" -> "Kbd"
+            "pastiera.quick_launcher" -> "Find"
+            "pastiera.main" -> "App"
+            else -> "Cmd"
+        }
         "native_ctrl" -> "Ctrl"
-        "none" -> null // Don't show label for "none"
-        else -> null
+        else -> null // "none": nothing printed under the letter
     }
 }
 

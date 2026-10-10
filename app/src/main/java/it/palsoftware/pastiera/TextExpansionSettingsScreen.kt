@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.width
@@ -18,6 +19,16 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.ArrowForward
+import androidx.compose.material.icons.automirrored.filled.KeyboardReturn
+import androidx.compose.material.icons.automirrored.filled.KeyboardTab
+import androidx.compose.material.icons.automirrored.filled.ShortText
+import androidx.compose.material.icons.filled.Abc
+import androidx.compose.material.icons.filled.DataObject
+import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.EmojiEmotions
+import androidx.compose.material.icons.filled.EmojiSymbols
+import androidx.compose.material.icons.filled.SpaceBar
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.AlertDialog
@@ -46,7 +57,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
+import it.palsoftware.pastiera.ui.SettingsRowIcon
 import it.palsoftware.pastiera.inputmethod.expansion.ExpansionPresentation
 import it.palsoftware.pastiera.inputmethod.expansion.TextExpansionEngine
 import java.util.Locale
@@ -81,13 +94,13 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
 
     SettingsScaffold(title = stringResource(R.string.text_expansion_title), onBack = onBack) { padding ->
         Column(
-            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState()),
-            verticalArrangement = Arrangement.spacedBy(2.dp)
+            modifier = Modifier.fillMaxSize().padding(padding).verticalScroll(rememberScrollState())
         ) {
             SectionTitle(stringResource(R.string.snippets_title))
             SwitchSettingRow(
                 title = stringResource(R.string.snippets_enable_title),
                 linkId = "text_expansion.snippets.enabled",
+                icon = Icons.AutoMirrored.Filled.ShortText,
                 description = stringResource(R.string.snippets_enable_description),
                 checked = enabled,
                 onCheckedChange = {
@@ -104,7 +117,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
                         prefixError = selected.isNotEmpty() && !TextExpansionEngine.isValidSnippetPrefix(selected)
                         if (!prefixError && selected.isNotEmpty()) SettingsManager.setSnippetsPrefix(context, selected)
                     },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
+                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp),
                     label = { Text(stringResource(R.string.snippets_prefix_title)) },
                     supportingText = {
                         Text(
@@ -120,7 +133,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
                 ExposedDropdownMenuBox(
                     expanded = presentationExpanded,
                     onExpandedChange = { presentationExpanded = it },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 ) {
                     OutlinedTextField(
                         value = presentationLabel(presentation),
@@ -150,6 +163,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_tab_title),
                 linkId = "text_expansion.snippets.tab",
+                icon = Icons.AutoMirrored.Filled.KeyboardTab,
                 description = stringResource(R.string.expansion_tab_description),
                 checked = policy.acceptWithTab,
                 onCheckedChange = {
@@ -160,6 +174,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_enter_title),
                 linkId = "text_expansion.snippets.enter",
+                icon = Icons.AutoMirrored.Filled.KeyboardReturn,
                 description = stringResource(R.string.expansion_enter_description),
                 checked = policy.acceptWithEnter,
                 onCheckedChange = {
@@ -171,23 +186,34 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
                 modifier = Modifier.fillMaxWidth().settingRow("text_expansion.snippets.manage") { openSettingsChild(context, "snippets", "manage") }
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(16.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                    modifier = Modifier.fillMaxWidth().heightIn(min = 64.dp).padding(horizontal = 16.dp, vertical = 10.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
+                    SettingsRowIcon(Icons.Filled.Edit)
                     Column(modifier = Modifier.weight(1f)) {
-                        Text(stringResource(R.string.snippets_manage_title), fontWeight = FontWeight.Medium)
+                        Text(
+                            stringResource(R.string.snippets_manage_title),
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Medium
+                        )
                         Text(
                             stringResource(R.string.snippets_manage_description),
                             style = MaterialTheme.typography.bodySmall,
                             color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
-                    Text("›", style = MaterialTheme.typography.headlineSmall)
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_space_title),
                 linkId = "text_expansion.snippets.space",
+                icon = Icons.Filled.SpaceBar,
                 description = stringResource(R.string.expansion_space_description),
                 checked = policy.exactOnSpace,
                 onCheckedChange = {
@@ -198,6 +224,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_prefix_space_title),
                 linkId = "text_expansion.snippets.prefix_space",
+                icon = Icons.Filled.Abc,
                 description = stringResource(R.string.expansion_prefix_space_description),
                 checked = policy.acceptPrefixWithSpace,
                 onCheckedChange = {
@@ -209,6 +236,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.emoji_shortcodes_enable_title),
                 linkId = "text_expansion.emoji.enabled",
+                icon = Icons.Filled.EmojiEmotions,
                 description = stringResource(R.string.emoji_shortcodes_enable_description),
                 checked = emojiEnabled,
                 onCheckedChange = {
@@ -219,6 +247,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.symbol_shortcodes_enable_title),
                 linkId = "text_expansion.symbols.enabled",
+                icon = Icons.Filled.EmojiSymbols,
                 description = stringResource(R.string.symbol_shortcodes_enable_description),
                 checked = symbolsEnabled,
                 onCheckedChange = {
@@ -230,7 +259,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
                 ExposedDropdownMenuBox(
                     expanded = emojiPresentationExpanded,
                     onExpandedChange = { emojiPresentationExpanded = it },
-                    modifier = Modifier.fillMaxWidth().padding(16.dp)
+                    modifier = Modifier.fillMaxWidth().padding(start = 52.dp, end = 16.dp, top = 8.dp, bottom = 8.dp)
                 ) {
                     OutlinedTextField(
                         value = presentationLabel(emojiPresentation),
@@ -260,6 +289,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_tab_title),
                 linkId = "text_expansion.emoji_symbols.tab",
+                icon = Icons.AutoMirrored.Filled.KeyboardTab,
                 description = stringResource(R.string.expansion_tab_description),
                 checked = emojiPolicy.acceptWithTab,
                 onCheckedChange = {
@@ -270,6 +300,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_enter_title),
                 linkId = "text_expansion.emoji_symbols.enter",
+                icon = Icons.AutoMirrored.Filled.KeyboardReturn,
                 description = stringResource(R.string.expansion_enter_description),
                 checked = emojiPolicy.acceptWithEnter,
                 onCheckedChange = {
@@ -280,6 +311,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.emoji_symbols_close_title),
                 linkId = "text_expansion.emoji_symbols.exact_close",
+                icon = Icons.Filled.DataObject,
                 description = stringResource(R.string.emoji_symbols_close_description),
                 checked = exactOnClose,
                 onCheckedChange = {
@@ -290,6 +322,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_space_title),
                 linkId = "text_expansion.emoji_symbols.space",
+                icon = Icons.Filled.SpaceBar,
                 description = stringResource(R.string.expansion_space_description),
                 checked = emojiPolicy.exactOnSpace,
                 onCheckedChange = {
@@ -300,6 +333,7 @@ fun TextExpansionSettingsScreen(onBack: () -> Unit) {
             SwitchSettingRow(
                 title = stringResource(R.string.expansion_prefix_space_title),
                 linkId = "text_expansion.emoji_symbols.prefix_space",
+                icon = Icons.Filled.Abc,
                 description = stringResource(R.string.expansion_prefix_space_description),
                 checked = emojiPolicy.acceptPrefixWithSpace,
                 onCheckedChange = {
@@ -434,13 +468,18 @@ private fun SettingsScaffold(
                 tonalElevation = 1.dp
             ) {
                 Row(
-                    modifier = Modifier.fillMaxWidth().padding(horizontal = 8.dp, vertical = 4.dp),
+                    modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     IconButton(onClick = onBack) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.settings_back_content_description))
                     }
-                    Text(title, style = MaterialTheme.typography.headlineSmall, modifier = Modifier.weight(1f))
+                    Text(
+                        title,
+                        style = MaterialTheme.typography.headlineSmall,
+                        fontWeight = FontWeight.SemiBold,
+                        modifier = Modifier.padding(start = 8.dp).weight(1f)
+                    )
                     action()
                 }
             }
@@ -451,32 +490,33 @@ private fun SettingsScaffold(
 
 @Composable
 private fun SectionTitle(title: String) {
-    Text(
-        title,
-        style = MaterialTheme.typography.titleSmall,
-        color = MaterialTheme.colorScheme.primary,
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)
-    )
+    it.palsoftware.pastiera.ui.SettingsSectionLabel(title)
 }
 
 @Composable
 private fun SwitchSettingRow(
     title: String,
     linkId: String? = null,
+    icon: ImageVector?,
     description: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit
 ) {
     Surface(modifier = Modifier.fillMaxWidth()) {
         Row(
-            modifier = Modifier.fillMaxWidth().settingRow(linkId) { onCheckedChange(!checked) }.padding(16.dp),
-            verticalAlignment = Alignment.CenterVertically
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(min = 64.dp)
+                .settingRow(linkId) { onCheckedChange(!checked) }
+                .padding(horizontal = 16.dp, vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(12.dp)
         ) {
+            SettingsRowIcon(icon)
             Column(modifier = Modifier.weight(1f)) {
-                Text(title, fontWeight = FontWeight.Medium)
+                Text(title, style = MaterialTheme.typography.titleMedium, fontWeight = FontWeight.Medium)
                 Text(description, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
             }
-            Spacer(Modifier.width(12.dp))
             Switch(checked = checked, onCheckedChange = onCheckedChange)
         }
     }

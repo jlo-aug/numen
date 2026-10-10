@@ -32,7 +32,6 @@ import it.palsoftware.pastiera.inputmethod.suggestions.ui.FullSuggestionsBar
 import it.palsoftware.pastiera.inputmethod.ui.LedStatusView
 import it.palsoftware.pastiera.inputmethod.ui.VariationBarView
 
-private const val HARDWARE_PREVIEW_MAX_CHROME_SCALE = 1.6f
 private const val HARDWARE_PREVIEW_EXTRA_HEIGHT_DP = 12f
 private const val HARDWARE_PREVIEW_BOTTOM_INDICATOR_HEIGHT_DP = 6.5f
 private const val SUGGESTIONS_PREVIEW_BASE_HEIGHT_DP = 36f
@@ -51,13 +50,13 @@ private const val SOFTWARE_PREVIEW_MODIFIER_DOUBLE_TAP_MS = 450L
 internal fun HardwareKeyboardThemePreview(theme: KeyboardThemePreset) {
     val context = LocalContext.current
     val showBottomIndicators = SettingsManager.getModifierIndicatorShowsBottomStrip(context)
+    // The box follows the bar's own height, so no empty band shows above the bar.
     val previewHeightDp = hardwareKeyboardPreviewHeightDp(theme, showBottomIndicators)
-    val viewportHeightDp = hardwareKeyboardPreviewViewportHeightDp(showBottomIndicators)
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .height(viewportHeightDp.dp)
+            .height(previewHeightDp.dp)
             .clipToBounds()
             .background(Color(theme.background)),
         contentAlignment = Alignment.BottomCenter
@@ -874,12 +873,6 @@ private fun hardwareKeyboardPreviewHeightDp(
 ): Float =
     suggestionsPreviewHeightDp(theme) +
         variationsPreviewHeightDp(theme) +
-        HARDWARE_PREVIEW_EXTRA_HEIGHT_DP -
-        if (showBottomIndicators) 0f else HARDWARE_PREVIEW_BOTTOM_INDICATOR_HEIGHT_DP
-
-private fun hardwareKeyboardPreviewViewportHeightDp(showBottomIndicators: Boolean): Float =
-    SUGGESTIONS_PREVIEW_BASE_HEIGHT_DP * HARDWARE_PREVIEW_MAX_CHROME_SCALE +
-        VARIATIONS_PREVIEW_BASE_HEIGHT_DP * HARDWARE_PREVIEW_MAX_CHROME_SCALE +
         HARDWARE_PREVIEW_EXTRA_HEIGHT_DP -
         if (showBottomIndicators) 0f else HARDWARE_PREVIEW_BOTTOM_INDICATOR_HEIGHT_DP
 

@@ -8,7 +8,22 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.automirrored.filled.HelpOutline
-import androidx.compose.material.icons.filled.TextFields
+import androidx.compose.material.icons.automirrored.filled.Backspace
+import androidx.compose.material.icons.automirrored.filled.FormatIndentIncrease
+import androidx.compose.material.icons.automirrored.filled.Segment
+import androidx.compose.material.icons.automirrored.filled.ShortText
+import androidx.compose.material.icons.automirrored.filled.KeyboardBackspace
+import androidx.compose.material.icons.automirrored.filled.TrendingFlat
+import androidx.compose.material.icons.filled.FirstPage
+import androidx.compose.material.icons.filled.FormatQuote
+import androidx.compose.material.icons.filled.SpaceBar
+import androidx.compose.material.icons.filled.TextFormat
+import androidx.compose.material.icons.filled.Title
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsRowStartInset
+import it.palsoftware.pastiera.ui.SettingsSubRowStartInset
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -31,8 +46,7 @@ import it.palsoftware.pastiera.core.Punctuation
 @Composable
 fun TextInputSettingsScreen(
     modifier: Modifier = Modifier,
-    onBack: () -> Unit,
-    onNavModeSettingsClick: () -> Unit = {}
+    onBack: () -> Unit
 ) {
     val context = LocalContext.current
     var showTextExpansion by remember { mutableStateOf(settingsChild(context, "text") == "expansion") }
@@ -95,18 +109,6 @@ fun TextInputSettingsScreen(
         mutableStateOf(SettingsManager.getSmartQuotes(context))
     }
 
-
-    var clearAltOnSpace by remember {
-        mutableStateOf(SettingsManager.getClearAltOnSpace(context))
-    }
-
-    var autoShowKeyboard by remember {
-        mutableStateOf(SettingsManager.getAutoShowKeyboard(context))
-    }
-
-    var altCtrlSpeechShortcut by remember {
-        mutableStateOf(SettingsManager.getAltCtrlSpeechShortcutEnabled(context))
-    }
 
     var shiftBackspaceDelete by remember {
         mutableStateOf(SettingsManager.getShiftBackspaceDelete(context))
@@ -293,9 +295,9 @@ fun TextInputSettingsScreen(
                 .padding(paddingValues)
                 .verticalScroll(rememberScrollState())
         ) {
-            SettingsSectionHeader(text = stringResource(R.string.text_expansion_title))
             SettingsNavigationRow(
                 title = stringResource(R.string.text_expansion_title),
+                icon = Icons.AutoMirrored.Filled.ShortText,
                 description = stringResource(R.string.text_expansion_description),
                 linkId = SettingLinkIds.TEXT_INPUT_TEXT_EXPANSION,
                 onClick = { openSettingsChild(context, "text", "expansion") }
@@ -304,6 +306,7 @@ fun TextInputSettingsScreen(
             SettingsSectionHeader(text = stringResource(R.string.text_input_section_capitalization))
             SettingsSwitchRow(
                 title = stringResource(R.string.auto_capitalize_title),
+                icon = Icons.Filled.Title,
                 description = stringResource(R.string.auto_capitalize_description),
                 checked = autoCapitalizeFirstLetter,
                 linkId = SettingLinkIds.TEXT_INPUT_AUTO_CAPITALIZE,
@@ -315,10 +318,11 @@ fun TextInputSettingsScreen(
             AnimatedVisibility(visible = autoCapitalizeFirstLetter) {
                 Column {
                     SettingsSwitchRow(
-                        title = stringResource(R.string.auto_capitalize_respect_manual_shift_off_title),
+                                title = stringResource(R.string.auto_capitalize_respect_manual_shift_off_title),
+                        icon = null,
                         description = stringResource(R.string.auto_capitalize_respect_manual_shift_off_description),
                         checked = autoCapitalizeRespectManualShiftOff,
-                        inset = 52.dp,
+                        inset = SettingsSubRowStartInset,
                         linkId = SettingLinkIds.TEXT_INPUT_AUTO_CAPITALIZE_RESPECT_MANUAL_SHIFT_OFF,
                         onCheckedChange = { enabled ->
                             autoCapitalizeRespectManualShiftOff = enabled
@@ -327,9 +331,10 @@ fun TextInputSettingsScreen(
                     )
                     SettingsSwitchRow(
                         title = stringResource(R.string.auto_capitalize_restricted_fields_title),
+                        icon = null,
                         description = stringResource(R.string.auto_capitalize_restricted_fields_description),
                         checked = autoCapitalizeRestrictedFields,
-                        inset = 52.dp,
+                        inset = SettingsSubRowStartInset,
                         linkId = SettingLinkIds.TEXT_INPUT_AUTO_CAPITALIZE_RESTRICTED_FIELDS,
                         onCheckedChange = { enabled ->
                             autoCapitalizeRestrictedFields = enabled
@@ -340,6 +345,7 @@ fun TextInputSettingsScreen(
             }
             SettingsSwitchRow(
                 title = stringResource(R.string.auto_capitalize_after_period_title),
+                icon = Icons.Filled.TextFormat,
                 description = stringResource(R.string.auto_capitalize_after_period_description),
                 checked = autoCapitalizeAfterPeriod,
                 linkId = SettingLinkIds.TEXT_INPUT_AUTO_CAPITALIZE_AFTER_PERIOD,
@@ -352,6 +358,7 @@ fun TextInputSettingsScreen(
             SettingsSectionHeader(text = stringResource(R.string.text_input_section_spacing_punctuation))
             SettingsSwitchRow(
                 title = stringResource(R.string.double_space_to_period_title),
+                icon = Icons.Filled.SpaceBar,
                 description = stringResource(R.string.double_space_to_period_description),
                 checked = doubleSpaceToPeriod,
                 linkId = SettingLinkIds.TEXT_INPUT_DOUBLE_SPACE_TO_PERIOD,
@@ -362,6 +369,7 @@ fun TextInputSettingsScreen(
             )
             SettingsNavigationRow(
                 title = stringResource(R.string.auto_space_punctuation_title),
+                icon = Icons.AutoMirrored.Filled.FormatIndentIncrease,
                 description = autoSpacePunctuationSummary(
                     beforePunctuation = autoSpacePunctuation,
                     afterPunctuation = spaceAfterPunctuation,
@@ -374,6 +382,7 @@ fun TextInputSettingsScreen(
             )
             SettingsSwitchRow(
                 title = stringResource(R.string.comma_space_title),
+                icon = Icons.AutoMirrored.Filled.Segment,
                 description = stringResource(R.string.comma_space_description),
                 checked = commaSpace,
                 linkId = SettingLinkIds.TEXT_INPUT_COMMA_SPACE,
@@ -386,6 +395,8 @@ fun TextInputSettingsScreen(
             SettingsSectionHeader(text = stringResource(R.string.text_input_section_typography))
             SettingsDropdownSwitchRow(
                 title = stringResource(R.string.spaced_hyphen_to_en_dash_title),
+                icon = Icons.AutoMirrored.Filled.TrendingFlat,
+                description = stringResource(R.string.spaced_hyphen_to_en_dash_description),
                 checked = spacedHyphenToEnDash,
                 linkId = SettingLinkIds.TEXT_INPUT_SPACED_HYPHEN_TO_EN_DASH,
                 onCheckedChange = { enabled ->
@@ -408,6 +419,7 @@ fun TextInputSettingsScreen(
             )
             SettingsSwitchRow(
                 title = stringResource(R.string.mid_word_quote_to_apostrophe_title),
+                icon = ImageVector.vectorResource(R.drawable.ic_apostrophe_24),
                 description = stringResource(R.string.mid_word_quote_to_apostrophe_description),
                 checked = midWordQuoteToApostrophe,
                 linkId = SettingLinkIds.TEXT_INPUT_MID_WORD_QUOTE_TO_APOSTROPHE,
@@ -418,6 +430,7 @@ fun TextInputSettingsScreen(
             )
             SettingsSwitchRow(
                 title = stringResource(R.string.smart_quotes_title),
+                icon = Icons.Filled.FormatQuote,
                 description = stringResource(R.string.smart_quotes_description),
                 checked = smartQuotes,
                 linkId = SettingLinkIds.TEXT_INPUT_SMART_QUOTES,
@@ -427,139 +440,40 @@ fun TextInputSettingsScreen(
                 }
             )
 
-            SettingsSectionHeader(text = stringResource(R.string.text_input_section_keyboard_behavior))
-            SettingsSwitchRow(
-                title = stringResource(R.string.clear_alt_on_space_title),
-                description = stringResource(R.string.clear_alt_on_space_description),
-                checked = clearAltOnSpace,
-                linkId = SettingLinkIds.TEXT_INPUT_CLEAR_ALT_ON_SPACE,
-                onCheckedChange = { enabled ->
-                    clearAltOnSpace = enabled
-                    SettingsManager.setClearAltOnSpace(context, enabled)
-                }
-            )
-            SettingsSwitchRow(
-                title = stringResource(R.string.alt_ctrl_speech_shortcut_title),
-                description = stringResource(R.string.alt_ctrl_speech_shortcut_description),
-                checked = altCtrlSpeechShortcut,
-                linkId = SettingLinkIds.TEXT_INPUT_ALT_CTRL_SPEECH_SHORTCUT,
-                onCheckedChange = { enabled ->
-                    altCtrlSpeechShortcut = enabled
-                    SettingsManager.setAltCtrlSpeechShortcutEnabled(context, enabled)
-                }
-            )
-
             SettingsSectionHeader(text = stringResource(R.string.text_input_section_delete))
-            Surface(
-                modifier = Modifier
-                    .fillMaxWidth(),
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 16.dp, vertical = 6.dp)
-                ) {
-                    Text(
-                        text = stringResource(R.string.delete_alternatives_description),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .settingRow(SettingLinkIds.TEXT_INPUT_SHIFT_BACKSPACE_DELETE),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.shift_backspace_delete_title),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = shiftBackspaceDelete,
-                            onCheckedChange = { enabled ->
-                                shiftBackspaceDelete = enabled
-                                SettingsManager.setShiftBackspaceDelete(context, enabled)
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .settingRow(SettingLinkIds.TEXT_INPUT_ALT_BACKSPACE_DELETE),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.alt_backspace_delete_title),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = altBackspaceDelete,
-                            onCheckedChange = { enabled ->
-                                altBackspaceDelete = enabled
-                                SettingsManager.setAltBackspaceDelete(context, enabled)
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .settingRow(SettingLinkIds.TEXT_INPUT_BACKSPACE_AT_START_DELETE),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.SpaceBetween
-                    ) {
-                        Text(
-                            text = stringResource(R.string.backspace_at_start_delete_title),
-                            style = MaterialTheme.typography.bodyLarge,
-                            modifier = Modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = backspaceAtStartDelete,
-                            onCheckedChange = { enabled ->
-                                backspaceAtStartDelete = enabled
-                                SettingsManager.setBackspaceAtStartDelete(context, enabled)
-                            }
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Text(
-                        text = stringResource(R.string.delete_alternatives_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    SettingsNavigationRow(
-                        title = stringResource(R.string.delete_alternatives_nav_mode_title),
-                        description = stringResource(R.string.settings_nav_mode_configure),
-                        iconInset = 0.dp,
-                        linkId = SettingLinkIds.TEXT_INPUT_DELETE_NAV_MODE,
-                        onClick = onNavModeSettingsClick
-                    )
-                    Spacer(modifier = Modifier.height(6.dp))
-                    Text(
-                        text = stringResource(R.string.delete_alternatives_selection_hint),
-                        style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
-                    )
+            SettingsSwitchRow(
+                title = stringResource(R.string.shift_backspace_delete_title),
+                icon = Icons.AutoMirrored.Filled.KeyboardBackspace,
+                description = stringResource(R.string.shift_backspace_delete_description),
+                checked = shiftBackspaceDelete,
+                linkId = SettingLinkIds.TEXT_INPUT_SHIFT_BACKSPACE_DELETE,
+                onCheckedChange = { enabled ->
+                    shiftBackspaceDelete = enabled
+                    SettingsManager.setShiftBackspaceDelete(context, enabled)
                 }
-            }
-
+            )
+            SettingsSwitchRow(
+                title = stringResource(R.string.alt_backspace_delete_title),
+                icon = Icons.AutoMirrored.Filled.Backspace,
+                description = stringResource(R.string.alt_backspace_delete_description),
+                checked = altBackspaceDelete,
+                linkId = SettingLinkIds.TEXT_INPUT_ALT_BACKSPACE_DELETE,
+                onCheckedChange = { enabled ->
+                    altBackspaceDelete = enabled
+                    SettingsManager.setAltBackspaceDelete(context, enabled)
+                }
+            )
+            SettingsSwitchRow(
+                title = stringResource(R.string.backspace_at_start_delete_title),
+                icon = Icons.Filled.FirstPage,
+                description = stringResource(R.string.backspace_at_start_delete_description),
+                checked = backspaceAtStartDelete,
+                linkId = SettingLinkIds.TEXT_INPUT_BACKSPACE_AT_START_DELETE,
+                onCheckedChange = { enabled ->
+                    backspaceAtStartDelete = enabled
+                    SettingsManager.setBackspaceAtStartDelete(context, enabled)
+                }
+            )
             Spacer(modifier = Modifier.height(16.dp))
         }
     }
@@ -574,7 +488,7 @@ private fun SettingsSectionHeader(text: String) {
 private fun SettingsRowFrame(
     modifier: Modifier = Modifier,
     minHeight: androidx.compose.ui.unit.Dp = 64.dp,
-    inset: androidx.compose.ui.unit.Dp = 16.dp,
+    inset: androidx.compose.ui.unit.Dp = SettingsRowStartInset,
     content: @Composable RowScope.() -> Unit
 ) {
     Surface(
@@ -596,9 +510,10 @@ private fun SettingsRowFrame(
 @Composable
 private fun SettingsSwitchRow(
     title: String,
+    icon: ImageVector?,
     description: String? = null,
     checked: Boolean,
-    inset: androidx.compose.ui.unit.Dp = 16.dp,
+    inset: androidx.compose.ui.unit.Dp = SettingsRowStartInset,
     onCheckedChange: (Boolean) -> Unit,
     linkId: String? = null
 ) {
@@ -607,25 +522,18 @@ private fun SettingsSwitchRow(
         inset = inset,
         minHeight = if (description == null) 64.dp else 72.dp
     ) {
-        Icon(
-            imageVector = Icons.Filled.TextFields,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
+        SettingsRowIcon(icon)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 2
+                fontWeight = FontWeight.Medium
             )
             if (description != null) {
                 Text(
                     text = description,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant,
-                    maxLines = 2
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         }
@@ -639,41 +547,32 @@ private fun SettingsSwitchRow(
 @Composable
 private fun SettingsNavigationRow(
     title: String,
+    icon: ImageVector?,
     description: String,
-    iconInset: androidx.compose.ui.unit.Dp = 16.dp,
     linkId: String? = null,
     onClick: () -> Unit
 ) {
     SettingsRowFrame(
         modifier = Modifier.settingRow(linkId, onClick),
-        minHeight = 72.dp,
-        inset = iconInset
+        minHeight = 72.dp
     ) {
-        Icon(
-            imageVector = Icons.Filled.TextFields,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
+        SettingsRowIcon(icon)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 2
+                fontWeight = FontWeight.Medium
             )
             Text(
                 text = description,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-                maxLines = 2
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         Icon(
             imageVector = Icons.AutoMirrored.Filled.ArrowForward,
             contentDescription = null,
-            tint = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.size(20.dp)
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -682,6 +581,8 @@ private fun SettingsNavigationRow(
 @OptIn(ExperimentalMaterial3Api::class)
 private fun SettingsDropdownSwitchRow(
     title: String,
+    icon: ImageVector?,
+    description: String,
     checked: Boolean,
     onCheckedChange: (Boolean) -> Unit,
     expanded: Boolean,
@@ -694,22 +595,23 @@ private fun SettingsDropdownSwitchRow(
 ) {
     SettingsRowFrame(
         modifier = Modifier.settingRow(linkId),
-        minHeight = 88.dp
+        minHeight = 72.dp
     ) {
-        Icon(
-            imageVector = Icons.Filled.TextFields,
-            contentDescription = null,
-            tint = MaterialTheme.colorScheme.primary,
-            modifier = Modifier.size(24.dp)
-        )
+        SettingsRowIcon(icon)
         Column(modifier = Modifier.weight(1f)) {
             Text(
                 text = title,
                 style = MaterialTheme.typography.titleMedium,
-                fontWeight = FontWeight.Medium,
-                maxLines = 2
+                fontWeight = FontWeight.Medium
             )
-            ExposedDropdownMenuBox(
+            // Off: just say what it does. On: let the user pick the dash.
+            if (!checked) {
+                Text(
+                    text = description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            } else ExposedDropdownMenuBox(
                 expanded = expanded,
                 onExpandedChange = { onExpandedChange(!expanded) }
             ) {
@@ -718,7 +620,6 @@ private fun SettingsDropdownSwitchRow(
                     onValueChange = {},
                     readOnly = true,
                     singleLine = true,
-                    enabled = checked,
                     textStyle = MaterialTheme.typography.bodySmall,
                     trailingIcon = {
                         ExposedDropdownMenuDefaults.TrailingIcon(expanded = expanded)
@@ -727,10 +628,7 @@ private fun SettingsDropdownSwitchRow(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp)
-                        .menuAnchor(
-                            type = MenuAnchorType.PrimaryNotEditable,
-                            enabled = checked
-                        )
+                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
                 )
                 ExposedDropdownMenu(
                     expanded = expanded,
@@ -739,8 +637,7 @@ private fun SettingsDropdownSwitchRow(
                     options.forEach { option ->
                         DropdownMenuItem(
                             text = { Text(optionLabel(option)) },
-                            onClick = { onOptionSelected(option) },
-                            enabled = checked
+                            onClick = { onOptionSelected(option) }
                         )
                     }
                 }

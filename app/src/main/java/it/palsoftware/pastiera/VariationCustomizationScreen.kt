@@ -10,9 +10,10 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.PushPin
+import androidx.compose.material.icons.filled.ViewWeek
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Refresh
-import androidx.compose.material.icons.filled.TextFields
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.DeleteOutline
 import androidx.compose.material3.*
@@ -211,7 +212,7 @@ fun VariationCustomizationScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.TextFields,
+                        imageVector = Icons.Filled.ViewWeek,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
@@ -220,14 +221,12 @@ fun VariationCustomizationScreen(
                         Text(
                             text = stringResource(R.string.static_variation_preset_title),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
+                            fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = stringResource(R.string.static_variation_bar_mode_description),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
 
                         ExposedDropdownMenuBox(
@@ -311,7 +310,7 @@ fun VariationCustomizationScreen(
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.TextFields,
+                        imageVector = Icons.Filled.PushPin,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(24.dp)
@@ -320,14 +319,12 @@ fun VariationCustomizationScreen(
                         Text(
                             text = stringResource(R.string.static_variation_layer_sticky_title),
                             style = MaterialTheme.typography.titleMedium,
-                            fontWeight = FontWeight.Medium,
-                            maxLines = 1
+                            fontWeight = FontWeight.Medium
                         )
                         Text(
                             text = stringResource(R.string.static_variation_layer_sticky_description),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                            maxLines = 2
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     Switch(
@@ -341,10 +338,9 @@ fun VariationCustomizationScreen(
             }
             
             // Static and per-letter mappings share one addressable editor heading.
-            Text(
+            it.palsoftware.pastiera.ui.SettingsSectionLabel(
                 text = stringResource(R.string.setting_link_variation_mappings),
-                style = MaterialTheme.typography.titleMedium,
-                modifier = Modifier.fillMaxWidth().settingRow("variations.mappings").padding(16.dp)
+                modifier = Modifier.settingRow("variations.mappings")
             )
             // Static variations row
             VariationRow(
@@ -423,7 +419,7 @@ fun VariationCustomizationScreen(
             )
 
             VariationRow(
-                letter = stringResource(R.string.long_press_modifier_alt),
+                letter = stringResource(R.string.variation_row_alt),
                 variations = staticVariationsAlt,
                 labelWidth = 64.dp,
                 onBoxClick = { index ->
@@ -814,7 +810,7 @@ private fun VariationRow(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.Add,
-                            contentDescription = "Add slot"
+                            contentDescription = stringResource(R.string.variation_add_key)
                         )
                     }
                     IconButton(
@@ -824,7 +820,7 @@ private fun VariationRow(
                     ) {
                         Icon(
                             imageVector = Icons.Filled.DeleteOutline,
-                            contentDescription = "Remove rightmost slot"
+                            contentDescription = stringResource(R.string.variation_remove_last_key)
                         )
                     }
                 }

@@ -25,8 +25,10 @@ internal fun Intent.putSettingsPage(page: SettingsPage): Intent = apply {
     putExtra(EXTRA_DEVICE_PAGE, page.keyboardsDevicesDestination.name)
 }
 
-internal fun Intent.settingsPage(): SettingsPage {
+internal fun Intent.settingsPage(context: Context): SettingsPage {
+    // A link to a hidden row opens the screen of its visible fallback (see visibleTarget).
     val linked = data?.let(SettingLinkRegistry::parseSettingLinkUri)?.let(SettingLinkRegistry::byId)
+        ?.let { SettingLinkRegistry.visibleTarget(context, it) }
     if (linked != null && !linked.route.symCustomization) return linked.route.toSettingsPage()
     val destination = getStringExtra(EXTRA_PAGE)?.let { value ->
         SettingsDestination.entries.firstOrNull { it.name == value }

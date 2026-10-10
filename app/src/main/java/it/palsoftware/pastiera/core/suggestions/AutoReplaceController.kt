@@ -119,6 +119,9 @@ class AutoReplaceController(
         // slip to a common lowercase word.
         private const val SENTENCE_START_FIX_MIN_FREQUENCY = 115
         private const val SENTENCE_START_FIX_MIN_LIKELIHOOD = 0.65
+        // Names are rarely one slip away from a long everyday word, so those may be less common.
+        private const val SENTENCE_START_LONG_WORD_LENGTH = 7
+        private const val SENTENCE_START_LONG_FIX_MIN_FREQUENCY = 60
         // A lowercase slip only becomes a name or place when that name is common.
         private const val PROPER_NOUN_FIX_MIN_FREQUENCY = 130
         private const val PROPER_NOUN_CLASSIC_SLIP_MIN_FREQUENCY = 100
@@ -1552,9 +1555,14 @@ class AutoReplaceController(
         }
         val typedIsCapitalized = word.firstOrNull()?.isUpperCase() == true && word.drop(1).all { !it.isUpperCase() }
         if (!typedIsCapitalized) return true
-        return candidateIsName ||
-            frequency >= SENTENCE_START_FIX_MIN_FREQUENCY &&
-            likelihood >= SENTENCE_START_FIX_MIN_LIKELIHOOD
+        if (candidateIsName) return true
+        // A long everyday word one letter off ("Yesterdar") is a slip, not a name.
+        if (candidate.length >= SENTENCE_START_LONG_WORD_LENGTH && frequency >= SENTENCE_START_LONG_FIX_MIN_FREQUENCY &&
+            (likelihood >= SENTENCE_START_FIX_MIN_LIKELIHOOD || editDistance(word.lowercase(), candidate.lowercase()) == 1)
+        ) {
+            return true
+        }
+        return frequency >= SENTENCE_START_FIX_MIN_FREQUENCY && likelihood >= SENTENCE_START_FIX_MIN_LIKELIHOOD
     }
 
     /**

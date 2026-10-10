@@ -5,13 +5,11 @@ import android.content.SharedPreferences
 import android.net.Uri
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
@@ -27,9 +25,17 @@ import androidx.compose.material.icons.filled.Backup
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.BugReport
-import androidx.compose.material.icons.filled.Info
-import androidx.compose.material.icons.filled.TextFields
-import androidx.compose.material.icons.filled.TouchApp
+import androidx.compose.material.icons.filled.School
+import androidx.compose.material.icons.filled.ContentPaste
+import androidx.compose.material.icons.filled.Swipe
+import androidx.compose.material.icons.filled.ViewAgenda
+import it.palsoftware.pastiera.ui.SettingsRowIcon
+import it.palsoftware.pastiera.ui.SettingsSliderRow
+import androidx.compose.material3.DropdownMenuItem
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExposedDropdownMenuBox
+import androidx.compose.material3.ExposedDropdownMenuDefaults
+import androidx.compose.material3.MenuAnchorType
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.AlertDialog
@@ -60,7 +66,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.OutlinedTextField
-import it.palsoftware.pastiera.BuildConfig
 import it.palsoftware.pastiera.R
 import it.palsoftware.pastiera.backup.BackupManager
 import it.palsoftware.pastiera.backup.RestoreManager
@@ -74,6 +79,7 @@ import java.util.Locale
 /**
  * Advanced settings screen.
  */
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AdvancedSettingsScreen(
     modifier: Modifier = Modifier,
@@ -90,6 +96,7 @@ fun AdvancedSettingsScreen(
     var swipeIncrementalThreshold by remember {
         mutableStateOf(SettingsManager.getSwipeIncrementalThreshold(context))
     }
+    var clipboardRetentionExpanded by remember { mutableStateOf(false) }
     var clipboardRetentionTime by remember {
         mutableStateOf(SettingsManager.getClipboardRetentionTime(context).toString())
     }
@@ -99,10 +106,6 @@ fun AdvancedSettingsScreen(
     var pendingDeviceChangeRestore by remember {
         mutableStateOf<Pair<Uri, RestoreManager.DeviceChange>?>(null)
     }
-    val currentDestination = remember { when (settingsChild(context, "advanced")) {
-        "ImeTest" -> AdvancedDestination.ImeTest
-        else -> AdvancedDestination.Main
-    } }
     val highlightedSettingId = LocalSettingHighlightId.current
     // Listen to SharedPreferences changes to update UI when values are restored
     DisposableEffect(prefs) {
@@ -125,9 +128,6 @@ fun AdvancedSettingsScreen(
         }
     }
 
-    fun navigateTo(destination: AdvancedDestination) {
-        openSettingsChild(context, "advanced", when (destination) { AdvancedDestination.Main -> "Main"; AdvancedDestination.ImeTest -> "ImeTest" })
-    }
     fun navigateBack() { context.settingsActivity().finish() }
 
     fun defaultBackupName(): String {
@@ -235,442 +235,371 @@ fun AdvancedSettingsScreen(
         )
     }
 
-    val destination = currentDestination
-        when (destination) {
-            AdvancedDestination.Main -> {
-                Scaffold(
-                    topBar = {
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .windowInsetsPadding(WindowInsets.statusBars),
-                            tonalElevation = 1.dp
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 12.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                IconButton(onClick = { navigateBack() }) {
-                                    Icon(
-                        imageVector = Icons.AutoMirrored.Filled.ArrowBack,
-                                        contentDescription = stringResource(R.string.settings_back_content_description)
-                                    )
-                                }
-                                Text(
-                                    text = stringResource(R.string.settings_category_advanced),
-                                    style = MaterialTheme.typography.headlineSmall,
-                                    fontWeight = FontWeight.SemiBold,
-                                    modifier = Modifier.padding(start = 8.dp)
-                                )
-                            }
-                        }
-                    },
-                    snackbarHost = { SnackbarHost(snackbarHostState) }
-                ) { paddingValues ->
-                    Column(
-                        modifier = modifier
+        Scaffold(
+            topBar = {
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .windowInsetsPadding(WindowInsets.statusBars),
+                    tonalElevation = 1.dp
+                ) {
+                    Row(
+                        modifier = Modifier
                             .fillMaxWidth()
-                            .padding(paddingValues)
-                            .verticalScroll(rememberScrollState())
+                            .padding(horizontal = 16.dp, vertical = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Backup
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .settingRow(SettingLinkIds.ADVANCED_BACKUP) {
-                                    backupLauncher.launch(defaultBackupName())
-                                }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Backup,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.backup_now),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.backup_now_description),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 2
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
+                        IconButton(onClick = { navigateBack() }) {
+                            Icon(
+                imageVector = Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.settings_back_content_description)
+                            )
                         }
-
-                        // Restore
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .settingRow(SettingLinkIds.ADVANCED_RESTORE) {
-                                    restoreLauncher.launch(arrayOf("application/zip"))
-                                }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.History,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.restore_from_file),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.restore_from_file_description),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 2
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                        // Swipe Incremental Threshold
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .settingRow(SettingLinkIds.ADVANCED_SWIPE_INCREMENTAL_THRESHOLD)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.TouchApp,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.swipe_incremental_threshold_title),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = "${String.format("%.1f", swipeIncrementalThreshold)} ${stringResource(R.string.dip_unit)}",
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1
-                                    )
-                                }
-                                Slider(
-                                    value = SettingsManager.getMaxSwipeIncrementalThreshold() +
-                                        SettingsManager.getMinSwipeIncrementalThreshold() - swipeIncrementalThreshold,
-                                    onValueChange = { newInvertedValue ->
-                                        // Invert the slider value (25 to 3) back to stored value (3 to 25)
-                                        val actualValue = SettingsManager.getMaxSwipeIncrementalThreshold() +
-                                            SettingsManager.getMinSwipeIncrementalThreshold() - newInvertedValue
-                                        swipeIncrementalThreshold = actualValue
-                                        SettingsManager.setSwipeIncrementalThreshold(context, actualValue)
-                                    },
-                                    valueRange = SettingsManager.getMinSwipeIncrementalThreshold()..SettingsManager.getMaxSwipeIncrementalThreshold(),
-                                    steps = 16,
-                                    modifier = Modifier
-                                        .weight(1.0f)
-                                        .height(24.dp)
-                                )
-                            }
-                        }
-
-                        // Clipboard Retention Time
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp)
-                                .settingRow(SettingLinkIds.ADVANCED_CLIPBOARD_RETENTION_TIME)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.History,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(
-                                    modifier = Modifier.weight(1f),
-                                    verticalArrangement = Arrangement.spacedBy(2.dp)
-                                ) {
-                                    Text(
-                                        text = stringResource(R.string.clipboard_retention_time_title),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.clipboard_retention_time_description),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1
-                                    )
-                                }
-                                OutlinedTextField(
-                                    value = clipboardRetentionTime,
-                                    onValueChange = { text ->
-                                        val filtered = text.filter { it.isDigit() }.take(5)
-                                        clipboardRetentionTime = filtered
-                                    },
-                                    placeholder = { Text("min") },
-                                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number),
-                                    modifier = Modifier.widthIn(max = 120.dp),
-                                    singleLine = true
-                                )
-                                OutlinedButton(
-                                    onClick = {
-                                        val minutes = clipboardRetentionTime.toLongOrNull()
-                                        if (minutes != null) {
-                                            SettingsManager.setClipboardRetentionTime(context, minutes)
-                                        }
-                                        keyboardController?.hide()
-                                        focusManager.clearFocus()
-                                    }
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.Check,
-                                        contentDescription = stringResource(R.string.clipboard_retention_apply)
-                                    )
-                                }
-                            }
-                        }
-
-                        if (SettingsManager.getExperimentalCandidatesViewEnabled(context)) { // Numen only offers turning this off, since this mode cannot hide the bar.
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .settingRow(SettingLinkIds.ADVANCED_EXPERIMENTAL_CANDIDATES_VIEW)
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(16.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Column(
-                                        modifier = Modifier.weight(1f),
-                                        verticalArrangement = Arrangement.spacedBy(4.dp)
-                                    ) {
-                                        Text(
-                                            text = stringResource(R.string.experimental_candidates_view_title),
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium
-                                        )
-                                        Text(
-                                            text = stringResource(R.string.experimental_candidates_view_description),
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant
-                                        )
-                                    }
-                                    Switch(
-                                        checked = experimentalCandidatesViewEnabled,
-                                        onCheckedChange = { enabled ->
-                                            experimentalCandidatesViewEnabled = enabled
-                                            SettingsManager.setExperimentalCandidatesViewEnabled(context, enabled)
-                                        }
-                                    )
-                                }
-                            }
-                        }
-
-                        // IME Test Screen (only in debug builds)
-                        if (BuildConfig.DEBUG) {
-                            Surface(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .heightIn(min = 64.dp)
-                                    .clickable { navigateTo(AdvancedDestination.ImeTest) }
-                            ) {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 16.dp, vertical = 8.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                ) {
-                                    Icon(
-                                        imageVector = Icons.Filled.TextFields,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.primary,
-                                        modifier = Modifier.size(24.dp)
-                                    )
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = "IME Test Screen",
-                                            style = MaterialTheme.typography.titleMedium,
-                                            fontWeight = FontWeight.Medium,
-                                            maxLines = 1
-                                        )
-                                        Text(
-                                            text = "Test all input field types and IME actions",
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                            maxLines = 1
-                                        )
-                                    }
-                                    Icon(
-                                        imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                        contentDescription = null,
-                                        tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                    )
-                                }
-                            }
-                        }
-
-                        // Diagnostics
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .settingRow(SettingLinkIds.ADVANCED_DIAGNOSTICS) {
-                                    context.startActivity(Intent(context, DiagnosticsActivity::class.java))
-                                }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.BugReport,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.home_diagnostics_title),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.home_diagnostics_description),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
-                        // Show Tutorial
-                        Surface(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .heightIn(min = 64.dp)
-                                .settingRow(SettingLinkIds.ADVANCED_SHOW_TUTORIAL) {
-                                    SettingsManager.resetTutorialCompleted(context)
-                                    val intent = Intent(context, TutorialActivity::class.java)
-                                    context.startActivity(intent)
-                                }
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 16.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                Icon(
-                                    imageVector = Icons.Filled.Info,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.primary,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        text = stringResource(R.string.tutorial_show),
-                                        style = MaterialTheme.typography.titleMedium,
-                                        fontWeight = FontWeight.Medium,
-                                        maxLines = 1
-                                    )
-                                    Text(
-                                        text = stringResource(R.string.tutorial_review_description),
-                                        style = MaterialTheme.typography.bodySmall,
-                                        color = MaterialTheme.colorScheme.onSurfaceVariant,
-                                        maxLines = 1
-                                    )
-                                }
-                                Icon(
-                                    imageVector = Icons.AutoMirrored.Filled.ArrowForward,
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.onSurfaceVariant
-                                )
-                            }
-                        }
-
+                        Text(
+                            text = stringResource(R.string.settings_category_advanced),
+                            style = MaterialTheme.typography.headlineSmall,
+                            fontWeight = FontWeight.SemiBold,
+                            modifier = Modifier.padding(start = 8.dp)
+                        )
                     }
                 }
-            }
+            },
+            snackbarHost = { SnackbarHost(snackbarHostState) }
+        ) { paddingValues ->
+            Column(
+                modifier = modifier
+                    .fillMaxWidth()
+                    .padding(paddingValues)
+                    .verticalScroll(rememberScrollState())
+            ) {
+                // Backup
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 64.dp)
+                        .settingRow(SettingLinkIds.ADVANCED_BACKUP) {
+                            backupLauncher.launch(defaultBackupName())
+                        }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Backup,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.backup_now),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.backup_now_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
-            AdvancedDestination.ImeTest -> {
-                ImeTestScreen(
-                    modifier = modifier,
-                    onBack = { navigateBack() }
-                )
-            }
+                // Restore
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 64.dp)
+                        .settingRow(SettingLinkIds.ADVANCED_RESTORE) {
+                            restoreLauncher.launch(arrayOf("application/zip"))
+                        }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.History,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.restore_from_file),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.restore_from_file_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
 
+                // Cursor speed (swipe incremental threshold)
+                SettingsSliderRow(
+                    icon = Icons.Filled.Swipe,
+                    title = stringResource(R.string.swipe_incremental_threshold_title),
+                    value = null,
+                    description = stringResource(R.string.swipe_incremental_threshold_description),
+                    modifier = Modifier.settingRow(SettingLinkIds.ADVANCED_SWIPE_INCREMENTAL_THRESHOLD)
+                ) {
+                    // The slider is inverted: right = shorter swipe per character = faster.
+                    Slider(
+                        value = SettingsManager.getMaxSwipeIncrementalThreshold() +
+                            SettingsManager.getMinSwipeIncrementalThreshold() - swipeIncrementalThreshold,
+                        onValueChange = { newInvertedValue ->
+                            // Invert the slider value (25 to 3) back to stored value (3 to 25)
+                            val actualValue = SettingsManager.getMaxSwipeIncrementalThreshold() +
+                                SettingsManager.getMinSwipeIncrementalThreshold() - newInvertedValue
+                            swipeIncrementalThreshold = actualValue
+                            SettingsManager.setSwipeIncrementalThreshold(context, actualValue)
+                        },
+                        valueRange = SettingsManager.getMinSwipeIncrementalThreshold()..SettingsManager.getMaxSwipeIncrementalThreshold(),
+                        steps = 16,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                    Row(modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)) {
+                        Text(
+                            text = stringResource(R.string.swipe_cursor_speed_slower),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = Modifier.weight(1f)
+                        )
+                        Text(
+                            text = stringResource(R.string.swipe_cursor_speed_faster),
+                            style = MaterialTheme.typography.labelSmall,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Clipboard Retention Time: a few fixed choices. A saved value that is not
+                // one of them (set by an older version or a restore) is listed too, so it is kept.
+                val retentionMinutes = clipboardRetentionTime.toLongOrNull()
+                    ?: SettingsManager.getClipboardRetentionTime(context)
+                val retentionChoices = (CLIPBOARD_RETENTION_CHOICES_MINUTES + retentionMinutes).distinct().sorted()
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .settingRow(SettingLinkIds.ADVANCED_CLIPBOARD_RETENTION_TIME)
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        SettingsRowIcon(Icons.Filled.ContentPaste)
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.clipboard_retention_time_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.clipboard_retention_choice_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                            ExposedDropdownMenuBox(
+                                expanded = clipboardRetentionExpanded,
+                                onExpandedChange = { clipboardRetentionExpanded = it },
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 8.dp)
+                            ) {
+                                OutlinedTextField(
+                                    value = clipboardRetentionLabel(retentionMinutes),
+                                    onValueChange = {},
+                                    readOnly = true,
+                                    singleLine = true,
+                                    trailingIcon = {
+                                        ExposedDropdownMenuDefaults.TrailingIcon(expanded = clipboardRetentionExpanded)
+                                    },
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .menuAnchor(MenuAnchorType.PrimaryNotEditable)
+                                )
+                                ExposedDropdownMenu(
+                                    expanded = clipboardRetentionExpanded,
+                                    onDismissRequest = { clipboardRetentionExpanded = false }
+                                ) {
+                                    retentionChoices.forEach { minutes ->
+                                        DropdownMenuItem(
+                                            text = { Text(clipboardRetentionLabel(minutes)) },
+                                            onClick = {
+                                                clipboardRetentionExpanded = false
+                                                clipboardRetentionTime = minutes.toString()
+                                                SettingsManager.setClipboardRetentionTime(context, minutes)
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+
+                if (SettingsManager.getExperimentalCandidatesViewEnabled(context)) { // Numen only offers turning this off, since this mode cannot hide the bar.
+                    Surface(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .settingRow(SettingLinkIds.ADVANCED_EXPERIMENTAL_CANDIDATES_VIEW)
+                    ) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(16.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            SettingsRowIcon(Icons.Filled.ViewAgenda)
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.experimental_candidates_view_title),
+                                    style = MaterialTheme.typography.titleMedium,
+                                    fontWeight = FontWeight.Medium
+                                )
+                                Text(
+                                    text = stringResource(R.string.experimental_candidates_view_description),
+                                    style = MaterialTheme.typography.bodySmall,
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                                )
+                            }
+                            Switch(
+                                checked = experimentalCandidatesViewEnabled,
+                                onCheckedChange = { enabled ->
+                                    experimentalCandidatesViewEnabled = enabled
+                                    SettingsManager.setExperimentalCandidatesViewEnabled(context, enabled)
+                                }
+                            )
+                        }
+                    }
+                }
+
+                // Diagnostics
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 64.dp)
+                        .settingRow(SettingLinkIds.ADVANCED_DIAGNOSTICS) {
+                            context.startActivity(Intent(context, DiagnosticsActivity::class.java))
+                        }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.BugReport,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.home_diagnostics_title),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.home_diagnostics_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+                // Show tutorial
+                Surface(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(min = 64.dp)
+                        .settingRow(SettingLinkIds.ADVANCED_SHOW_TUTORIAL) {
+                            SettingsManager.resetTutorialCompleted(context)
+                            val intent = Intent(context, TutorialActivity::class.java)
+                            context.startActivity(intent)
+                        }
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.School,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = stringResource(R.string.tutorial_show),
+                                style = MaterialTheme.typography.titleMedium,
+                                fontWeight = FontWeight.Medium
+                            )
+                            Text(
+                                text = stringResource(R.string.tutorial_review_description),
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant
+                            )
+                        }
+                        Icon(
+                            imageVector = Icons.AutoMirrored.Filled.ArrowForward,
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    }
+                }
+
+            }
         }
-
 }
 
-private sealed class AdvancedDestination {
-    object Main : AdvancedDestination()
-    object ImeTest : AdvancedDestination()
+/** Clipboard retention choices in minutes; 0 keeps copied items until cleared by hand. */
+private val CLIPBOARD_RETENTION_CHOICES_MINUTES = listOf(0L, 15L, 60L, 120L, 1440L)
+
+@Composable
+private fun clipboardRetentionLabel(minutes: Long): String = when (minutes) {
+    0L -> stringResource(R.string.clipboard_retention_never)
+    15L -> stringResource(R.string.clipboard_retention_15_minutes)
+    60L -> stringResource(R.string.clipboard_retention_1_hour)
+    120L -> stringResource(R.string.clipboard_retention_2_hours)
+    1440L -> stringResource(R.string.clipboard_retention_1_day)
+    else -> stringResource(R.string.clipboard_retention_custom_minutes, minutes.toInt())
 }
